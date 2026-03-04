@@ -1,0 +1,1938 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Notion API",
+    "version": "1"
+  },
+  "servers": [
+    {
+      "url": "https://api.notion.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    },
+    "parameters": {},
+    "schemas": {}
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/users/{user_id}": {
+      "get": {
+        "summary": "Retrieve a user",
+        "description": "",
+        "operationId": "get-user",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{\n  \"object\": \"user\",\n  \"id\": \"d40e767c-d7af-4b18-a86d-55c61f1e39a4\",\n  \"type\": \"person\",\n\t\"person\": {\n\t\t\"email\": \"avo@example.org\",\n\t},\n  \"name\": \"Avocado Lovelace\",\n  \"avatar_url\": \"https://secure.notion-static.com/e6a352a8-8381-44d0-a1dc-9ed80e62b53d.jpg\",\n}"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/users": {
+      "get": {
+        "summary": "List all users",
+        "operationId": "get-users",
+        "parameters": [
+          {
+            "name": "start_cursor",
+            "in": "query",
+            "description": "If supplied, this endpoint will return a page of results starting after the cursor provided. If not supplied, this endpoint will return the first page of results.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "The number of items from the full list desired in the response. Maximum: 100",
+            "schema": {
+              "type": "integer",
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v1/users/me": {
+      "get": {
+        "summary": "Retrieve your token's bot user",
+        "description": "",
+        "operationId": "get-self",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{\n  \"object\": \"user\",\n  \"id\": \"16d84278-ab0e-484c-9bdd-b35da3bd8905\",\n  \"name\": \"pied piper\",\n  \"avatar_url\": null,\n  \"type\": \"bot\",\n  \"bot\": {\n    \"owner\": {\n      \"type\": \"user\",\n      \"user\": {\n        \"object\": \"user\",\n        \"id\": \"5389a034-eb5c-47b5-8a9e-f79c99ef166c\",\n        \"name\": \"christine makenotion\",\n        \"avatar_url\": null,\n        \"type\": \"person\",\n        \"person\": {\n          \"email\": \"christine@makenotion.com\"\n        }\n      }\n    }\n  }\n}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "user"
+                    },
+                    "id": {
+                      "type": "string",
+                      "example": "16d84278-ab0e-484c-9bdd-b35da3bd8905"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "pied piper"
+                    },
+                    "avatar_url": {},
+                    "type": {
+                      "type": "string",
+                      "example": "bot"
+                    },
+                    "bot": {
+                      "type": "object",
+                      "properties": {
+                        "owner": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "user"
+                            },
+                            "user": {
+                              "type": "object",
+                              "properties": {
+                                "object": {
+                                  "type": "string",
+                                  "example": "user"
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "example": "5389a034-eb5c-47b5-8a9e-f79c99ef166c"
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "example": "christine makenotion"
+                                },
+                                "avatar_url": {},
+                                "type": {
+                                  "type": "string",
+                                  "example": "person"
+                                },
+                                "person": {
+                                  "type": "object",
+                                  "properties": {
+                                    "email": {
+                                      "type": "string",
+                                      "example": "christine@makenotion.com"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/databases/{database_id}/query": {
+      "post": {
+        "summary": "Query a database",
+        "description": "",
+        "operationId": "post-database-query",
+        "parameters": [
+          {
+            "name": "database_id",
+            "in": "path",
+            "description": "Identifier for a Notion database.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "filter_properties",
+            "in": "query",
+            "description": "A list of page property value IDs associated with the database. Use this param to limit the response to a specific page property value or values for pages that meet the `filter` criteria.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filter": {
+                    "type": "object",
+                    "description": "When supplied, limits which pages are returned based on the [filter conditions](ref:post-database-query-filter).",
+                    "or": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": "object",
+                          "properties": {
+                            "property": {
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string"
+                                },
+                                "does_not_equal": {
+                                  "type": "string"
+                                },
+                                "contains": {
+                                  "type": "string"
+                                },
+                                "does_not_contain": {
+                                  "type": "string"
+                                },
+                                "starts_with": {
+                                  "type": "string"
+                                },
+                                "ends_with": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "rich_text": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string"
+                                },
+                                "does_not_equal": {
+                                  "type": "string"
+                                },
+                                "contains": {
+                                  "type": "string"
+                                },
+                                "does_not_contain": {
+                                  "type": "string"
+                                },
+                                "starts_with": {
+                                  "type": "string"
+                                },
+                                "ends_with": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "url": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string"
+                                },
+                                "does_not_equal": {
+                                  "type": "string"
+                                },
+                                "contains": {
+                                  "type": "string"
+                                },
+                                "does_not_contain": {
+                                  "type": "string"
+                                },
+                                "starts_with": {
+                                  "type": "string"
+                                },
+                                "ends_with": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "email": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string"
+                                },
+                                "does_not_equal": {
+                                  "type": "string"
+                                },
+                                "contains": {
+                                  "type": "string"
+                                },
+                                "does_not_contain": {
+                                  "type": "string"
+                                },
+                                "starts_with": {
+                                  "type": "string"
+                                },
+                                "ends_with": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "phone_number": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string"
+                                },
+                                "does_not_equal": {
+                                  "type": "string"
+                                },
+                                "contains": {
+                                  "type": "string"
+                                },
+                                "does_not_contain": {
+                                  "type": "string"
+                                },
+                                "starts_with": {
+                                  "type": "string"
+                                },
+                                "ends_with": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "number": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "number"
+                                },
+                                "does_not_equal": {
+                                  "type": "number"
+                                },
+                                "contains": {
+                                  "type": "number"
+                                },
+                                "does_not_contain": {
+                                  "type": "number"
+                                },
+                                "starts_with": {
+                                  "type": "number"
+                                },
+                                "ends_with": {
+                                  "type": "number"
+                                }
+                              }
+                            },
+                            "checkbox": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "boolean"
+                                },
+                                "does_not_equal": {
+                                  "type": "boolean"
+                                }
+                              }
+                            },
+                            "select": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string"
+                                },
+                                "does_not_equal": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "multi_select": {
+                              "type": "object",
+                              "properties": {
+                                "contains": {
+                                  "type": "string"
+                                },
+                                "does_not_contain": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "status": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string"
+                                },
+                                "does_not_equal": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "date": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "before": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "after": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "on_or_before": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "on_or_after": {
+                                  "type": "string",
+                                  "format": "date"
+                                }
+                              }
+                            },
+                            "created_time": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "before": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "after": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "on_or_before": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "on_or_after": {
+                                  "type": "string",
+                                  "format": "date"
+                                }
+                              }
+                            },
+                            "last_edited_time": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "before": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "after": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "on_or_before": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "on_or_after": {
+                                  "type": "string",
+                                  "format": "date"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "maxItems": 100
+                    },
+                    "and": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": "object",
+                          "properties": {
+                            "property": {
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string"
+                                },
+                                "does_not_equal": {
+                                  "type": "string"
+                                },
+                                "contains": {
+                                  "type": "string"
+                                },
+                                "does_not_contain": {
+                                  "type": "string"
+                                },
+                                "starts_with": {
+                                  "type": "string"
+                                },
+                                "ends_with": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "rich_text": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string"
+                                },
+                                "does_not_equal": {
+                                  "type": "string"
+                                },
+                                "contains": {
+                                  "type": "string"
+                                },
+                                "does_not_contain": {
+                                  "type": "string"
+                                },
+                                "starts_with": {
+                                  "type": "string"
+                                },
+                                "ends_with": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "url": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string"
+                                },
+                                "does_not_equal": {
+                                  "type": "string"
+                                },
+                                "contains": {
+                                  "type": "string"
+                                },
+                                "does_not_contain": {
+                                  "type": "string"
+                                },
+                                "starts_with": {
+                                  "type": "string"
+                                },
+                                "ends_with": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "email": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string"
+                                },
+                                "does_not_equal": {
+                                  "type": "string"
+                                },
+                                "contains": {
+                                  "type": "string"
+                                },
+                                "does_not_contain": {
+                                  "type": "string"
+                                },
+                                "starts_with": {
+                                  "type": "string"
+                                },
+                                "ends_with": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "phone_number": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string"
+                                },
+                                "does_not_equal": {
+                                  "type": "string"
+                                },
+                                "contains": {
+                                  "type": "string"
+                                },
+                                "does_not_contain": {
+                                  "type": "string"
+                                },
+                                "starts_with": {
+                                  "type": "string"
+                                },
+                                "ends_with": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "number": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "number"
+                                },
+                                "does_not_equal": {
+                                  "type": "number"
+                                },
+                                "contains": {
+                                  "type": "number"
+                                },
+                                "does_not_contain": {
+                                  "type": "number"
+                                },
+                                "starts_with": {
+                                  "type": "number"
+                                },
+                                "ends_with": {
+                                  "type": "number"
+                                }
+                              }
+                            },
+                            "checkbox": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "boolean"
+                                },
+                                "does_not_equal": {
+                                  "type": "boolean"
+                                }
+                              }
+                            },
+                            "select": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string"
+                                },
+                                "does_not_equal": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "multi_select": {
+                              "type": "object",
+                              "properties": {
+                                "contains": {
+                                  "type": "string"
+                                },
+                                "does_not_contain": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "status": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string"
+                                },
+                                "does_not_equal": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "date": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "before": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "after": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "on_or_before": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "on_or_after": {
+                                  "type": "string",
+                                  "format": "date"
+                                }
+                              }
+                            },
+                            "created_time": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "before": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "after": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "on_or_before": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "on_or_after": {
+                                  "type": "string",
+                                  "format": "date"
+                                }
+                              }
+                            },
+                            "last_edited_time": {
+                              "type": "object",
+                              "properties": {
+                                "equals": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "before": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "after": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "on_or_before": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "on_or_after": {
+                                  "type": "string",
+                                  "format": "date"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "maxItems": 100
+                    }
+                  },
+                  "sorts": {
+                    "type": "array",
+                    "description": "When supplied, orders the results based on the provided [sort criteria](ref:post-database-query-sort).",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "property",
+                        "direction"
+                      ],
+                      "properties": {
+                        "property": {
+                          "type": "string"
+                        },
+                        "direction": {
+                          "enum": [
+                            "ascending",
+                            "descending"
+                          ],
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "start_cursor": {
+                    "type": "string",
+                    "description": "When supplied, returns a page of results starting after the cursor provided. If not supplied, this endpoint will return the first page of results."
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "description": "The number of items from the full list desired in the response. Maximum: 100",
+                    "default": 100
+                  },
+                  "archived": {
+                    "type": "boolean"
+                  },
+                  "in_trash": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {},
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/search": {
+      "post": {
+        "summary": "Search by title",
+        "description": "",
+        "operationId": "post-search",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "The text that the API compares page and database titles against."
+                  },
+                  "sort": {
+                    "type": "object",
+                    "description": "A set of criteria, `direction` and `timestamp` keys, that orders the results. The **only** supported timestamp value is `\"last_edited_time\"`. Supported `direction` values are `\"ascending\"` and `\"descending\"`. If `sort` is not provided, then the most recently edited results are returned first.",
+                    "properties": {
+                      "direction": {
+                        "type": "string",
+                        "description": "The direction to sort. Possible values include `ascending` and `descending`."
+                      },
+                      "timestamp": {
+                        "type": "string",
+                        "description": "The name of the timestamp to sort against. Possible values include `last_edited_time`."
+                      }
+                    }
+                  },
+                  "filter": {
+                    "type": "object",
+                    "description": "A set of criteria, `value` and `property` keys, that limits the results to either only pages or only databases. Possible `value` values are `\"page\"` or `\"database\"`. The only supported `property` value is `\"object\"`.",
+                    "properties": {
+                      "value": {
+                        "type": "string",
+                        "description": "The value of the property to filter the results by.  Possible values for object type include `page` or `database`.  **Limitation**: Currently the only filter allowed is `object` which will filter by type of object (either `page` or `database`)"
+                      },
+                      "property": {
+                        "type": "string",
+                        "description": "The name of the property to filter by. Currently the only property you can filter by is the object type.  Possible values include `object`.   Limitation: Currently the only filter allowed is `object` which will filter by type of object (either `page` or `database`)"
+                      }
+                    }
+                  },
+                  "start_cursor": {
+                    "type": "string",
+                    "description": "A `cursor` value returned in a previous response that If supplied, limits the response to results starting after the `cursor`. If not supplied, then the first page of results is returned. Refer to [pagination](https://developers.notion.com/reference/intro#pagination) for more details."
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "description": "The number of items from the full list to include in the response. Maximum: `100`.",
+                    "default": 100,
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {},
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/blocks/{block_id}/children": {
+      "get": {
+        "summary": "Retrieve block children",
+        "description": "",
+        "operationId": "get-block-children",
+        "parameters": [
+          {
+            "name": "block_id",
+            "in": "path",
+            "description": "Identifier for a [block](ref:block)",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "start_cursor",
+            "in": "query",
+            "description": "If supplied, this endpoint will return a page of results starting after the cursor provided. If not supplied, this endpoint will return the first page of results.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "The number of items from the full list desired in the response. Maximum: 100",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100
+            }
+          }
+        ],
+        "responses": {},
+        "deprecated": false,
+        "security": []
+      },
+      "patch": {
+        "summary": "Append block children",
+        "description": "",
+        "operationId": "patch-block-children",
+        "parameters": [
+          {
+            "name": "block_id",
+            "in": "path",
+            "description": "Identifier for a [block](ref:block). Also accepts a [page](ref:page) ID.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "children"
+                ],
+                "properties": {
+                  "children": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "paragraph": {
+                          "type": "object",
+                          "properties": {
+                            "rich_text": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "text": {
+                                    "type": "object",
+                                    "properties": {
+                                      "content": {
+                                        "type": "string"
+                                      },
+                                      "link": {
+                                        "type": [
+                                          "object",
+                                          "null"
+                                        ],
+                                        "properties": {
+                                          "url": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "url"
+                                        ]
+                                      }
+                                    },
+                                    "additionalProperties": false,
+                                    "required": [
+                                      "content"
+                                    ]
+                                  },
+                                  "type": {
+                                    "enum": [
+                                      "text"
+                                    ],
+                                    "type": "string"
+                                  }
+                                },
+                                "additionalProperties": false,
+                                "required": [
+                                  "text"
+                                ]
+                              },
+                              "maxItems": 100
+                            }
+                          },
+                          "additionalProperties": false,
+                          "required": [
+                            "rich_text"
+                          ]
+                        },
+                        "bulleted_list_item": {
+                          "type": "object",
+                          "properties": {
+                            "rich_text": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "text": {
+                                    "type": "object",
+                                    "properties": {
+                                      "content": {
+                                        "type": "string"
+                                      },
+                                      "link": {
+                                        "type": [
+                                          "object",
+                                          "null"
+                                        ],
+                                        "properties": {
+                                          "url": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "url"
+                                        ]
+                                      }
+                                    },
+                                    "additionalProperties": false,
+                                    "required": [
+                                      "content"
+                                    ]
+                                  },
+                                  "type": {
+                                    "enum": [
+                                      "text"
+                                    ],
+                                    "type": "string"
+                                  }
+                                },
+                                "additionalProperties": false,
+                                "required": [
+                                  "text"
+                                ]
+                              },
+                              "maxItems": 100
+                            }
+                          },
+                          "additionalProperties": false,
+                          "required": [
+                            "rich_text"
+                          ]
+                        },
+                        "type": {
+                          "enum": [
+                            "paragraph",
+                            "bulleted_list_item"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "description": "Child content to append to a container block as an array of [block objects](ref:block)"
+                  },
+                  "after": {
+                    "type": "string",
+                    "description": "The ID of the existing block that the new block should be appended after."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {},
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/blocks/{block_id}": {
+      "get": {
+        "summary": "Retrieve a block",
+        "description": "",
+        "operationId": "retrieve-a-block",
+        "parameters": [
+          {
+            "name": "block_id",
+            "in": "path",
+            "description": "Identifier for a Notion block",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {},
+        "deprecated": false,
+        "security": []
+      },
+      "patch": {
+        "summary": "Update a block",
+        "description": "",
+        "operationId": "update-a-block",
+        "parameters": [
+          {
+            "name": "block_id",
+            "in": "path",
+            "description": "Identifier for a Notion block",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "object",
+                    "description": "The [block object `type`](ref:block#block-object-keys) value with the properties to be updated. Currently only `text` (for supported block types) and `checked` (for `to_do` blocks) fields can be updated.",
+                    "properties": {}
+                  },
+                  "archived": {
+                    "type": "boolean",
+                    "description": "Set to true to archive (delete) a block. Set to false to un-archive (restore) a block.",
+                    "default": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {},
+        "deprecated": false,
+        "security": []
+      },
+      "delete": {
+        "summary": "Delete a block",
+        "description": "",
+        "operationId": "delete-a-block",
+        "parameters": [
+          {
+            "name": "block_id",
+            "in": "path",
+            "description": "Identifier for a Notion block",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {},
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/pages/{page_id}": {
+      "get": {
+        "summary": "Retrieve a page",
+        "description": "",
+        "operationId": "retrieve-a-page",
+        "parameters": [
+          {
+            "name": "page_id",
+            "in": "path",
+            "description": "Identifier for a Notion page",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "filter_properties",
+            "in": "query",
+            "description": "A list of page property value IDs associated with the page. Use this param to limit the response to a specific page property value or values. To retrieve multiple properties, specify each page property ID. For example: `?filter_properties=iAk8&filter_properties=b7dh`.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {},
+        "deprecated": false,
+        "security": []
+      },
+      "patch": {
+        "summary": "Update page properties",
+        "description": "",
+        "operationId": "patch-page",
+        "parameters": [
+          {
+            "name": "page_id",
+            "in": "path",
+            "description": "The identifier for the Notion page to be updated.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "properties": {
+                    "description": "The property values to update for the page. The keys are the names or IDs of the property and the values are property values. If a page property ID is not included, then it is not changed.",
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "text": {
+                              "type": "object",
+                              "properties": {
+                                "content": {
+                                  "type": "string"
+                                },
+                                "link": {
+                                  "type": [
+                                    "object",
+                                    "null"
+                                  ],
+                                  "properties": {
+                                    "url": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "url"
+                                  ]
+                                }
+                              },
+                              "additionalProperties": false,
+                              "required": [
+                                "content"
+                              ]
+                            },
+                            "type": {
+                              "enum": [
+                                "text"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "additionalProperties": false,
+                          "required": [
+                            "text"
+                          ]
+                        },
+                        "maxItems": 100
+                      },
+                      "type": {
+                        "enum": [
+                          "title"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                      "title"
+                    ]
+                  },
+                  "in_trash": {
+                    "type": "boolean",
+                    "description": "Set to true to delete a block. Set to false to restore a block.",
+                    "default": false
+                  },
+                  "archived": {
+                    "type": "boolean"
+                  },
+                  "icon": {
+                    "description": "A page icon for the page. Supported types are [external file object](https://developers.notion.com/reference/file-object) or [emoji object](https://developers.notion.com/reference/emoji-object).",
+                    "type": "object",
+                    "properties": {
+                      "emoji": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                      "emoji"
+                    ]
+                  },
+                  "cover": {
+                    "type": "object",
+                    "description": "A cover image for the page. Only [external file objects](https://developers.notion.com/reference/file-object) are supported.",
+                    "properties": {
+                      "external": {
+                        "type": "object",
+                        "properties": {
+                          "url": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false,
+                        "required": [
+                          "url"
+                        ]
+                      },
+                      "type": {
+                        "enum": [
+                          "external"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "external"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {},
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/pages": {
+      "post": {
+        "summary": "Create a page",
+        "description": "",
+        "operationId": "post-page",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "parent",
+                  "properties"
+                ],
+                "properties": {
+                  "parent": {
+                    "type": "object",
+                    "properties": {
+                      "page_id": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    },
+                    "required": [
+                      "page_id"
+                    ]
+                  },
+                  "properties": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "text"
+                          ],
+                          "properties": {
+                            "text": {
+                              "type": "object",
+                              "required": [
+                                "content"
+                              ],
+                              "properties": {
+                                "content": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "maxItems": 100
+                      },
+                      "type": {
+                        "enum": [
+                          "title"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                      "title"
+                    ]
+                  },
+                  "children": {
+                    "type": "array",
+                    "description": "The content to be rendered on the new page, represented as an array of [block objects](https://developers.notion.com/reference/block).",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "icon": {
+                    "type": "string",
+                    "description": "The icon of the new page. Either an [emoji object](https://developers.notion.com/reference/emoji-object) or an [external file object](https://developers.notion.com/reference/file-object)..",
+                    "format": "json"
+                  },
+                  "cover": {
+                    "type": "string",
+                    "description": "The cover image of the new page, represented as a [file object](https://developers.notion.com/reference/file-object).",
+                    "format": "json"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {},
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/databases": {
+      "post": {
+        "summary": "Create a database",
+        "description": "",
+        "operationId": "create-a-database",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "parent",
+                  "properties"
+                ],
+                "properties": {
+                  "parent": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "enum": [
+                          "page_id"
+                        ],
+                        "type": "string"
+                      },
+                      "page_id": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "page_id"
+                    ]
+                  },
+                  "properties": {
+                    "type": "object",
+                    "description": "Property schema of database. The keys are the names of properties as they appear in Notion and the values are [property schema objects](https://developers.notion.com/reference/property-schema-object).",
+                    "additionalProperties": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "title": {
+                              "type": "object",
+                              "properties": {},
+                              "additionalProperties": false
+                            },
+                            "description": {
+                              "type": "string",
+                              "maxLength": 280,
+                              "minLength": 1
+                            }
+                          },
+                          "additionalProperties": false,
+                          "required": [
+                            "title"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "title": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "text"
+                      ],
+                      "properties": {
+                        "text": {
+                          "type": "object",
+                          "properties": {
+                            "content": {
+                              "type": "string"
+                            },
+                            "link": {
+                              "type": [
+                                "object",
+                                "null"
+                              ],
+                              "properties": {
+                                "url": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "url"
+                              ]
+                            }
+                          },
+                          "additionalProperties": false,
+                          "required": [
+                            "content"
+                          ]
+                        },
+                        "type": {
+                          "enum": [
+                            "text"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "maxItems": 100
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{\n    \"object\": \"database\",\n    \"id\": \"bc1211ca-e3f1-4939-ae34-5260b16f627c\",\n    \"created_time\": \"2021-07-08T23:50:00.000Z\",\n    \"last_edited_time\": \"2021-07-08T23:50:00.000Z\",\n    \"icon\": {\n        \"type\": \"emoji\",\n        \"emoji\": \"🎉\"\n    },\n    \"cover\": {\n        \"type\": \"external\",\n        \"external\": {\n            \"url\": \"https://website.domain/images/image.png\"\n        }\n    },\n    \"url\": \"https://www.notion.so/bc1211cae3f14939ae34260b16f627c\",\n    \"title\": [\n        {\n            \"type\": \"text\",\n            \"text\": {\n                \"content\": \"Grocery List\",\n                \"link\": null\n            },\n            \"annotations\": {\n                \"bold\": false,\n                \"italic\": false,\n                \"strikethrough\": false,\n                \"underline\": false,\n                \"code\": false,\n                \"color\": \"default\"\n            },\n            \"plain_text\": \"Grocery List\",\n            \"href\": null\n        }\n    ],\n    \"properties\": {\n        \"+1\": {\n            \"id\": \"Wp%3DC\",\n            \"name\": \"+1\",\n            \"type\": \"people\",\n            \"people\": {}\n        },\n        \"In stock\": {\n            \"id\": \"fk%5EY\",\n            \"name\": \"In stock\",\n            \"type\": \"checkbox\",\n            \"checkbox\": {}\n        },\n        \"Price\": {\n            \"id\": \"evWq\",\n            \"name\": \"Price\",\n            \"type\": \"number\",\n            \"number\": {\n                \"format\": \"dollar\"\n            }\n        },\n        \"Description\": {\n            \"id\": \"V}lX\",\n            \"name\": \"Description\",\n            \"type\": \"rich_text\",\n            \"rich_text\": {}\n        },\n        \"Last ordered\": {\n            \"id\": \"eVnV\",\n            \"name\": \"Last ordered\",\n            \"type\": \"date\",\n            \"date\": {}\n        },\n        \"Meals\": {\n            \"id\": \"%7DWA~\",\n            \"name\": \"Meals\",\n            \"type\": \"relation\",\n            \"relation\": {\n                \"database_id\": \"668d797c-76fa-4934-9b05-ad288df2d136\",\n                \"single_property\": {}\n            }\n        },\n        \"Number of meals\": {\n            \"id\": \"Z\\\\Eh\",\n            \"name\": \"Number of meals\",\n            \"type\": \"rollup\",\n            \"rollup\": {\n                \"rollup_property_name\": \"Name\",\n                \"relation_property_name\": \"Meals\",\n                \"rollup_property_id\": \"title\",\n                \"relation_property_id\": \"mxp^\",\n                \"function\": \"count\"\n            }\n        },\n        \"Store availability\": {\n            \"id\": \"s}Kq\",\n            \"name\": \"Store availability\",\n            \"type\": \"multi_select\",\n            \"multi_select\": {\n                \"options\": [\n                    {\n                        \"id\": \"cb79b393-d1c1-4528-b517-c450859de766\",\n                        \"name\": \"Duc Loi Market\",\n                        \"color\": \"blue\"\n                    },\n                    {\n                        \"id\": \"58aae162-75d4-403b-a793-3bc7308e4cd2\",\n                        \"name\": \"Rainbow Grocery\",\n                        \"color\": \"gray\"\n                    },\n                    {\n                        \"id\": \"22d0f199-babc-44ff-bd80-a9eae3e3fcbf\",\n                        \"name\": \"Nijiya Market\",\n                        \"color\": \"purple\"\n                    },\n                    {\n                        \"id\": \"0d069987-ffb0-4347-bde2-8e4068003dbc\",\n                        \"name\": \"Gus's Community Market\",\n                        \"color\": \"yellow\"\n                    }\n                ]\n            }\n        },\n        \"Photo\": {\n            \"id\": \"yfiK\",\n            \"name\": \"Photo\",\n            \"type\": \"files\",\n            \"files\": {}\n        },\n        \"Food group\": {\n            \"id\": \"CM%3EH\",\n            \"name\": \"Food group\",\n            \"type\": \"select\",\n            \"select\": {\n                \"options\": [\n                    {\n                        \"id\": \"6d4523fa-88cb-4ffd-9364-1e39d0f4e566\",\n                        \"name\": \"🥦Vegetable\",\n                        \"color\": \"green\"\n                    },\n                    {\n                        \"id\": \"268d7e75-de8f-4c4b-8b9d-de0f97021833\",\n                        \"name\": \"🍎Fruit\",\n                        \"color\": \"red\"\n                    },\n                    {\n                        \"id\": \"1b234a00-dc97-489c-b987-829264cfdfef\",\n                        \"name\": \"💪Protein\",\n                        \"color\": \"yellow\"\n                    }\n                ]\n            }\n        },\n        \"Name\": {\n            \"id\": \"title\",\n            \"name\": \"Name\",\n            \"type\": \"title\",\n            \"title\": {}\n        }\n    },\n    \"parent\": {\n        \"type\": \"page_id\",\n        \"page_id\": \"98ad959b-2b6a-4774-80ee-00246fb0ea9b\"\n    },\n    \"archived\": false\n}{\n    \"object\": \"database\",\n    \"id\": \"bc1211ca-e3f1-4939-ae34-5260b16f627c\",\n    \"created_time\": \"2021-07-08T23:50:00.000Z\",\n    \"last_edited_time\": \"2021-07-08T23:50:00.000Z\",\n    \"icon\": {\n        \"type\": \"emoji\",\n        \"emoji\": \"🎉\"\n    },\n    \"cover\": {\n        \"type\": \"external\",\n        \"external\": {\n            \"url\": \"https://website.domain/images/image.png\"\n        }\n    },\n    \"url\": \"https://www.notion.so/bc1211cae3f14939ae34260b16f627c\",\n    \"title\": [\n        {\n            \"type\": \"text\",\n            \"text\": {\n                \"content\": \"Grocery List\",\n                \"link\": null\n            },\n            \"annotations\": {\n                \"bold\": false,\n                \"italic\": false,\n                \"strikethrough\": false,\n                \"underline\": false,\n                \"code\": false,\n                \"color\": \"default\"\n            },\n            \"plain_text\": \"Grocery List\",\n            \"href\": null\n        }\n    ],\n    \"properties\": {\n        \"+1\": {\n            \"id\": \"Wp%3DC\",\n            \"name\": \"+1\",\n            \"type\": \"people\",\n            \"people\": {}\n        },\n        \"In stock\": {\n            \"id\": \"fk%5EY\",\n            \"name\": \"In stock\",\n            \"type\": \"checkbox\",\n            \"checkbox\": {}\n        },\n        \"Price\": {\n            \"id\": \"evWq\",\n            \"name\": \"Price\",\n            \"type\": \"number\",\n            \"number\": {\n                \"format\": \"dollar\"\n            }\n        },\n        \"Description\": {\n            \"id\": \"V}lX\",\n            \"name\": \"Description\",\n            \"type\": \"rich_text\",\n            \"rich_text\": {}\n        },\n        \"Last ordered\": {\n            \"id\": \"eVnV\",\n            \"name\": \"Last ordered\",\n            \"type\": \"date\",\n            \"date\": {}\n        },\n        \"Meals\": {\n            \"id\": \"%7DWA~\",\n            \"name\": \"Meals\",\n            \"type\": \"relation\",\n            \"relation\": {\n                \"database_id\": \"668d797c-76fa-4934-9b05-ad288df2d136\",\n                \"synced_property_name\": \"Related to Grocery List (Meals)\"\n            }\n        },\n        \"Number of meals\": {\n            \"id\": \"Z\\\\Eh\",\n            \"name\": \"Number of meals\",\n            \"type\": \"rollup\",\n            \"rollup\": {\n                \"rollup_property_name\": \"Name\",\n                \"relation_property_name\": \"Meals\",\n                \"rollup_property_id\": \"title\",\n                \"relation_property_id\": \"mxp^\",\n                \"function\": \"count\"\n            }\n        },\n        \"Store availability\": {\n            \"id\": \"s}Kq\",\n            \"name\": \"Store availability\",\n            \"type\": \"multi_select\",\n            \"multi_select\": {\n                \"options\": [\n                    {\n                        \"id\": \"cb79b393-d1c1-4528-b517-c450859de766\",\n                        \"name\": \"Duc Loi Market\",\n                        \"color\": \"blue\"\n                    },\n                    {\n                        \"id\": \"58aae162-75d4-403b-a793-3bc7308e4cd2\",\n                        \"name\": \"Rainbow Grocery\",\n                        \"color\": \"gray\"\n                    },\n                    {\n                        \"id\": \"22d0f199-babc-44ff-bd80-a9eae3e3fcbf\",\n                        \"name\": \"Nijiya Market\",\n                        \"color\": \"purple\"\n                    },\n                    {\n                        \"id\": \"0d069987-ffb0-4347-bde2-8e4068003dbc\",\n                        \"name\": \"Gus's Community Market\",\n                        \"color\": \"yellow\"\n                    }\n                ]\n            }\n        },\n        \"Photo\": {\n            \"id\": \"yfiK\",\n            \"name\": \"Photo\",\n            \"type\": \"files\",\n            \"files\": {}\n        },\n        \"Food group\": {\n            \"id\": \"CM%3EH\",\n            \"name\": \"Food group\",\n            \"type\": \"select\",\n            \"select\": {\n                \"options\": [\n                    {\n                        \"id\": \"6d4523fa-88cb-4ffd-9364-1e39d0f4e566\",\n                        \"name\": \"🥦Vegetable\",\n                        \"color\": \"green\"\n                    },\n                    {\n                        \"id\": \"268d7e75-de8f-4c4b-8b9d-de0f97021833\",\n                        \"name\": \"🍎Fruit\",\n                        \"color\": \"red\"\n                    },\n                    {\n                        \"id\": \"1b234a00-dc97-489c-b987-829264cfdfef\",\n                        \"name\": \"💪Protein\",\n                        \"color\": \"yellow\"\n                    }\n                ]\n            }\n        },\n        \"Name\": {\n            \"id\": \"title\",\n            \"name\": \"Name\",\n            \"type\": \"title\",\n            \"title\": {}\n        }\n    },\n    \"parent\": {\n        \"type\": \"page_id\",\n        \"page_id\": \"98ad959b-2b6a-4774-80ee-00246fb0ea9b\"\n    },\n    \"archived\": false,\n    \"is_inline\": false\n}"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/databases/{database_id}": {
+      "patch": {
+        "summary": "Update a database",
+        "description": "",
+        "operationId": "update-a-database",
+        "parameters": [
+          {
+            "name": "database_id",
+            "in": "path",
+            "description": "identifier for a Notion database",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "description": "An array of [rich text objects](https://developers.notion.com/reference/rich-text) that represents the title of the database that is displayed in the Notion UI. If omitted, then the database title remains unchanged.",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "text"
+                      ],
+                      "properties": {
+                        "text": {
+                          "type": "object",
+                          "properties": {
+                            "content": {
+                              "type": "string"
+                            },
+                            "link": {
+                              "type": [
+                                "object",
+                                "null"
+                              ],
+                              "properties": {
+                                "url": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "url"
+                              ]
+                            }
+                          },
+                          "additionalProperties": false,
+                          "required": [
+                            "content"
+                          ]
+                        },
+                        "type": {
+                          "enum": [
+                            "text"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "description": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "text"
+                      ],
+                      "properties": {
+                        "text": {
+                          "type": "object",
+                          "properties": {
+                            "content": {
+                              "type": "string"
+                            },
+                            "link": {
+                              "type": [
+                                "object",
+                                "null"
+                              ],
+                              "properties": {
+                                "url": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "url"
+                              ]
+                            }
+                          },
+                          "additionalProperties": false,
+                          "required": [
+                            "content"
+                          ]
+                        },
+                        "type": {
+                          "enum": [
+                            "text"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "maxItems": 100,
+                    "description": "An array of [rich text objects](https://developers.notion.com/reference/rich-text) that represents the description of the database that is displayed in the Notion UI. If omitted, then the database description remains unchanged."
+                  },
+                  "properties": {
+                    "type": "object",
+                    "description": "Property schema of database. The keys are the names of properties as they appear in Notion and the values are [property schema objects](https://developers.notion.com/reference/property-schema-object).",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {},
+        "deprecated": false,
+        "security": []
+      },
+      "get": {
+        "summary": "Retrieve a database",
+        "description": "",
+        "operationId": "retrieve-a-database",
+        "parameters": [
+          {
+            "name": "database_id",
+            "in": "path",
+            "description": "An identifier for the Notion database.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{\n    \"object\": \"database\",\n    \"id\": \"bc1211ca-e3f1-4939-ae34-5260b16f627c\",\n    \"created_time\": \"2021-07-08T23:50:00.000Z\",\n    \"last_edited_time\": \"2021-07-08T23:50:00.000Z\",\n    \"icon\": {\n        \"type\": \"emoji\",\n        \"emoji\": \"🎉\"\n    },\n    \"cover\": {\n        \"type\": \"external\",\n        \"external\": {\n            \"url\": \"https://website.domain/images/image.png\"\n        }\n    },\n    \"url\": \"https://www.notion.so/bc1211cae3f14939ae34260b16f627c\",\n    \"title\": [\n        {\n            \"type\": \"text\",\n            \"text\": {\n                \"content\": \"Grocery List\",\n                \"link\": null\n            },\n            \"annotations\": {\n                \"bold\": false,\n                \"italic\": false,\n                \"strikethrough\": false,\n                \"underline\": false,\n                \"code\": false,\n                \"color\": \"default\"\n            },\n            \"plain_text\": \"Grocery List\",\n            \"href\": null\n        }\n    ],\n    \"description\": [\n        {\n            \"type\": \"text\",\n            \"text\": {\n                \"content\": \"Grocery list for just kale 🥬\",\n                \"link\": null\n            },\n            \"annotations\": {\n                \"bold\": false,\n                \"italic\": false,\n                \"strikethrough\": false,\n                \"underline\": false,\n                \"code\": false,\n                \"color\": \"default\"\n            },\n            \"plain_text\": \"Grocery list for just kale 🥬\",\n            \"href\": null\n        }\n    ],\n    \"properties\": {\n        \"+1\": {\n            \"id\": \"Wp%3DC\",\n            \"name\": \"+1\",\n            \"type\": \"people\",\n            \"people\": {}\n        },\n        \"In stock\": {\n            \"id\": \"fk%5EY\",\n            \"name\": \"In stock\",\n            \"type\": \"checkbox\",\n            \"checkbox\": {}\n        },\n        \"Price\": {\n            \"id\": \"evWq\",\n            \"name\": \"Price\",\n            \"type\": \"number\",\n            \"number\": {\n                \"format\": \"dollar\"\n            }\n        },\n        \"Description\": {\n            \"id\": \"V}lX\",\n            \"name\": \"Description\",\n            \"type\": \"rich_text\",\n            \"rich_text\": {}\n        },\n        \"Last ordered\": {\n            \"id\": \"eVnV\",\n            \"name\": \"Last ordered\",\n            \"type\": \"date\",\n            \"date\": {}\n        },\n        \"Meals\": {\n            \"id\": \"%7DWA~\",\n            \"name\": \"Meals\",\n            \"type\": \"relation\",\n            \"relation\": {\n                \"database_id\": \"668d797c-76fa-4934-9b05-ad288df2d136\",\n                \"synced_property_name\": \"Related to Grocery List (Meals)\"\n            }\n        },\n        \"Number of meals\": {\n            \"id\": \"Z\\\\Eh\",\n            \"name\": \"Number of meals\",\n            \"type\": \"rollup\",\n            \"rollup\": {\n                \"rollup_property_name\": \"Name\",\n                \"relation_property_name\": \"Meals\",\n                \"rollup_property_id\": \"title\",\n                \"relation_property_id\": \"mxp^\",\n                \"function\": \"count\"\n            }\n        },\n        \"Store availability\": {\n            \"id\": \"s}Kq\",\n            \"name\": \"Store availability\",\n            \"type\": \"multi_select\",\n            \"multi_select\": {\n                \"options\": [\n                    {\n                        \"id\": \"cb79b393-d1c1-4528-b517-c450859de766\",\n                        \"name\": \"Duc Loi Market\",\n                        \"color\": \"blue\"\n                    },\n                    {\n                        \"id\": \"58aae162-75d4-403b-a793-3bc7308e4cd2\",\n                        \"name\": \"Rainbow Grocery\",\n                        \"color\": \"gray\"\n                    },\n                    {\n                        \"id\": \"22d0f199-babc-44ff-bd80-a9eae3e3fcbf\",\n                        \"name\": \"Nijiya Market\",\n                        \"color\": \"purple\"\n                    },\n                    {\n                        \"id\": \"0d069987-ffb0-4347-bde2-8e4068003dbc\",\n                        \"name\": \"Gus's Community Market\",\n                        \"color\": \"yellow\"\n                    }\n                ]\n            }\n        },\n        \"Photo\": {\n            \"id\": \"yfiK\",\n            \"name\": \"Photo\",\n            \"type\": \"files\",\n            \"files\": {}\n        },\n        \"Food group\": {\n            \"id\": \"CM%3EH\",\n            \"name\": \"Food group\",\n            \"type\": \"select\",\n            \"select\": {\n                \"options\": [\n                    {\n                        \"id\": \"6d4523fa-88cb-4ffd-9364-1e39d0f4e566\",\n                        \"name\": \"🥦Vegetable\",\n                        \"color\": \"green\"\n                    },\n                    {\n                        \"id\": \"268d7e75-de8f-4c4b-8b9d-de0f97021833\",\n                        \"name\": \"🍎Fruit\",\n                        \"color\": \"red\"\n                    },\n                    {\n                        \"id\": \"1b234a00-dc97-489c-b987-829264cfdfef\",\n                        \"name\": \"💪Protein\",\n                        \"color\": \"yellow\"\n                    }\n                ]\n            }\n        },\n        \"Name\": {\n            \"id\": \"title\",\n            \"name\": \"Name\",\n            \"type\": \"title\",\n            \"title\": {}\n        }\n    },\n    \"parent\": {\n        \"type\": \"page_id\",\n        \"page_id\": \"98ad959b-2b6a-4774-80ee-00246fb0ea9b\"\n    },\n    \"archived\": false,\n    \"is_inline\": false,\n    \"public_url\": null\n}"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/pages/{page_id}/properties/{property_id}": {
+      "get": {
+        "summary": "Retrieve a page property item",
+        "description": "",
+        "operationId": "retrieve-a-page-property",
+        "parameters": [
+          {
+            "name": "page_id",
+            "in": "path",
+            "description": "Identifier for a Notion page",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "property_id",
+            "in": "path",
+            "description": "Identifier for a page [property](https://developers.notion.com/reference/page#all-property-values)",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "For paginated properties. The max number of property item objects on a page. The default size is 100",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "start_cursor",
+            "in": "query",
+            "description": "For paginated properties.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Number Property Item": {
+                    "value": "{\n  \"object\": \"property_item\",\n  \"id\" \"kjPO\",\n  \"type\": \"number\",\n  \"number\": 2\n}"
+                  },
+                  "Result": {
+                    "value": "{\n    \"object\": \"list\",\n    \"results\": [\n        {\n            \"object\": \"property_item\",\n            \"id\" \"kjPO\",\n            \"type\": \"rich_text\",\n            \"rich_text\": {\n                \"type\": \"text\",\n                \"text\": {\n                    \"content\": \"Avocado \",\n                    \"link\": null\n                },\n                \"annotations\": {\n                    \"bold\": false,\n                    \"italic\": false,\n                    \"strikethrough\": false,\n                    \"underline\": false,\n                    \"code\": false,\n                    \"color\": \"default\"\n                },\n                \"plain_text\": \"Avocado \",\n                \"href\": null\n            }\n        },\n        {\n            \"object\": \"property_item\",\n            \"id\" \"ijPO\",\n            \"type\": \"rich_text\",\n            \"rich_text\": {\n                \"type\": \"mention\",\n                \"mention\": {\n                    \"type\": \"page\",\n                    \"page\": {\n                        \"id\": \"41117fd7-69a5-4694-bc07-c1e3a682c857\"\n                    }\n                },\n                \"annotations\": {\n                    \"bold\": false,\n                    \"italic\": false,\n                    \"strikethrough\": false,\n                    \"underline\": false,\n                    \"code\": false,\n                    \"color\": \"default\"\n                },\n                \"plain_text\": \"Lemons\",\n                \"href\": \"http://notion.so/41117fd769a54694bc07c1e3a682c857\"\n            }\n        },\n        {\n            \"object\": \"property_item\",\n            \"id\" \"kjPO\",\n            \"type\": \"rich_text\",\n            \"rich_text\": {\n                \"type\": \"text\",\n                \"text\": {\n                    \"content\": \" Tomato \",\n                    \"link\": null\n                },\n                \"annotations\": {\n                    \"bold\": false,\n                    \"italic\": false,\n                    \"strikethrough\": false,\n                    \"underline\": false,\n                    \"code\": false,\n                    \"color\": \"default\"\n                },\n                \"plain_text\": \" Tomato \",\n                \"href\": null\n            }\n        },\n...\n    ],\n    \"next_cursor\": \"some-next-cursor-value\",\n    \"has_more\": true,\n\t\t\"next_url\": \"http://api.notion.com/v1/pages/0e5235bf86aa4efb93aa772cce7eab71/properties/NVv^?start_cursor=some-next-cursor-value&page_size=25\",\n    \"property_item\": {\n      \"id\": \"NVv^\",\n      \"next_url\": null,\n      \"type\": \"rich_text\",\n      \"rich_text\": {}\n    }\n}"
+                  },
+                  "Rollup List Property Item": {
+                    "value": "{\n    \"object\": \"list\",\n    \"results\": [\n        {\n            \"object\": \"property_item\",\n          \t\"id\": \"dj2l\",\n            \"type\": \"relation\",\n            \"relation\": {\n                \"id\": \"83f92c9d-523d-466e-8c1f-9bc2c25a99fe\"\n            }\n        },\n        {\n            \"object\": \"property_item\",\n          \t\"id\": \"dj2l\",\n            \"type\": \"relation\",\n            \"relation\": {\n                \"id\": \"45cfb825-3463-4891-8932-7e6d8c170630\"\n            }\n        },\n        {\n            \"object\": \"property_item\",\n          \t\"id\": \"dj2l\",\n            \"type\": \"relation\",\n            \"relation\": {\n                \"id\": \"1688be1a-a197-4f2a-9688-e528c4b56d94\"\n            }\n        }\n    ],\n    \"next_cursor\": \"some-next-cursor-value\",\n    \"has_more\": true,\n\t\t\"property_item\": {\n      \"id\": \"y}~p\",\n      \"next_url\": \"http://api.notion.com/v1/pages/0e5235bf86aa4efb93aa772cce7eab71/properties/y%7D~p?start_cursor=1QaTunT5&page_size=25\",\n      \"type\": \"rollup\",\n      \"rollup\": {\n        \"function\": \"sum\",\n        \"type\": \"incomplete\",\n        \"incomplete\": {}\n      }\n    }\n    \"type\": \"property_item\"\n}"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/comments": {
+      "get": {
+        "summary": "Retrieve comments",
+        "description": "Retrieves a list of un-resolved [Comment objects](ref:comment-object) from a page or block.",
+        "operationId": "retrieve-a-comment",
+        "parameters": [
+          {
+            "name": "block_id",
+            "in": "query",
+            "description": "Identifier for a Notion block or page",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start_cursor",
+            "in": "query",
+            "description": "If supplied, this endpoint will return a page of results starting after the cursor provided. If not supplied, this endpoint will return the first page of results.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "The number of items from the full list desired in the response. Maximum: 100",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "OK": {
+                    "value": "{\n    \"object\": \"list\",\n    \"results\": [\n        {\n            \"object\": \"comment\",\n            \"id\": \"94cc56ab-9f02-409d-9f99-1037e9fe502f\",\n            \"parent\": {\n                \"type\": \"page_id\",\n                \"page_id\": \"5c6a2821-6bb1-4a7e-b6e1-c50111515c3d\"\n            },\n            \"discussion_id\": \"f1407351-36f5-4c49-a13c-49f8ba11776d\",\n            \"created_time\": \"2022-07-15T16:52:00.000Z\",\n            \"last_edited_time\": \"2022-07-15T19:16:00.000Z\",\n            \"created_by\": {\n                \"object\": \"user\",\n                \"id\": \"9b15170a-9941-4297-8ee6-83fa7649a87a\"\n            },\n            \"rich_text\": [\n                {\n                    \"type\": \"text\",\n                    \"text\": {\n                        \"content\": \"Single comment\",\n                        \"link\": null\n                    },\n                    \"annotations\": {\n                        \"bold\": false,\n                        \"italic\": false,\n                        \"strikethrough\": false,\n                        \"underline\": false,\n                        \"code\": false,\n                        \"color\": \"default\"\n                    },\n                    \"plain_text\": \"Single comment\",\n                    \"href\": null\n                }\n            ]\n        }\n    ],\n    \"next_cursor\": null,\n    \"has_more\": false,\n    \"type\": \"comment\",\n    \"comment\": {}\n}"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      },
+      "post": {
+        "summary": "Create comment",
+        "description": "Creates a comment in a page or existing discussion thread.",
+        "operationId": "create-a-comment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "parent",
+                  "rich_text"
+                ],
+                "properties": {
+                  "parent": {
+                    "type": "object",
+                    "description": "The page that contains the comment",
+                    "required": [
+                      "page_id"
+                    ],
+                    "properties": {
+                      "page_id": {
+                        "type": "string",
+                        "description": "the page ID"
+                      }
+                    }
+                  },
+                  "rich_text": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "text"
+                      ],
+                      "properties": {
+                        "text": {
+                          "type": "object",
+                          "required": [
+                            "content"
+                          ],
+                          "properties": {
+                            "content": {
+                              "type": "string",
+                              "description": "The content of the comment"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{\n    \"object\": \"comment\",\n    \"id\": \"b52b8ed6-e029-4707-a671-832549c09de3\",\n    \"parent\": {\n        \"type\": \"page_id\",\n        \"page_id\": \"5c6a2821-6bb1-4a7e-b6e1-c50111515c3d\"\n    },\n    \"discussion_id\": \"f1407351-36f5-4c49-a13c-49f8ba11776d\",\n    \"created_time\": \"2022-07-15T20:53:00.000Z\",\n    \"last_edited_time\": \"2022-07-15T20:53:00.000Z\",\n    \"created_by\": {\n        \"object\": \"user\",\n        \"id\": \"067dee40-6ebd-496f-b446-093c715fb5ec\"\n    },\n    \"rich_text\": [\n        {\n            \"type\": \"text\",\n            \"text\": {\n                \"content\": \"Hello world\",\n                \"link\": null\n            },\n            \"annotations\": {\n                \"bold\": false,\n                \"italic\": false,\n                \"strikethrough\": false,\n                \"underline\": false,\n                \"code\": false,\n                \"color\": \"default\"\n            },\n            \"plain_text\": \"Hello world\",\n            \"href\": null\n        }\n    ]\n}"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    }
+  }
+}
