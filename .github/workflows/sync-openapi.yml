@@ -1,11 +1,6 @@
 name: Sync OpenAPI Specs # can be customized
-on:                                              # additional custom triggers can be configured, examples below
-  workflow_dispatch:                             # manual dispatch
-  push:                                          
-    branches:
-      - main                                     # on push to main
-  schedule:
-    - cron: '0 3 * * *'                          # everyday at 3:00 AM UTC
+on:
+  workflow_dispatch:
 
 jobs:
   update-from-source:
