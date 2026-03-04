@@ -23776,7 +23776,8 @@
         "type": "string",
         "enum": [
           "MCP_Atlas",
-          "Toolathlon"
+          "Toolathlon",
+          "MCP_Mark"
         ],
         "title": "BenchmarkEnum",
         "description": "Supported benchmarks for sandbox initial environment"
