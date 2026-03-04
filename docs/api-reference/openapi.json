@@ -22507,14 +22507,14 @@
         }
       }
     },
-    "/local-sandbox/canvas_toolathlon/{sandbox_id}/initialize": {
+    "/local-sandbox/canvas/{sandbox_id}/initialize": {
       "post": {
         "tags": [
           "local-sandbox"
         ],
-        "summary": "Initialize canvas_toolathlon sandbox with data",
-        "description": "Initialize the sandbox with canvas_toolathlon-specific data following the defined schema.",
-        "operationId": "initialize_sandbox_local_sandbox_canvas_toolathlon__sandbox_id__initialize_post",
+        "summary": "Initialize canvas sandbox with data",
+        "description": "Initialize the sandbox with canvas-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_local_sandbox_canvas__sandbox_id__initialize_post",
         "security": [
           {
             "HTTPBearer": []
@@ -22586,14 +22586,14 @@
         }
       }
     },
-    "/local-sandbox/canvas_toolathlon/{sandbox_id}/dump": {
+    "/local-sandbox/canvas/{sandbox_id}/dump": {
       "get": {
         "tags": [
           "local-sandbox"
         ],
-        "summary": "Export canvas_toolathlon sandbox data",
+        "summary": "Export canvas sandbox data",
         "description": "Export all data from the sandbox in the same format used for initialization.",
-        "operationId": "dump_sandbox_local_sandbox_canvas_toolathlon__sandbox_id__dump_get",
+        "operationId": "dump_sandbox_local_sandbox_canvas__sandbox_id__dump_get",
         "security": [
           {
             "HTTPBearer": []
@@ -28677,7 +28677,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Input"
                 },
                 "type": "array"
               },
@@ -28699,7 +28699,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Output"
                 },
                 "type": "array"
               },
@@ -29847,7 +29847,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -29869,7 +29869,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -31560,7 +31560,7 @@
           "pdf-tools",
           "google_cloud",
           "poste_email_toolathlon",
-          "canvas_toolathlon",
+          "canvas",
           "localmemory"
         ],
         "title": "LocalSandboxMCPServer",
@@ -38655,7 +38655,7 @@
         "title": "YouTubePlaylistItem",
         "description": "YouTube Playlist Item - represents a video in a playlist"
       },
-      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input": {
+      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Input": {
         "properties": {
           "title": {
             "type": "string",
@@ -38797,7 +38797,7 @@
         "title": "GoogleCalendarEvent",
         "description": "Google Calendar event object"
       },
-      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output": {
+      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Output": {
         "properties": {
           "title": {
             "type": "string",
