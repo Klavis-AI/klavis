@@ -22507,6 +22507,135 @@
         }
       }
     },
+    "/local-sandbox/canvas_toolathlon/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Initialize canvas_toolathlon sandbox with data",
+        "description": "Initialize the sandbox with canvas_toolathlon-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_local_sandbox_canvas_toolathlon__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          },
+          {
+            "name": "init_default_data",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "If true, use default test data for initialization",
+              "default": false,
+              "title": "Init Default Data"
+            },
+            "description": "If true, use default test data for initialization"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/CanvasData-Input"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Request Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/local-sandbox/canvas_toolathlon/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Export canvas_toolathlon sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_local_sandbox_canvas_toolathlon__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_CanvasData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/universes": {
       "get": {
         "tags": [
@@ -24291,6 +24420,324 @@
         "title": "Campaign",
         "description": "Marketing campaign"
       },
+      "CanvasAssignment-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Assignment name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Assignment description (HTML)"
+          },
+          "points_possible": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Points Possible",
+            "description": "Maximum points"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At",
+            "description": "Due date in ISO 8601 format"
+          },
+          "submission_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Submission Types",
+            "description": "Allowed submission types: online_text_entry, online_upload, online_url, etc."
+          },
+          "published": {
+            "type": "boolean",
+            "title": "Published",
+            "description": "Whether the assignment is published",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CanvasAssignment",
+        "description": "A Canvas assignment within a course."
+      },
+      "CanvasAssignment-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "CanvasCourse-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Course name"
+          },
+          "course_code": {
+            "type": "string",
+            "title": "Course Code",
+            "description": "Course code (e.g. CS101)"
+          },
+          "published": {
+            "type": "boolean",
+            "title": "Published",
+            "description": "Whether the course is published",
+            "default": true
+          },
+          "assignments": {
+            "items": {
+              "$ref": "#/components/schemas/CanvasAssignment-Input"
+            },
+            "type": "array",
+            "title": "Assignments",
+            "description": "Course assignments"
+          },
+          "quizzes": {
+            "items": {
+              "$ref": "#/components/schemas/CanvasQuiz-Input"
+            },
+            "type": "array",
+            "title": "Quizzes",
+            "description": "Course quizzes"
+          },
+          "enrollments": {
+            "items": {
+              "$ref": "#/components/schemas/CanvasEnrollment-Input"
+            },
+            "type": "array",
+            "title": "Enrollments",
+            "description": "Course enrollments"
+          },
+          "announcements": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Announcements",
+            "description": "Course announcements. Each dict has 'title' and 'message' (HTML)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "course_code"
+        ],
+        "title": "CanvasCourse",
+        "description": "A Canvas course with its assignments, quizzes, and enrollments."
+      },
+      "CanvasCourse-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "CanvasData-Input": {
+        "properties": {
+          "courses": {
+            "items": {
+              "$ref": "#/components/schemas/CanvasCourse-Input"
+            },
+            "type": "array",
+            "title": "Courses",
+            "description": "Courses to create/load into the Canvas instance"
+          }
+        },
+        "type": "object",
+        "title": "CanvasData",
+        "description": "Complete Canvas sandbox data structure for initialize/dump operations.\n\nCanvas sandboxes come pre-baked with ~500 users and 3 admin accounts.\nThis schema allows loading additional course data on top of the pre-baked state.\n\nExample:\n    {\n        \"courses\": [\n            {\n                \"name\": \"Introduction to CS\",\n                \"course_code\": \"CS101\",\n                \"published\": true,\n                \"assignments\": [...],\n                \"quizzes\": [...],\n                \"enrollments\": [\n                    {\"user_email\": \"rkelly27@mcp.com\", \"role\": \"StudentEnrollment\"}\n                ]\n            }\n        ]\n    }"
+      },
+      "CanvasData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "CanvasEnrollment-Input": {
+        "properties": {
+          "user_email": {
+            "type": "string",
+            "title": "User Email",
+            "description": "Email of the user to enroll (must exist in Canvas)"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "description": "Enrollment role: StudentEnrollment, TeacherEnrollment, TaEnrollment",
+            "default": "StudentEnrollment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_email"
+        ],
+        "title": "CanvasEnrollment",
+        "description": "An enrollment linking a user to a course."
+      },
+      "CanvasEnrollment-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "CanvasQuiz-Input": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Quiz title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Quiz description (HTML)"
+          },
+          "quiz_type": {
+            "type": "string",
+            "title": "Quiz Type",
+            "description": "Quiz type: practice_quiz, assignment, graded_survey, survey",
+            "default": "assignment"
+          },
+          "time_limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Time Limit",
+            "description": "Time limit in minutes"
+          },
+          "published": {
+            "type": "boolean",
+            "title": "Published",
+            "description": "Whether the quiz is published",
+            "default": true
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At",
+            "description": "Due date in ISO 8601 format"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/CanvasQuizQuestion-Input"
+            },
+            "type": "array",
+            "title": "Questions",
+            "description": "Quiz questions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "CanvasQuiz",
+        "description": "A Canvas quiz within a course."
+      },
+      "CanvasQuiz-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "CanvasQuizQuestion-Input": {
+        "properties": {
+          "question_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Question Name",
+            "description": "Short name/label for the question"
+          },
+          "question_text": {
+            "type": "string",
+            "title": "Question Text",
+            "description": "The question text (supports HTML)"
+          },
+          "question_type": {
+            "type": "string",
+            "title": "Question Type",
+            "description": "Question type: multiple_choice_question, true_false_question, short_answer_question, essay_question, etc.",
+            "default": "multiple_choice_question"
+          },
+          "points_possible": {
+            "type": "number",
+            "title": "Points Possible",
+            "description": "Points for this question",
+            "default": 1
+          },
+          "answers": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answers",
+            "description": "Answer options. Each dict has 'answer_text' and 'answer_weight' (100 = correct, 0 = wrong)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question_text"
+        ],
+        "title": "CanvasQuizQuestion",
+        "description": "A single quiz question."
+      },
+      "CanvasQuizQuestion-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
       "Case": {
         "properties": {
           "subject": {
@@ -25801,6 +26248,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[CalcomData]"
+      },
+      "DumpSandboxResponse_CanvasData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CanvasData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[CanvasData]"
       },
       "DumpSandboxResponse_ClickUpData_": {
         "properties": {
@@ -28198,7 +28676,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Input"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -28220,7 +28698,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Output"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -29368,7 +29846,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input"
                 },
                 "type": "array"
               },
@@ -29390,7 +29868,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output"
                 },
                 "type": "array"
               },
@@ -31081,6 +31559,7 @@
           "pdf-tools",
           "google_cloud",
           "poste_email_toolathlon",
+          "canvas_toolathlon",
           "localmemory"
         ],
         "title": "LocalSandboxMCPServer",
@@ -38175,7 +38654,7 @@
         "title": "YouTubePlaylistItem",
         "description": "YouTube Playlist Item - represents a video in a playlist"
       },
-      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Input": {
+      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input": {
         "properties": {
           "title": {
             "type": "string",
@@ -38317,7 +38796,7 @@
         "title": "GoogleCalendarEvent",
         "description": "Google Calendar event object"
       },
-      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Output": {
+      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output": {
         "properties": {
           "title": {
             "type": "string",
