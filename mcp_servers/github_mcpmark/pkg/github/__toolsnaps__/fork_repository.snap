@@ -1,0 +1,29 @@
+{
+  "annotations": {
+    "title": "Fork repository",
+    "readOnlyHint": false
+  },
+  "description": "Fork a GitHub repository to your account or specified organization",
+  "inputSchema": {
+    "properties": {
+      "organization": {
+        "description": "Organization to fork to",
+        "type": "string"
+      },
+      "owner": {
+        "description": "Repository owner",
+        "type": "string"
+      },
+      "repo": {
+        "description": "Repository name",
+        "type": "string"
+      }
+    },
+    "required": [
+      "owner",
+      "repo"
+    ],
+    "type": "object"
+  },
+  "name": "fork_repository"
+}

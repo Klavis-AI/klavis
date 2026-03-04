@@ -1,0 +1,3 @@
+#!/bin/bash
+
+echo '{"jsonrpc":"2.0","id":3,"params":{"name":"get_me"},"method":"tools/call"}' | go run  cmd/github-mcp-server/main.go stdio  | jq .

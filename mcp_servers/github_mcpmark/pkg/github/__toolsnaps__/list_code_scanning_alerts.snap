@@ -1,0 +1,57 @@
+{
+  "annotations": {
+    "title": "List code scanning alerts",
+    "readOnlyHint": true
+  },
+  "description": "List code scanning alerts in a GitHub repository.",
+  "inputSchema": {
+    "properties": {
+      "owner": {
+        "description": "The owner of the repository.",
+        "type": "string"
+      },
+      "ref": {
+        "description": "The Git reference for the results you want to list.",
+        "type": "string"
+      },
+      "repo": {
+        "description": "The name of the repository.",
+        "type": "string"
+      },
+      "severity": {
+        "description": "Filter code scanning alerts by severity",
+        "enum": [
+          "critical",
+          "high",
+          "medium",
+          "low",
+          "warning",
+          "note",
+          "error"
+        ],
+        "type": "string"
+      },
+      "state": {
+        "default": "open",
+        "description": "Filter code scanning alerts by state. Defaults to open",
+        "enum": [
+          "open",
+          "closed",
+          "dismissed",
+          "fixed"
+        ],
+        "type": "string"
+      },
+      "tool_name": {
+        "description": "The name of the tool used for code scanning.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "owner",
+      "repo"
+    ],
+    "type": "object"
+  },
+  "name": "list_code_scanning_alerts"
+}
