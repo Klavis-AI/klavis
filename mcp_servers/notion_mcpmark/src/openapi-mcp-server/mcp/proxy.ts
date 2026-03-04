@@ -151,10 +151,10 @@ export class MCPProxy {
     }
 
     // Alternative: try NOTION_TOKEN
-    const notionToken = process.env.NOTION_TOKEN
-    if (notionToken) {
+    const envNotionToken = process.env.NOTION_TOKEN
+    if (envNotionToken) {
       return {
-        'Authorization': `Bearer ${notionToken}`,
+        'Authorization': `Bearer ${envNotionToken}`,
         'Notion-Version': '2022-06-28'
       }
     }
