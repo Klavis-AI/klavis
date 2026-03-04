@@ -17,4 +17,4 @@ bin/
 .DS_Store
 
 # binary
-github-mcp-server
+/github-mcp-server
