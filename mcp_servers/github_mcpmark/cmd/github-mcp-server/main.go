@@ -1,0 +1,146 @@
+package main
+
+import (
+	"errors"
+	"fmt"
+	"os"
+	"strings"
+
+	"github.com/github/github-mcp-server/internal/ghmcp"
+	"github.com/github/github-mcp-server/pkg/github"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+)
+
+// These variables are set by the build process using ldflags.
+var version = "version"
+var commit = "commit"
+var date = "date"
+
+var (
+	rootCmd = &cobra.Command{
+		Use:     "server",
+		Short:   "GitHub MCP Server",
+		Long:    `A GitHub MCP server that handles various tools and resources.`,
+		Version: fmt.Sprintf("Version: %s\nCommit: %s\nBuild Date: %s", version, commit, date),
+	}
+
+	httpCmd = &cobra.Command{
+		Use:   "http",
+		Short: "Start HTTP server",
+		Long:  `Start an HTTP server that listens for MCP requests using the streamable HTTP transport. The GitHub token is read from the Authorization header or x-auth-data header on each request.`,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			var enabledToolsets []string
+			if err := viper.UnmarshalKey("toolsets", &enabledToolsets); err != nil {
+				return fmt.Errorf("failed to unmarshal toolsets: %w", err)
+			}
+
+			httpConfig := ghmcp.HTTPServerConfig{
+				Version:              version,
+				Host:                 viper.GetString("host"),
+				Port:                 viper.GetInt("port"),
+				EnabledToolsets:      enabledToolsets,
+				DynamicToolsets:      viper.GetBool("dynamic_toolsets"),
+				ReadOnly:             viper.GetBool("read-only"),
+				EnableCommandLogging: viper.GetBool("enable-command-logging"),
+				LogFilePath:          viper.GetString("log-file"),
+				ContentWindowSize:    viper.GetInt("content-window-size"),
+			}
+			return ghmcp.RunHTTPServer(httpConfig)
+		},
+	}
+
+	stdioCmd = &cobra.Command{
+		Use:   "stdio",
+		Short: "Start stdio server",
+		Long:  `Start a server that communicates via standard input/output streams using JSON-RPC messages.`,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			token := viper.GetString("personal_access_token")
+			if token == "" {
+				return errors.New("GITHUB_PERSONAL_ACCESS_TOKEN not set")
+			}
+
+			// If you're wondering why we're not using viper.GetStringSlice("toolsets"),
+			// it's because viper doesn't handle comma-separated values correctly for env
+			// vars when using GetStringSlice.
+			// https://github.com/spf13/viper/issues/380
+			var enabledToolsets []string
+			if err := viper.UnmarshalKey("toolsets", &enabledToolsets); err != nil {
+				return fmt.Errorf("failed to unmarshal toolsets: %w", err)
+			}
+
+			stdioServerConfig := ghmcp.StdioServerConfig{
+				Version:              version,
+				Host:                 viper.GetString("host"),
+				Token:                token,
+				EnabledToolsets:      enabledToolsets,
+				DynamicToolsets:      viper.GetBool("dynamic_toolsets"),
+				ReadOnly:             viper.GetBool("read-only"),
+				ExportTranslations:   viper.GetBool("export-translations"),
+				EnableCommandLogging: viper.GetBool("enable-command-logging"),
+				LogFilePath:          viper.GetString("log-file"),
+				ContentWindowSize:    viper.GetInt("content-window-size"),
+			}
+			return ghmcp.RunStdioServer(stdioServerConfig)
+		},
+	}
+)
+
+func init() {
+	cobra.OnInitialize(initConfig)
+	rootCmd.SetGlobalNormalizationFunc(wordSepNormalizeFunc)
+
+	rootCmd.SetVersionTemplate("{{.Short}}\n{{.Version}}\n")
+
+	// Add global flags that will be shared by all commands
+	rootCmd.PersistentFlags().StringSlice("toolsets", github.DefaultTools, "An optional comma separated list of groups of tools to allow, defaults to enabling all")
+	rootCmd.PersistentFlags().Bool("dynamic-toolsets", false, "Enable dynamic toolsets")
+	rootCmd.PersistentFlags().Bool("read-only", false, "Restrict the server to read-only operations")
+	rootCmd.PersistentFlags().String("log-file", "", "Path to log file")
+	rootCmd.PersistentFlags().Bool("enable-command-logging", false, "When enabled, the server will log all command requests and responses to the log file")
+	rootCmd.PersistentFlags().Bool("export-translations", false, "Save translations to a JSON file")
+	rootCmd.PersistentFlags().String("gh-host", "", "Specify the GitHub hostname (for GitHub Enterprise etc.)")
+	rootCmd.PersistentFlags().Int("content-window-size", 5000, "Specify the content window size")
+
+	// Bind flag to viper
+	_ = viper.BindPFlag("toolsets", rootCmd.PersistentFlags().Lookup("toolsets"))
+	_ = viper.BindPFlag("dynamic_toolsets", rootCmd.PersistentFlags().Lookup("dynamic-toolsets"))
+	_ = viper.BindPFlag("read-only", rootCmd.PersistentFlags().Lookup("read-only"))
+	_ = viper.BindPFlag("log-file", rootCmd.PersistentFlags().Lookup("log-file"))
+	_ = viper.BindPFlag("enable-command-logging", rootCmd.PersistentFlags().Lookup("enable-command-logging"))
+	_ = viper.BindPFlag("export-translations", rootCmd.PersistentFlags().Lookup("export-translations"))
+	_ = viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("gh-host"))
+	_ = viper.BindPFlag("content-window-size", rootCmd.PersistentFlags().Lookup("content-window-size"))
+
+	// HTTP-specific flags
+	httpCmd.Flags().Int("port", 5000, "Port to listen on")
+	_ = viper.BindPFlag("port", httpCmd.Flags().Lookup("port"))
+
+	// Add subcommands
+	rootCmd.AddCommand(stdioCmd)
+	rootCmd.AddCommand(httpCmd)
+}
+
+func initConfig() {
+	// Initialize Viper configuration
+	viper.SetEnvPrefix("github")
+	viper.AutomaticEnv()
+
+}
+
+func main() {
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+}
+
+func wordSepNormalizeFunc(_ *pflag.FlagSet, name string) pflag.NormalizedName {
+	from := []string{"_"}
+	to := "-"
+	for _, sep := range from {
+		name = strings.ReplaceAll(name, sep, to)
+	}
+	return pflag.NormalizedName(name)
+}
