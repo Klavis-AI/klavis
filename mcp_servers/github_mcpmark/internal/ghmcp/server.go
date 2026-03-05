@@ -482,7 +482,7 @@ func RunHTTPServer(cfg HTTPServerConfig) error {
 		return ctx
 	}
 
-	addr := fmt.Sprintf(":%d", cfg.Port)
+	addr := fmt.Sprintf("0.0.0.0:%d", cfg.Port)
 
 	// Let Start() manage its own mux (routes POST/GET/DELETE to /mcp).
 	streamableServer := server.NewStreamableHTTPServer(ghServer,
