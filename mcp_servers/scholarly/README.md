@@ -1,86 +1,130 @@
-# mcp-scholarly
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/adityak74-mcp-scholarly-badge.png)](https://mseep.ai/app/adityak74-mcp-scholarly)
 
-A Model Context Protocol (MCP) server to search for accurate academic articles from arXiv and Google Scholar.
+# mcp-scholarly MCP server
+[![smithery badge](https://smithery.ai/badge/mcp-scholarly)](https://smithery.ai/server/mcp-scholarly)
 
-> **Note**: This project is forked and modified from [adityak74/mcp-scholarly](https://github.com/adityak74/mcp-scholarly)
+A MCP server to search for accurate academic articles. More scholarly vendors will be added soon.
 
-## Features
+![demo1.jpeg](examples/demo1.png)
 
-- Search academic articles on arXiv
-- Search academic articles on Google Scholar
-- MCP-compliant server for integration with AI assistants
+![image](https://github.com/user-attachments/assets/13202184-bc12-4530-b7c1-2ee698f3e1cc)
 
-## Requirements
+<a href="https://glama.ai/mcp/servers/aq05b2p0ql"><img width="380" height="200" src="https://glama.ai/mcp/servers/aq05b2p0ql/badge" alt="Scholarly Server MCP server" /></a>
 
-- Python >= 3.11
-- Dependencies listed in `requirements.txt`
+![star-history-202551](https://github.com/user-attachments/assets/f22d5796-017c-4c53-b230-101a09a28118)
 
-## Installation
 
-1. Clone the repository:
+## Components
+
+### Tools
+
+The server implements one tool:
+- search-arxiv: Search arxiv for articles related to the given keyword.
+  - Takes "keyword" as required string arguments
+
+## Quickstart
+
+### Install
+
+#### Claude Desktop
+
+On MacOS: `~/Library/Application\ Support/Claude/claude_desktop_config.json`
+On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+
+<details>
+  <summary>Development/Unpublished Servers Configuration</summary>
+  ```
+  "mcpServers": {
+    "mcp-scholarly": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/Users/adityakarnam/PycharmProjects/mcp-scholarly/mcp-scholarly",
+        "run",
+        "mcp-scholarly"
+      ]
+    }
+  }
+  ```
+</details>
+
+<details>
+  <summary>Published Servers Configuration</summary>
+  ```
+  "mcpServers": {
+    "mcp-scholarly": {
+      "command": "uvx",
+      "args": [
+        "mcp-scholarly"
+      ]
+    }
+  }
+  ```
+</details>
+
+or if you are using Docker
+
+<details>
+  <summary>Published Docker Servers Configuration</summary>
+  ```
+  "mcpServers": {
+    "mcp-scholarly": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "mcp/scholarly"
+      ]
+    }
+  }
+  ```
+</details>
+
+### Installing via Smithery
+
+To install mcp-scholarly for Claude Desktop automatically via [Smithery](https://smithery.ai/server/mcp-scholarly):
+
 ```bash
-git clone https://github.com/Klavis-AI/klavis.git
-cd mcp_servers/scholarly
+npx -y @smithery/cli install mcp-scholarly --client claude
 ```
 
-2. Install dependencies:
+## Development
+
+### Building and Publishing
+
+To prepare the package for distribution:
+
+1. Sync dependencies and update lockfile:
 ```bash
-pip install -r requirements.txt
+uv sync
 ```
 
-## Running the MCP Server
-
-### Using Python Module
-
-Run the server with default settings (port 5000):
+2. Build package distributions:
 ```bash
-python -m mcp_scholarly
+uv build
 ```
 
-### Custom Port and Options
+This will create source and wheel distributions in the `dist/` directory.
 
-You can customize the server with various options:
-
+3. Publish to PyPI:
 ```bash
-# Run on a custom port
-python -m mcp_scholarly --port 8080
-
-# Set logging level
-python -m mcp_scholarly --log-level DEBUG
-
-# Enable JSON responses instead of SSE streams
-python -m mcp_scholarly --json-response
+uv publish
 ```
 
-### Environment Variables
+Note: You'll need to set PyPI credentials via environment variables or command flags:
+- Token: `--token` or `UV_PUBLISH_TOKEN`
+- Or username/password: `--username`/`UV_PUBLISH_USERNAME` and `--password`/`UV_PUBLISH_PASSWORD`
 
-You can set the default port using an environment variable:
+### Debugging
+
+Since MCP servers run over stdio, debugging can be challenging. For the best debugging
+experience, we strongly recommend using the [MCP Inspector](https://github.com/modelcontextprotocol/inspector).
+
+
+You can launch the MCP Inspector via [`npm`](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) with this command:
+
 ```bash
-# Set in .env file
-SCHOLARLY_MCP_SERVER_PORT=5000
+npx @modelcontextprotocol/inspector uv --directory /Users/adityakarnam/PycharmProjects/mcp-scholarly/mcp-scholarly run mcp-scholarly
 ```
 
-## Using Docker
 
-Build and run the server using Docker:
-
-```bash
-# Build the Docker image from the repository root
-docker build -f mcp_servers/scholarly/Dockerfile -t mcp-scholarly .
-
-# Run the container
-docker run -p 5000:5000 mcp-scholarly
-
-# Run with environment variables
-docker run -p 5000:5000 -e SCHOLARLY_MCP_SERVER_PORT=5000 mcp-scholarly
-```
-
-## Available Options
-
-- `--port`: Port to listen on for HTTP (default: 5000)
-- `--log-level`: Logging level - DEBUG, INFO, WARNING, ERROR, CRITICAL (default: INFO)
-- `--json-response`: Enable JSON responses for StreamableHTTP instead of SSE streams
-
-## License
-
-See [LICENSE](LICENSE) file for details.
+Upon launching, the Inspector will display a URL that you can access in your browser to begin debugging.
