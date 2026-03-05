@@ -484,11 +484,21 @@ func RunHTTPServer(cfg HTTPServerConfig) error {
 
 	addr := fmt.Sprintf("0.0.0.0:%d", cfg.Port)
 
-	// Let Start() manage its own mux (routes POST/GET/DELETE to /mcp).
+	mux := http.NewServeMux()
+	httpSrv := &http.Server{
+		Addr:    addr,
+		Handler: mux,
+	}
+
 	streamableServer := server.NewStreamableHTTPServer(ghServer,
 		server.WithStateLess(true),
 		server.WithHTTPContextFunc(contextFunc),
+		server.WithStreamableHTTPServer(httpSrv),
 	)
+
+	// Register both /mcp and /mcp/ so the cloud proxy trailing-slash variant works.
+	mux.Handle("/mcp", streamableServer)
+	mux.Handle("/mcp/", streamableServer)
 
 	// Graceful shutdown on signal.
 	go func() {
@@ -496,7 +506,7 @@ func RunHTTPServer(cfg HTTPServerConfig) error {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		logger.Info("shutting down HTTP server")
-		if err := streamableServer.Shutdown(shutdownCtx); err != nil {
+		if err := httpSrv.Shutdown(shutdownCtx); err != nil {
 			logger.Error("error during server shutdown", "error", err)
 		}
 	}()
@@ -504,7 +514,7 @@ func RunHTTPServer(cfg HTTPServerConfig) error {
 	_, _ = fmt.Fprintf(os.Stderr, "GitHub MCP Server running on HTTP (streamable) at %s/mcp\n", addr)
 	logger.Info("HTTP server listening", "addr", addr)
 
-	if err := streamableServer.Start(addr); err != nil && err != http.ErrServerClosed {
+	if err := httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return fmt.Errorf("HTTP server error: %w", err)
 	}
 
