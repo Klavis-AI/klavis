@@ -621,13 +621,34 @@ async def get_recommendations(ticker: str, recommendation_type: str, months_back
 
 
 if __name__ == "__main__":
+    import contextlib
     import uvicorn
+    from collections.abc import AsyncIterator
+    from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
+    from starlette.applications import Starlette
+    from starlette.routing import Mount
+    from starlette.types import Receive, Scope, Send
 
     print("Starting Yahoo Finance MCP server...")
-    uvicorn.run(
-        yfinance_server.streamable_http_app(),
-        host="0.0.0.0",
-        port=5000,
-        proxy_headers=True,
-        forwarded_allow_ips="*",
+
+    session_manager = StreamableHTTPSessionManager(
+        app=yfinance_server._mcp_server,
+        event_store=None,
+        json_response=False,
+        stateless=True,
     )
+
+    async def handle_streamable_http(scope: Scope, receive: Receive, send: Send) -> None:
+        await session_manager.handle_request(scope, receive, send)
+
+    @contextlib.asynccontextmanager
+    async def lifespan(app: Starlette) -> AsyncIterator[None]:
+        async with session_manager.run():
+            yield
+
+    starlette_app = Starlette(
+        routes=[Mount("/mcp", app=handle_streamable_http)],
+        lifespan=lifespan,
+    )
+
+    uvicorn.run(starlette_app, host="0.0.0.0", port=5000)
