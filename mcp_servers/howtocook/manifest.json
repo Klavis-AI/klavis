@@ -1,0 +1,51 @@
+{
+  "dxt_version": "0.1",
+  "name": "howtocook-mcp",
+  "version": "0.1.1",
+  "description": "MCP Server for howtocook recipe database - 炫一周好饭，拒绝拼好饭",
+  "author": {
+    "name": "worry",
+    "email": "weileihhh@gmail.com",
+    "url": "https://github.com/worryzyy"
+  },
+  "homepage": "https://howtocookmcp.weilei.site",
+  "documentation": "https://github.com/worryzyy/HowToCook-mcp/blob/master/README.md",
+  "server": {
+    "type": "node",
+    "entry_point": "build/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/build/index.js"
+      ],
+      "env": {}
+    }
+  },
+  "tools": [
+    {
+      "name": "mcp_howtocook_getAllRecipes",
+      "description": "获取所有菜谱"
+    },
+    {
+      "name": "mcp_howtocook_getRecipeById",
+      "description": "根据菜谱名称或ID查询指定菜谱的完整详情，包括食材、步骤等"
+    },
+    {
+      "name": "mcp_howtocook_getRecipesByCategory",
+      "description": "根据分类查询菜谱,菜谱分类名称，如水产、早餐、荤菜、主食等"
+    },
+    {
+      "name": "mcp_howtocook_recommendMeals",
+      "description": "根据用户的忌口、过敏原、人数智能推荐菜谱，创建一周的膳食计划以及大致的购物清单"
+    },
+    {
+      "name": "mcp_howtocook_whatToEat",
+      "description": "不知道吃什么？根据人数直接推荐适合的菜品组合"
+    }
+  ],
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/worryzyy/HowToCook-mcp"
+  }
+}
