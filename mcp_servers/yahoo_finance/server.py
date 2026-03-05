@@ -33,8 +33,6 @@ class RecommendationType(str, Enum):
 # Initialize FastMCP server
 yfinance_server = FastMCP(
     "yfinance",
-    host="0.0.0.0",
-    port=5000,
     instructions="""
 # Yahoo Finance MCP Server
 
@@ -623,6 +621,13 @@ async def get_recommendations(ticker: str, recommendation_type: str, months_back
 
 
 if __name__ == "__main__":
-    # Initialize and run the server
+    import uvicorn
+
     print("Starting Yahoo Finance MCP server...")
-    yfinance_server.run(transport="streamable-http")
+    uvicorn.run(
+        yfinance_server.streamable_http_app(),
+        host="0.0.0.0",
+        port=5000,
+        proxy_headers=True,
+        forwarded_allow_ips="*",
+    )
