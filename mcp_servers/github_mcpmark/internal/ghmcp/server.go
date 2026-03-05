@@ -593,42 +593,30 @@ func newHTTPMCPServer(cfg MCPServerConfig) (*server.MCPServer, error) {
 
 // extractTokenFromRequest extracts the GitHub token from an HTTP request.
 // It tries, in order:
-//  1. Authorization: Bearer <token> header
+//  1. AUTH_DATA environment variable (plain JSON with "access_token" field)
 //  2. x-auth-data header (base64-encoded JSON with "access_token" field)
-//  3. AUTH_DATA environment variable (plain JSON with "access_token" field)
 func extractTokenFromRequest(r *http.Request) string {
-	// 1. Authorization: Bearer <token>
-	if auth := r.Header.Get("Authorization"); auth != "" {
-		if parts := strings.SplitN(auth, " ", 2); len(parts) == 2 && strings.EqualFold(parts[0], "Bearer") {
-			if token := strings.TrimSpace(parts[1]); token != "" {
-				return token
+	// AUTH_DATA env var (plain JSON) then x-auth-data header (base64-encoded JSON).
+	// Resolve the raw JSON string first, then parse once.
+	authData := os.Getenv("AUTH_DATA")
+	if authData == "" {
+		if headerVal := r.Header.Get("x-auth-data"); headerVal != "" {
+			decoded, err := base64.StdEncoding.DecodeString(headerVal)
+			if err != nil {
+				return ""
 			}
+			authData = string(decoded)
 		}
 	}
-
-	// 2. x-auth-data header (base64-encoded JSON)
-	if headerVal := r.Header.Get("x-auth-data"); headerVal != "" {
-		if decoded, err := base64.StdEncoding.DecodeString(headerVal); err == nil {
-			var data map[string]interface{}
-			if json.Unmarshal(decoded, &data) == nil {
-				if token, ok := data["access_token"].(string); ok && token != "" {
-					return token
-				}
-			}
-		}
+	if authData == "" {
+		return ""
 	}
-
-	// 3. AUTH_DATA env var (plain JSON)
-	if authData := os.Getenv("AUTH_DATA"); authData != "" {
-		var data map[string]interface{}
-		if json.Unmarshal([]byte(authData), &data) == nil {
-			if token, ok := data["access_token"].(string); ok && token != "" {
-				return token
-			}
-		}
+	var data map[string]any
+	if err := json.Unmarshal([]byte(authData), &data); err != nil {
+		return ""
 	}
-
-	return ""
+	token, _ := data["access_token"].(string)
+	return token
 }
 
 type userAgentTransport struct {
