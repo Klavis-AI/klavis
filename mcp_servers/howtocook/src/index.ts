@@ -101,7 +101,7 @@ async function main() {
         // 为每个请求创建新的服务器实例
         const requestServer = createServerInstance();
 
-        if (url === "/mcp") {
+        if (url === "/mcp" || url === "/mcp/") {
           const transport = new StreamableHTTPServerTransport({
             sessionIdGenerator: undefined,
           });
