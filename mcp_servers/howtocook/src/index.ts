@@ -20,8 +20,8 @@ let categories: string[] = [];
 
 // 命令行参数处理
 const program = new Command()
-  .option("--transport <stdio|http|sse>", "transport type", "stdio")
-  .option("--port <number>", "port for HTTP/SSE transport", "3000")
+  .option("--transport <stdio|http|sse>", "transport type", "http")
+  .option("--port <number>", "port for HTTP/SSE transport", "5000")
   .parse(process.argv);
 
 const cliOptions = program.opts<{
