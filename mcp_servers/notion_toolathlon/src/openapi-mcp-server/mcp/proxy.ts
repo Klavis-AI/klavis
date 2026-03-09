@@ -2,7 +2,8 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { CallToolRequestSchema, JSONRPCResponse, ListToolsRequestSchema, Tool } from '@modelcontextprotocol/sdk/types.js'
 import { JSONSchema7 as IJsonSchema } from 'json-schema'
 import { OpenAPIToMCPConverter } from '../openapi/parser.js'
-import { HttpClient, HttpClientError } from '../client/http-client.js'
+import { HttpClient, HttpClientError, initApiClient } from '../client/http-client.js'
+import type { AxiosInstance } from 'axios'
 import { OpenAPIV3 } from 'openapi-types'
 import { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
 import { PageAccessController } from '../auth/page-access-control.js'
@@ -30,6 +31,34 @@ export interface MCPProxyOptions {
   notionToken?: string
 }
 
+/**
+ * Pre-computed tools, lookup, and cached API client from OpenAPI spec.
+ * These are expensive to compute and should be done once at startup.
+ */
+export interface PrecomputedTools {
+  tools: Record<string, NewToolDefinition>
+  openApiLookup: Record<string, OpenAPIV3.OperationObject & { method: string; path: string }>
+  cachedApi: Promise<AxiosInstance>
+}
+
+/**
+ * Pre-compute tools and initialize the API client from an OpenAPI spec.
+ * Call once at startup to avoid expensive re-parsing on every request.
+ */
+export function precomputeTools(openApiSpec: OpenAPIV3.Document): PrecomputedTools {
+  const converter = new OpenAPIToMCPConverter(openApiSpec)
+  const { tools, openApiLookup } = converter.convertToMCPTools()
+
+  const baseUrl = openApiSpec.servers?.[0]?.url
+  if (!baseUrl) {
+    throw new Error('No base URL found in OpenAPI spec')
+  }
+
+  const cachedApi = initApiClient(baseUrl, openApiSpec)
+
+  return { tools, openApiLookup, cachedApi }
+}
+
 // import this class, extend and return server
 export class MCPProxy {
   private server: Server
@@ -38,7 +67,7 @@ export class MCPProxy {
   private openApiLookup: Record<string, OpenAPIV3.OperationObject & { method: string; path: string }>
   private pageAccessController: PageAccessController | null = null
 
-  constructor(name: string, openApiSpec: OpenAPIV3.Document, options: MCPProxyOptions = {}) {
+  constructor(name: string, openApiSpec: OpenAPIV3.Document, options: MCPProxyOptions = {}, precomputed?: PrecomputedTools) {
     this.server = new Server({ name, version: '1.0.0' }, { capabilities: { tools: {} } })
     const baseUrl = openApiSpec.servers?.[0].url
     if (!baseUrl) {
@@ -50,6 +79,7 @@ export class MCPProxy {
         headers: this.parseHeadersFromEnv(options.notionToken),
       },
       openApiSpec,
+      precomputed?.cachedApi,
     )
 
     // Initialize page access control if needed
@@ -61,11 +91,16 @@ export class MCPProxy {
       })
     }
 
-    // Convert OpenAPI spec to MCP tools
-    const converter = new OpenAPIToMCPConverter(openApiSpec)
-    const { tools, openApiLookup } = converter.convertToMCPTools()
-    this.tools = tools
-    this.openApiLookup = openApiLookup
+    // Use pre-computed tools if available, otherwise compute them
+    if (precomputed) {
+      this.tools = precomputed.tools
+      this.openApiLookup = precomputed.openApiLookup
+    } else {
+      const converter = new OpenAPIToMCPConverter(openApiSpec)
+      const { tools, openApiLookup } = converter.convertToMCPTools()
+      this.tools = tools
+      this.openApiLookup = openApiLookup
+    }
 
     this.setupHandlers()
   }
