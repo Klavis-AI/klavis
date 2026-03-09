@@ -58,7 +58,6 @@ class AccessMode(str, Enum):
 
 
 # Global variables
-db_connections: dict[str, DbConnPool] = {}  # Cache connections by database URL
 current_access_mode = AccessMode.UNRESTRICTED
 shutdown_in_progress = False
 
@@ -108,39 +107,25 @@ def get_database_url() -> str:
         raise RuntimeError("Database URL not found in request context")
 
 
-def get_database_url_or_empty() -> str:
-    """Get the database URL from context or return empty string."""
-    try:
-        return database_url_context.get()
-    except LookupError:
-        return ""
-
-
-async def get_db_connection(database_url: str) -> DbConnPool:
-    """Get or create a database connection pool for the given URL."""
-    if database_url not in db_connections:
-        conn = DbConnPool()
-        await conn.pool_connect(database_url)
-        db_connections[database_url] = conn
-        logger.info("Created new connection pool for database")
-    return db_connections[database_url]
-
-
-async def get_sql_driver() -> Union[SqlDriver, SafeSqlDriver]:
-    """Get the appropriate SQL driver based on the current access mode and request context."""
-    database_url = get_database_url()
+@contextlib.asynccontextmanager
+async def create_sql_driver(database_url: str) -> AsyncIterator[Union[SqlDriver, SafeSqlDriver]]:
+    """Create a fresh database connection for one tool execution and close it when done."""
     if not database_url:
         raise ValueError("No database URL provided in request. Please include database URL in x-auth-data header.")
 
-    db_connection = await get_db_connection(database_url)
-    base_driver = SqlDriver(conn=db_connection)
-
-    if current_access_mode == AccessMode.RESTRICTED:
-        logger.debug("Using SafeSqlDriver with restrictions (RESTRICTED mode)")
-        return SafeSqlDriver(sql_driver=base_driver, timeout=30)  # 30 second timeout
-    else:
-        logger.debug("Using unrestricted SqlDriver (UNRESTRICTED mode)")
-        return base_driver
+    conn = DbConnPool()
+    await conn.pool_connect(database_url)
+    try:
+        base_driver = SqlDriver(conn=conn)
+        if current_access_mode == AccessMode.RESTRICTED:
+            logger.debug("Using SafeSqlDriver with restrictions (RESTRICTED mode)")
+            yield SafeSqlDriver(sql_driver=base_driver, timeout=30)
+        else:
+            logger.debug("Using unrestricted SqlDriver (UNRESTRICTED mode)")
+            yield base_driver
+    finally:
+        await conn.close()
+        logger.debug("Database connection closed after tool execution")
 
 
 def format_text_response(text: Any) -> ResponseType:
@@ -154,10 +139,9 @@ def format_error_response(error: str) -> ResponseType:
 
 
 # Tool implementations
-async def list_schemas_tool() -> ResponseType:
+async def list_schemas_tool(sql_driver: Union[SqlDriver, SafeSqlDriver]) -> ResponseType:
     """List all schemas in the database."""
     try:
-        sql_driver = await get_sql_driver()
         rows = await sql_driver.execute_query(
             """
             SELECT
@@ -180,13 +164,12 @@ async def list_schemas_tool() -> ResponseType:
 
 
 async def list_objects_tool(
+    sql_driver: Union[SqlDriver, SafeSqlDriver],
     schema_name: str,
     object_type: str = "table",
 ) -> ResponseType:
     """List objects of a given type in a schema."""
     try:
-        sql_driver = await get_sql_driver()
-
         if object_type in ("table", "view"):
             table_type = "BASE TABLE" if object_type == "table" else "VIEW"
             rows = await SafeSqlDriver.execute_param_query(
@@ -247,14 +230,13 @@ async def list_objects_tool(
 
 
 async def get_object_details_tool(
+    sql_driver: Union[SqlDriver, SafeSqlDriver],
     schema_name: str,
     object_name: str,
     object_type: str = "table",
 ) -> ResponseType:
     """Get detailed information about a database object."""
     try:
-        sql_driver = await get_sql_driver()
-
         if object_type in ("table", "view"):
             # Get columns
             col_rows = await SafeSqlDriver.execute_param_query(
@@ -379,6 +361,7 @@ async def get_object_details_tool(
 
 
 async def explain_query_tool(
+    sql_driver: Union[SqlDriver, SafeSqlDriver],
     sql: str,
     analyze: bool = False,
     hypothetical_indexes: list[dict[str, Any]] | None = None,
@@ -387,7 +370,6 @@ async def explain_query_tool(
     if hypothetical_indexes is None:
         hypothetical_indexes = []
     try:
-        sql_driver = await get_sql_driver()
         explain_tool = ExplainPlanTool(sql_driver=sql_driver)
         result: ExplainPlanArtifact | ErrorResult | None = None
 
@@ -435,10 +417,9 @@ async def explain_query_tool(
         return format_error_response(str(e))
 
 
-async def execute_sql_tool(sql: str) -> ResponseType:
+async def execute_sql_tool(sql_driver: Union[SqlDriver, SafeSqlDriver], sql: str) -> ResponseType:
     """Executes a SQL query against the database."""
     try:
-        sql_driver = await get_sql_driver()
         rows = await sql_driver.execute_query(sql)  # type: ignore
         if rows is None:
             return format_text_response("No results")
@@ -449,12 +430,12 @@ async def execute_sql_tool(sql: str) -> ResponseType:
 
 
 async def analyze_workload_indexes_tool(
+    sql_driver: Union[SqlDriver, SafeSqlDriver],
     max_index_size_mb: int = 10000,
     method: Literal["dta", "llm"] = "dta",
 ) -> ResponseType:
     """Analyze frequently executed queries in the database and recommend optimal indexes."""
     try:
-        sql_driver = await get_sql_driver()
         if method == "dta":
             index_tuning = DatabaseTuningAdvisor(sql_driver)
         else:
@@ -468,6 +449,7 @@ async def analyze_workload_indexes_tool(
 
 
 async def analyze_query_indexes_tool(
+    sql_driver: Union[SqlDriver, SafeSqlDriver],
     queries: list[str],
     max_index_size_mb: int = 10000,
     method: Literal["dta", "llm"] = "dta",
@@ -479,7 +461,6 @@ async def analyze_query_indexes_tool(
         return format_error_response(f"Please provide a list of up to {MAX_NUM_INDEX_TUNING_QUERIES} queries to analyze.")
 
     try:
-        sql_driver = await get_sql_driver()
         if method == "dta":
             index_tuning = DatabaseTuningAdvisor(sql_driver)
         else:
@@ -492,20 +473,20 @@ async def analyze_query_indexes_tool(
         return format_error_response(str(e))
 
 
-async def analyze_db_health_tool(health_type: str = "all") -> ResponseType:
+async def analyze_db_health_tool(sql_driver: Union[SqlDriver, SafeSqlDriver], health_type: str = "all") -> ResponseType:
     """Analyze database health for specified components."""
-    health_tool = DatabaseHealthTool(await get_sql_driver())
+    health_tool = DatabaseHealthTool(sql_driver)
     result = await health_tool.health(health_type=health_type)
     return format_text_response(result)
 
 
 async def get_top_queries_tool(
+    sql_driver: Union[SqlDriver, SafeSqlDriver],
     sort_by: str = "resources",
     limit: int = 10,
 ) -> ResponseType:
     """Reports the slowest or most resource-intensive queries."""
     try:
-        sql_driver = await get_sql_driver()
         top_queries_tool = TopQueriesCalc(sql_driver=sql_driver)
 
         if sort_by == "resources":
@@ -747,49 +728,58 @@ def create_server(access_mode: AccessMode) -> Server:
         name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         try:
-            if name == "list_schemas":
-                return await list_schemas_tool()
-            elif name == "list_objects":
-                return await list_objects_tool(
-                    schema_name=arguments.get("schema_name", ""),
-                    object_type=arguments.get("object_type", "table"),
-                )
-            elif name == "get_object_details":
-                return await get_object_details_tool(
-                    schema_name=arguments.get("schema_name", ""),
-                    object_name=arguments.get("object_name", ""),
-                    object_type=arguments.get("object_type", "table"),
-                )
-            elif name == "explain_query":
-                return await explain_query_tool(
-                    sql=arguments.get("sql", ""),
-                    analyze=arguments.get("analyze", False),
-                    hypothetical_indexes=arguments.get("hypothetical_indexes", []),
-                )
-            elif name == "execute_sql":
-                return await execute_sql_tool(sql=arguments.get("sql", ""))
-            elif name == "analyze_workload_indexes":
-                return await analyze_workload_indexes_tool(
-                    max_index_size_mb=arguments.get("max_index_size_mb", 10000),
-                    method=arguments.get("method", "dta"),
-                )
-            elif name == "analyze_query_indexes":
-                return await analyze_query_indexes_tool(
-                    queries=arguments.get("queries", []),
-                    max_index_size_mb=arguments.get("max_index_size_mb", 10000),
-                    method=arguments.get("method", "dta"),
-                )
-            elif name == "analyze_db_health":
-                return await analyze_db_health_tool(
-                    health_type=arguments.get("health_type", "all"),
-                )
-            elif name == "get_top_queries":
-                return await get_top_queries_tool(
-                    sort_by=arguments.get("sort_by", "resources"),
-                    limit=arguments.get("limit", 10),
-                )
-            else:
-                return [types.TextContent(type="text", text=f"Unknown tool: {name}")]
+            database_url = get_database_url()
+            async with create_sql_driver(database_url) as sql_driver:
+                if name == "list_schemas":
+                    return await list_schemas_tool(sql_driver)
+                elif name == "list_objects":
+                    return await list_objects_tool(
+                        sql_driver,
+                        schema_name=arguments.get("schema_name", ""),
+                        object_type=arguments.get("object_type", "table"),
+                    )
+                elif name == "get_object_details":
+                    return await get_object_details_tool(
+                        sql_driver,
+                        schema_name=arguments.get("schema_name", ""),
+                        object_name=arguments.get("object_name", ""),
+                        object_type=arguments.get("object_type", "table"),
+                    )
+                elif name == "explain_query":
+                    return await explain_query_tool(
+                        sql_driver,
+                        sql=arguments.get("sql", ""),
+                        analyze=arguments.get("analyze", False),
+                        hypothetical_indexes=arguments.get("hypothetical_indexes", []),
+                    )
+                elif name == "execute_sql":
+                    return await execute_sql_tool(sql_driver, sql=arguments.get("sql", ""))
+                elif name == "analyze_workload_indexes":
+                    return await analyze_workload_indexes_tool(
+                        sql_driver,
+                        max_index_size_mb=arguments.get("max_index_size_mb", 10000),
+                        method=arguments.get("method", "dta"),
+                    )
+                elif name == "analyze_query_indexes":
+                    return await analyze_query_indexes_tool(
+                        sql_driver,
+                        queries=arguments.get("queries", []),
+                        max_index_size_mb=arguments.get("max_index_size_mb", 10000),
+                        method=arguments.get("method", "dta"),
+                    )
+                elif name == "analyze_db_health":
+                    return await analyze_db_health_tool(
+                        sql_driver,
+                        health_type=arguments.get("health_type", "all"),
+                    )
+                elif name == "get_top_queries":
+                    return await get_top_queries_tool(
+                        sql_driver,
+                        sort_by=arguments.get("sort_by", "resources"),
+                        limit=arguments.get("limit", 10),
+                    )
+                else:
+                    return [types.TextContent(type="text", text=f"Unknown tool: {name}")]
         except Exception as e:
             logger.exception(f"Error executing tool {name}: {e}")
             return [types.TextContent(type="text", text=f"Error: {str(e)}")]
@@ -912,14 +902,6 @@ def main():
                 yield
             finally:
                 logger.info("Application shutting down...")
-                # Close all database connections
-                for _, conn in db_connections.items():
-                    try:
-                        await conn.close()
-                        logger.info("Closed database connection")
-                    except Exception as e:
-                        logger.error(f"Error closing database connection: {e}")
-                db_connections.clear()
 
     # Create an ASGI application with routes for both transports
     starlette_app = Starlette(
@@ -955,15 +937,6 @@ async def shutdown(sig=None):
 
     if sig:
         logger.info(f"Received exit signal {sig.name}")
-
-    # Close all database connections
-    for _, conn in db_connections.items():
-        try:
-            await conn.close()
-            logger.info("Closed database connection")
-        except Exception as e:
-            logger.error(f"Error closing database connection: {e}")
-    db_connections.clear()
 
     sys.exit(128 + sig if sig is not None else 0)
 
