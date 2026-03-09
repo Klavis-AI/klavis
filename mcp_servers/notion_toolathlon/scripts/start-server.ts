@@ -5,7 +5,7 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { randomBytes } from 'node:crypto'
 import express from 'express'
 
-import { initProxy, ValidationError } from '../src/init-server.js'
+import { initProxy, preloadSpec, ValidationError } from '../src/init-server.js'
 
 /**
  * Extract Notion token from request header.
@@ -134,6 +134,10 @@ Examples:
     await proxy.connect(new StdioServerTransport())
     return proxy.getServer()
   } else if (transport === 'http') {
+    // Pre-load and pre-compute the OpenAPI spec and tools once at startup
+    // to avoid re-parsing on every request (major memory optimization)
+    await preloadSpec(specPath, baseUrl)
+
     // Use Streamable HTTP transport
     const app = express()
     app.use(express.json())

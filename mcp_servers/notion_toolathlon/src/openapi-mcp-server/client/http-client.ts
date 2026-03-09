@@ -29,24 +29,44 @@ export class HttpClientError extends Error {
   }
 }
 
+/**
+ * Initialize the OpenAPI client from a spec. This is expensive (parses and
+ * validates the entire spec) so the result should be cached and reused.
+ */
+export function initApiClient(
+  baseUrl: string,
+  openApiSpec: OpenAPIV3.Document | OpenAPIV3_1.Document,
+): Promise<AxiosInstance> {
+  // @ts-expect-error
+  const client = new (OpenAPIClientAxios.default ?? OpenAPIClientAxios)({
+    definition: openApiSpec,
+    axiosConfigDefaults: {
+      baseURL: baseUrl,
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'notion-mcp-server',
+      },
+    },
+  })
+  return client.init()
+}
+
 export class HttpClient {
   private api: Promise<AxiosInstance>
-  private client: OpenAPIClientAxios
+  private perRequestHeaders: Record<string, string>
 
-  constructor(config: HttpClientConfig, openApiSpec: OpenAPIV3.Document | OpenAPIV3_1.Document) {
-    // @ts-expect-error
-    this.client = new (OpenAPIClientAxios.default ?? OpenAPIClientAxios)({
-      definition: openApiSpec,
-      axiosConfigDefaults: {
-        baseURL: config.baseUrl,
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'notion-mcp-server',
-          ...config.headers,
-        },
-      },
-    })
-    this.api = this.client.init()
+  /**
+   * Create an HttpClient. If a cachedApi is provided, reuses the already-initialized
+   * axios instance (avoids expensive re-parsing of the spec on every request).
+   */
+  constructor(config: HttpClientConfig, openApiSpec: OpenAPIV3.Document | OpenAPIV3_1.Document, cachedApi?: Promise<AxiosInstance>) {
+    this.perRequestHeaders = config.headers || {}
+
+    if (cachedApi) {
+      this.api = cachedApi
+    } else {
+      this.api = initApiClient(config.baseUrl, openApiSpec)
+    }
   }
 
   private async prepareFileUpload(operation: OpenAPIV3.OperationObject, params: Record<string, any>): Promise<FormData | null> {
@@ -152,12 +172,14 @@ export class HttpClient {
     try {
       // If we have form data, we need to set the correct headers
       const hasBody = Object.keys(bodyParams).length > 0
-      const headers = formData
+      const contentHeaders = formData
         ? formData.getHeaders()
         : { ...(hasBody ? { 'Content-Type': 'application/json' } : { 'Content-Type': null }) }
       const requestConfig = {
         headers: {
-          ...headers,
+          ...contentHeaders,
+          // Inject per-request auth headers (e.g. per-user Notion token)
+          ...this.perRequestHeaders,
         },
       }
 

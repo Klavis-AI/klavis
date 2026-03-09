@@ -4,7 +4,7 @@ import path from 'node:path'
 import { OpenAPIV3 } from 'openapi-types'
 import OpenAPISchemaValidator from 'openapi-schema-validator'
 
-import { MCPProxy } from './openapi-mcp-server/mcp/proxy.js'
+import { MCPProxy, precomputeTools, type PrecomputedTools } from './openapi-mcp-server/mcp/proxy.js'
 
 export class ValidationError extends Error {
   constructor(public errors: any[]) {
@@ -42,9 +42,21 @@ async function loadOpenApiSpec(specPath: string, baseUrl: string | undefined): P
   }
 }
 
-export async function initProxy(specPath: string, baseUrl: string | undefined, options: { pageIds?: string[]; pageUrls?: string[]; notionToken?: string } = {}) {
-  const openApiSpec = await loadOpenApiSpec(specPath, baseUrl)
-  const proxy = new MCPProxy('Notion API', openApiSpec, options)
+let cachedSpec: OpenAPIV3.Document | null = null
+let cachedPrecomputed: PrecomputedTools | null = null
 
+/**
+ * Pre-load the OpenAPI spec and precompute tools once at startup.
+ * This avoids re-parsing and re-converting on every request.
+ */
+export async function preloadSpec(specPath: string, baseUrl: string | undefined): Promise<void> {
+  cachedSpec = await loadOpenApiSpec(specPath, baseUrl)
+  cachedPrecomputed = precomputeTools(cachedSpec)
+  console.log('OpenAPI spec and tools pre-computed successfully')
+}
+
+export async function initProxy(specPath: string, baseUrl: string | undefined, options: { pageIds?: string[]; pageUrls?: string[]; notionToken?: string } = {}) {
+  const openApiSpec = cachedSpec ?? await loadOpenApiSpec(specPath, baseUrl)
+  const proxy = new MCPProxy('Notion API', openApiSpec, options, cachedPrecomputed ?? undefined)
   return proxy
 }
