@@ -19,13 +19,13 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ENV PATH="/root/.local/bin:${PATH}"
 
-COPY mcp_servers/arxiv-latex-mcp/.python-version .
+COPY mcp_servers/arxiv_latex/.python-version .
 
 RUN uv venv
 
 FROM base AS builder
 
-COPY mcp_servers/arxiv-latex-mcp/ .
+COPY mcp_servers/arxiv_latex/ .
 
 RUN uv sync
 
