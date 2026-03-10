@@ -1,0 +1,37 @@
+{
+  "dxt_version": "0.1",
+  "name": "arxiv-latex-mcp",
+  "version": "0.1.0",
+  "description": "MCP server that uses arxiv-to-prompt to fetch and process arXiv LaTeX sources for precise interpretation of mathematical expressions in scientific papers.",
+  "author": {
+    "name": "Takashi Ishida",
+    "url": "https://takashiishida.github.io"
+  },
+  "homepage": "https://github.com/takashiishida/arxiv-latex-mcp",
+  "documentation": "https://github.com/takashiishida/arxiv-latex-mcp",
+  "server": {
+    "type": "python",
+    "entry_point": "server/main.py",
+    "mcp_config": {
+      "command": "python3.10",
+      "args": [
+        "${__dirname}/server/main.py"
+      ],
+      "env": {
+        "PYTHONPATH": "${__dirname}/server/lib"
+      }
+    }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/takashiishida/arxiv-latex-mcp"
+  },
+  "compatibility": {
+    "claude_desktop": ">=0.11.4",
+    "platforms": ["darwin"],
+    "runtimes": {
+      "python": ">=3.10"
+    }
+  }
+}
