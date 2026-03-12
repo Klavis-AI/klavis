@@ -21564,6 +21564,17 @@
               "title": "Local Sandbox Id"
             },
             "description": "The local sandbox identifier"
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/GCSRegion",
+              "description": "GCS bucket region for the signed URL. Use 'asia' for users in China/Asia to upload to a nearby bucket (lower latency). The file is accessible from any region over Google's private backbone. Defaults to 'us'.",
+              "default": "us"
+            },
+            "description": "GCS bucket region for the signed URL. Use 'asia' for users in China/Asia to upload to a nearby bucket (lower latency). The file is accessible from any region over Google's private backbone. Defaults to 'us'."
           }
         ],
         "responses": {
@@ -21614,6 +21625,17 @@
               "title": "Local Sandbox Id"
             },
             "description": "The local sandbox identifier"
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/GCSRegion",
+              "description": "GCS bucket region where the archive was uploaded. Must match the region used in the `/upload-url` call. Defaults to 'us'.",
+              "default": "us"
+            },
+            "description": "GCS bucket region where the archive was uploaded. Must match the region used in the `/upload-url` call. Defaults to 'us'."
           }
         ],
         "responses": {
@@ -21664,6 +21686,17 @@
               "title": "Local Sandbox Id"
             },
             "description": "The local sandbox identifier"
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/GCSRegion",
+              "description": "GCS bucket region for the download URL. Use 'asia' for users in China/Asia for faster downloads from a nearby bucket. Defaults to 'us'.",
+              "default": "us"
+            },
+            "description": "GCS bucket region for the download URL. Use 'asia' for users in China/Asia for faster downloads from a nearby bucket. Defaults to 'us'."
           }
         ],
         "responses": {
@@ -27614,6 +27647,15 @@
         ],
         "title": "ExternalServerRequest"
       },
+      "GCSRegion": {
+        "type": "string",
+        "enum": [
+          "us",
+          "asia"
+        ],
+        "title": "GCSRegion",
+        "description": "Region hint for GCS upload/download bucket selection.\n\nControls which GCS bucket is used for signed URLs so that users\ngeographically closer to an edge bucket get faster transfers.\nThe data is always pulled to the US GKE cluster over Google's\nprivate backbone after upload."
+      },
       "GeneralAuth": {
         "properties": {
           "data": {
@@ -31562,7 +31604,7 @@
           "poste_email_toolathlon",
           "canvas",
           "localmemory",
-          "playwright_toolathlon"
+          "playwright"
         ],
         "title": "LocalSandboxMCPServer",
         "description": "Supported MCP servers for local sandboxing.\nThese are typically stateless or local-only servers."
@@ -36091,6 +36133,10 @@
           "duckduckgo",
           "whois",
           "wikipedia",
+          "scholarly",
+          "howtocook",
+          "yahoo_finance",
+          "12306",
           "weather",
           "twelvedata",
           "national_parks",
