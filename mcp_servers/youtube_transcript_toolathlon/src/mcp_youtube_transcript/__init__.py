@@ -7,45 +7,22 @@
 #  http://opensource.org/licenses/mit-license.php
 from __future__ import annotations
 
-from contextlib import asynccontextmanager
-from dataclasses import dataclass
+import asyncio
 from datetime import datetime, timedelta, timezone
-from functools import lru_cache, partial
 from itertools import islice
-from typing import Any, AsyncIterator, Tuple
+from typing import Any, Tuple
 from typing import Final
 from urllib.parse import urlparse, parse_qs
 
 import humanize
 import requests
 from bs4 import BeautifulSoup
-from mcp import ServerSession
 from mcp.server import FastMCP
-from mcp.server.fastmcp import Context
 from pydantic import Field, BaseModel, AwareDatetime
 from youtube_transcript_api import YouTubeTranscriptApi, FetchedTranscriptSnippet
 from youtube_transcript_api.proxies import WebshareProxyConfig, GenericProxyConfig, ProxyConfig
 from yt_dlp import YoutubeDL
 from yt_dlp.extractor.youtube import YoutubeIE
-
-
-@dataclass(frozen=True)
-class AppContext:
-    http_client: requests.Session
-    ytt_api: YouTubeTranscriptApi
-    dlp: YoutubeDL
-
-
-@asynccontextmanager
-async def _app_lifespan(_server: FastMCP, proxy_config: ProxyConfig | None) -> AsyncIterator[AppContext]:
-    # Prepare YoutubeDL params with proxy support
-    ytdlp_params: dict[str, Any] = {"quiet": True}
-    ytdlp_params.update(_proxy_config_to_ytdlp_params(proxy_config))
-
-    with requests.Session() as http_client, YoutubeDL(params=ytdlp_params, auto_init=False) as dlp:
-        ytt_api = YouTubeTranscriptApi(http_client=http_client, proxy_config=proxy_config)
-        dlp.add_info_extractor(YoutubeIE())
-        yield AppContext(http_client=http_client, ytt_api=ytt_api, dlp=dlp)
 
 
 class Transcript(BaseModel):
@@ -136,27 +113,29 @@ def _parse_video_id(url: str) -> str:
         return q[0]
 
 
-@lru_cache
-def _get_transcript_snippets(ctx: AppContext, video_id: str, lang: str) -> Tuple[str, list[FetchedTranscriptSnippet]]:
-    if lang == "en":
-        languages = ["en"]
-    else:
-        languages = [lang, "en"]
-
-    page = ctx.http_client.get(
-        f"https://www.youtube.com/watch?v={video_id}", headers={"Accept-Language": ",".join(languages)}
-    )
-    page.raise_for_status()
-    soup = BeautifulSoup(page.text, "html.parser")
-    title = soup.title.string if soup.title and soup.title.string else "Transcript"
-
-    transcripts = ctx.ytt_api.fetch(video_id, languages=languages)
+def _get_transcript_snippets(
+    proxy_config: ProxyConfig | None, video_id: str, lang: str
+) -> Tuple[str, list[FetchedTranscriptSnippet]]:
+    languages = ["en"] if lang == "en" else [lang, "en"]
+    with requests.Session() as http_client:
+        page = http_client.get(
+            f"https://www.youtube.com/watch?v={video_id}",
+            headers={"Accept-Language": ",".join(languages)},
+        )
+        page.raise_for_status()
+        soup = BeautifulSoup(page.text, "html.parser")
+        title = soup.title.string if soup.title and soup.title.string else "Transcript"
+        ytt_api = YouTubeTranscriptApi(http_client=http_client, proxy_config=proxy_config)
+        transcripts = ytt_api.fetch(video_id, languages=languages)
     return title, transcripts.snippets
 
 
-@lru_cache
-def _get_video_info(ctx: AppContext, video_url: str) -> VideoInfo:
-    res = ctx.dlp.extract_info(video_url, download=False)
+def _get_video_info(proxy_config: ProxyConfig | None, video_url: str) -> VideoInfo:
+    ytdlp_params: dict[str, Any] = {"quiet": True}
+    ytdlp_params.update(_proxy_config_to_ytdlp_params(proxy_config))
+    with YoutubeDL(params=ytdlp_params, auto_init=False) as dlp:
+        dlp.add_info_extractor(YoutubeIE())
+        res = dlp.extract_info(video_url, download=False)
     upload_date, duration = _parse_time_info(res["upload_date"], res["timestamp"], res["duration"])
     return VideoInfo(
         title=res["title"],
@@ -182,18 +161,19 @@ def server(
     elif http_proxy or https_proxy:
         proxy_config = GenericProxyConfig(http_proxy, https_proxy)
 
-    mcp = FastMCP("Youtube Transcript", lifespan=partial(_app_lifespan, proxy_config=proxy_config))
+    mcp = FastMCP("Youtube Transcript")
 
     @mcp.tool()
     async def get_transcript(
-        ctx: Context[ServerSession, AppContext],
         url: str = Field(description="The URL of the YouTube video"),
         lang: str = Field(description="The preferred language for the transcript", default="en"),
         next_cursor: str | None = Field(description="Cursor to retrieve the next page of the transcript", default=None),
     ) -> Transcript:
         """Retrieves the transcript of a YouTube video."""
 
-        title, snippets = _get_transcript_snippets(ctx.request_context.lifespan_context, _parse_video_id(url), lang)
+        title, snippets = await asyncio.to_thread(
+            _get_transcript_snippets, proxy_config, _parse_video_id(url), lang
+        )
         transcripts = (item.text for item in snippets)
 
         if response_limit is None or response_limit <= 0:
@@ -211,14 +191,15 @@ def server(
 
     @mcp.tool()
     async def get_timed_transcript(
-        ctx: Context[ServerSession, AppContext],
         url: str = Field(description="The URL of the YouTube video"),
         lang: str = Field(description="The preferred language for the transcript", default="en"),
         next_cursor: str | None = Field(description="Cursor to retrieve the next page of the transcript", default=None),
     ) -> TimedTranscript:
         """Retrieves the transcript of a YouTube video with timestamps."""
 
-        title, snippets = _get_transcript_snippets(ctx.request_context.lifespan_context, _parse_video_id(url), lang)
+        title, snippets = await asyncio.to_thread(
+            _get_transcript_snippets, proxy_config, _parse_video_id(url), lang
+        )
 
         if response_limit is None or response_limit <= 0:
             return TimedTranscript(
@@ -238,12 +219,11 @@ def server(
         return TimedTranscript(title=title, snippets=res, next_cursor=cursor)
 
     @mcp.tool()
-    def get_video_info(
-        ctx: Context[ServerSession, AppContext],
+    async def get_video_info(
         url: str = Field(description="The URL of the YouTube video"),
     ) -> VideoInfo:
         """Retrieves the video information."""
-        return _get_video_info(ctx.request_context.lifespan_context, url)
+        return await asyncio.to_thread(_get_video_info, proxy_config, url)
 
     return mcp
 
