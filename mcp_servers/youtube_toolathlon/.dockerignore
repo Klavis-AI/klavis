@@ -1,0 +1,13 @@
+.git
+.github
+node_modules
+npm-debug.log
+Dockerfile
+.env
+.env.example
+*.md
+!README.md
+.gitignore
+.npm
+.vscode
+dist

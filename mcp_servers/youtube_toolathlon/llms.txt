@@ -1,0 +1,42 @@
+# YouTube MCP Server
+
+This is a Model Context Protocol (MCP) server for integrating YouTube functionality with AI language models.
+
+## Deployment
+
+This server can be deployed in two ways:
+
+1. As a local npm package:
+   ```
+   npm install zubeid-youtube-mcp-server
+   ```
+
+2. Via Docker deployment on Smithery:
+   The server includes a Dockerfile and smithery.yaml for deployment.
+
+## Configuration
+
+The server requires the following environment variables:
+- `YOUTUBE_API_KEY`: Your YouTube Data API key (required)
+- `YOUTUBE_TRANSCRIPT_LANG`: Default language for transcripts (optional, defaults to 'en')
+
+## API Endpoints
+
+The server provides the following MCP methods:
+
+- `videos.getVideo`: Get detailed information about a YouTube video
+- `videos.searchVideos`: Search for videos on YouTube
+- `transcripts.getTranscript`: Get the transcript of a YouTube video
+- `channels.getChannel`: Get information about a YouTube channel
+- `channels.listVideos`: Get videos from a specific channel
+- `playlists.getPlaylist`: Get information about a YouTube playlist
+- `playlists.getPlaylistItems`: Get videos in a YouTube playlist
+
+## Common Issues
+
+If you're encountering deployment issues, ensure:
+1. Your YouTube API key is properly configured
+2. The server has internet access to connect to YouTube APIs
+3. The Docker build process has sufficient resources
+
+For more details, please refer to the README.md or open an issue on GitHub.
