@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from datetime import datetime, timedelta, timezone
 from itertools import islice
 from typing import Any, Tuple
@@ -155,11 +156,17 @@ def server(
 ) -> FastMCP:
     """Initializes the MCP server."""
 
+    logger = logging.getLogger(__name__)
+
     proxy_config: ProxyConfig | None = None
     if webshare_proxy_username and webshare_proxy_password:
         proxy_config = WebshareProxyConfig(webshare_proxy_username, webshare_proxy_password)
+        logger.info("Using Webshare proxy (username: %s)", webshare_proxy_username)
     elif http_proxy or https_proxy:
         proxy_config = GenericProxyConfig(http_proxy, https_proxy)
+        logger.info("Using generic proxy (http=%s, https=%s)", http_proxy, https_proxy)
+    else:
+        logger.info("No proxy configured")
 
     mcp = FastMCP("Youtube Transcript")
 
