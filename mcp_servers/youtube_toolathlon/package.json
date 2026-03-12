@@ -1,0 +1,51 @@
+{
+  "name": "zubeid-youtube-mcp-server",
+  "version": "1.0.0",
+  "description": "YouTube MCP Server Implementation",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "zubeid-youtube-mcp-server": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node ./dist/index.js",
+    "build": "tsc",
+    "dev": "nodemon --exec \"npm run build && npm start\" --ext ts",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.1.1",
+    "googleapis": "^129.0.0",
+    "ytdl-core": "^4.11.5",
+    "youtube-transcript": "^1.0.6"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.1",
+    "nodemon": "^3.0.0"
+  },
+  "keywords": [
+    "youtube",
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "claude",
+    "anthropic"
+  ],
+  "author": "Zubeid Hendricks",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZubeidHendricks/youtube-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ZubeidHendricks/youtube-mcp-server/issues"
+  },
+  "homepage": "https://github.com/ZubeidHendricks/youtube-mcp-server#readme"
+}

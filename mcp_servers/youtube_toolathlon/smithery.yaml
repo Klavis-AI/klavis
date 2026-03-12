@@ -1,0 +1,27 @@
+# Smithery.ai configuration
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - youtubeApiKey
+    properties:
+      youtubeApiKey:
+        type: string
+        description: Your YouTube Data API key.
+      youtubeTranscriptLang:
+        type: string
+        default: en
+        description: Default language for YouTube transcripts.
+  commandFunction:
+    # A function that produces the CLI command to start the MCP on stdio.
+    |-
+    (config) => ({
+      command: "node",
+      args: ["dist/index.js"],
+      env: {
+        YOUTUBE_API_KEY: config.youtubeApiKey,
+        YOUTUBE_TRANSCRIPT_LANG: config.youtubeTranscriptLang || 'en'
+      }
+    })

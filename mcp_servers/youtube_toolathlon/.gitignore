@@ -1,0 +1,42 @@
+# Environment variables
+.env
+
+# Dependencies
+/node_modules
+node_modules/
+
+# Build output
+/dist
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Application files to ignore
+*.pak
+*.dll
+*.exe
+*.dat
+*.ico
+*.json
+/resources/
+/locales/
+/frontend-new/
+/frontend-temp/
+/zoobayd-platform-fresh/
+/zoobayd-platform-new/
+
+# Keep specific JSON files
+!package.json
+!tsconfig.json
+!.env.example

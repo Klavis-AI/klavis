@@ -1,0 +1,15 @@
+.git
+.github
+node_modules
+src
+tests
+docs
+.env
+.env.example
+.gitignore
+.npmrc
+.vscode
+.DS_Store
+*.log
+youtube-mcp-readme.md
+youtube-readme.md
