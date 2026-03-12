@@ -2,7 +2,7 @@ import { google } from 'googleapis';
 import { ChannelParams, ChannelVideosParams, ChannelVideosNavParams } from '../types.js';
 import { ListManager } from './listManager.js';
 import { removeThumbnails, createErrorMessage } from '../utils/dataUtils.js';
-import { getApiKey } from '../auth.js';
+import { getAccessToken } from '../auth.js';
 
 /**
  * Service for interacting with YouTube channels
@@ -22,14 +22,17 @@ export class ChannelService {
   private initialize() {
     if (this.initialized) return;
 
-    const apiKey = getApiKey();
-    if (!apiKey) {
-      throw new Error('YouTube API key is missing. Provide it via AUTH_DATA env var or x-auth-data header.');
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error('OAuth access token is missing. Provide it via AUTH_DATA env var or x-auth-data header.');
     }
+
+    const oauth2Client = new google.auth.OAuth2();
+    oauth2Client.setCredentials({ access_token: accessToken });
 
     this.youtube = google.youtube({
       version: 'v3',
-      auth: apiKey
+      auth: oauth2Client,
     });
 
     this.initialized = true;

@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from 'async_hooks';
 import { Request } from 'express';
 
-export const asyncLocalStorage = new AsyncLocalStorage<{ apiKey: string }>();
+export const asyncLocalStorage = new AsyncLocalStorage<{ accessToken: string }>();
 
 export function extractAuthData(req: Request): { authToken: string; authData?: any } {
   let authDataStr = process.env.AUTH_DATA;
@@ -15,7 +15,7 @@ export function extractAuthData(req: Request): { authToken: string; authData?: a
   }
 
   if (!authDataStr) {
-    console.error('Error: YouTube API key is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
+    console.error('Error: OAuth access token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
     return { authToken: '' };
   }
 
@@ -31,9 +31,9 @@ export function extractAuthData(req: Request): { authToken: string; authData?: a
   }
 }
 
-export function getApiKey(): string {
+export function getAccessToken(): string {
   const store = asyncLocalStorage.getStore();
-  if (store?.apiKey) return store.apiKey;
+  if (store?.accessToken) return store.accessToken;
   // Fallback to env var (for stdio / local testing)
-  return process.env.YOUTUBE_API_KEY || '';
+  return process.env.ACCESS_TOKEN || '';
 }
