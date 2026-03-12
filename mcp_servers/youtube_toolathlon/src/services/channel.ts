@@ -2,6 +2,7 @@ import { google } from 'googleapis';
 import { ChannelParams, ChannelVideosParams, ChannelVideosNavParams } from '../types.js';
 import { ListManager } from './listManager.js';
 import { removeThumbnails, createErrorMessage } from '../utils/dataUtils.js';
+import { getApiKey } from '../auth.js';
 
 /**
  * Service for interacting with YouTube channels
@@ -20,17 +21,17 @@ export class ChannelService {
    */
   private initialize() {
     if (this.initialized) return;
-    
-    const apiKey = process.env.YOUTUBE_API_KEY;
+
+    const apiKey = getApiKey();
     if (!apiKey) {
-      throw new Error('YOUTUBE_API_KEY environment variable is not set.');
+      throw new Error('YouTube API key is missing. Provide it via AUTH_DATA env var or x-auth-data header.');
     }
 
     this.youtube = google.youtube({
       version: 'v3',
       auth: apiKey
     });
-    
+
     this.initialized = true;
   }
 

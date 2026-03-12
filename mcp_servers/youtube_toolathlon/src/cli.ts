@@ -1,20 +1,13 @@
 #!/usr/bin/env node
 
-import { startMcpServer } from './server.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { createMcpServer } from './server.js';
 
-// Check for required environment variables
-if (!process.env.YOUTUBE_API_KEY) {
-    console.error('Error: YOUTUBE_API_KEY environment variable is required.');
-    console.error('Please set it before running this server.');
+const server = createMcpServer();
+const transport = new StdioServerTransport();
+server.connect(transport).then(() => {
+    console.error('YouTube MCP Server started on stdio');
+}).catch(error => {
+    console.error('Failed to start YouTube MCP Server:', error);
     process.exit(1);
-}
-
-// Start the MCP server
-startMcpServer()
-    .then(() => {
-        console.log('YouTube MCP Server started successfully');
-    })
-    .catch(error => {
-        console.error('Failed to start YouTube MCP Server:', error);
-        process.exit(1);
-    });
+});

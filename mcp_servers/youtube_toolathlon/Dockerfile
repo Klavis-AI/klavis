@@ -1,21 +1,15 @@
-FROM node:16-alpine
+FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files first for better caching
-COPY package*.json ./
+COPY mcp_servers/youtube_toolathlon/package*.json ./
 
-# Install dependencies
 RUN npm install
 
-# Copy application code
-COPY . .
+COPY mcp_servers/youtube_toolathlon/ .
 
-# Build the application
 RUN npm run build
 
-# Set execution permission for CLI
-RUN chmod +x dist/cli.js
+EXPOSE 5000
 
-# Command is provided by smithery.yaml
 CMD ["node", "dist/index.js"]
