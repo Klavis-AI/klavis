@@ -1,0 +1,76 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = [ "hatchling" ]
+
+[project]
+name = "mcp-youtube-transcript"
+version = "0.5.11"
+description = "MCP server retrieving transcripts of YouTube videos"
+readme = "README.md"
+authors = [
+    { name = "Junpei Kawamoto", email = "kawamoto.junpei@gmail.com" },
+]
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "beautifulsoup4>=4.13.3",
+    "humanize>=4.13",
+    "mcp>=1.9",
+    "pydantic>=2.10.6",
+    "requests>=2.32.3",
+    "rich-click>=1.8.8",
+    "starlette>=0.46.0",
+    "uvicorn>=0.34.0",
+    "youtube-transcript-api>=1.1",
+    "yt-dlp>=2025.9.26",
+]
+scripts.mcp-youtube-transcript = "mcp_youtube_transcript.cli:main"
+
+[dependency-groups]
+dev = [
+    "bump-my-version>=1.1.1",
+    "pre-commit>=4.1",
+    "pre-commit-uv>=4.1.4",
+    "pytest>=8.3.5",
+    "pytest-mock>=3.14",
+    "pytest-recording>=0.13.4",
+    "types-requests>=2.32.0.20250306",
+]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.pyproject-fmt]
+indent = 4
+
+[tool.bumpversion]
+current_version = "0.5.11"
+commit = true
+pre_commit_hooks = [
+    "uv sync",
+    "git add uv.lock",
+]
+files = [
+    { filename = "pyproject.toml", search = 'version = "{current_version}"', replace = 'version = "{new_version}"' },
+    { filename = "manifest.json", search = '"version": "{current_version}"', replace = '"version": "{new_version}"' },
+    { filename = "server.json", search = '"version": "{current_version}"', replace = '"version": "{new_version}"' },
+    { filename = "server.json", search = "download/v{current_version}", replace = "download/v{new_version}" },
+]
+
+[tool.mypy]
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+overrides = [ { module = [
+    "yt_dlp.*",
+], ignore_missing_imports = true } ]
