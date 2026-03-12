@@ -1,0 +1,43 @@
+{
+  "name": "12306-mcp",
+  "version": "0.3.5",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc && shx chmod +x dist/*.js",
+    "start": "node dist/index.js",
+    "prepare": "npm run build",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "mcp",
+    "12306",
+    "mcp-server"
+  ],
+  "author": "joooook",
+  "license": "MIT",
+  "description": "This is a 12306 ticket search server based on the Model Context Protocol (MCP). ",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "axios": "^1.8.4",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "https-proxy-agent": "^7.0.6",
+    "ws": "^8.18.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.14.1",
+    "shx": "^0.3.4",
+    "typescript": "^5.8.3"
+  },
+  "type": "module",
+  "bin": {
+    "12306-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ]
+}
