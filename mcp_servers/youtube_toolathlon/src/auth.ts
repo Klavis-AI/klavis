@@ -3,7 +3,7 @@ import { Request } from 'express';
 
 export const asyncLocalStorage = new AsyncLocalStorage<{ accessToken: string; authData?: any }>();
 
-export function extractAuthData(req: Request): { authToken: string; authData?: any } {
+export function extractAuthData(req: Request): { authToken: string; authData: any } {
   let authDataStr = process.env.AUTH_DATA;
 
   if (!authDataStr && req.headers['x-auth-data']) {
@@ -15,19 +15,18 @@ export function extractAuthData(req: Request): { authToken: string; authData?: a
   }
 
   if (!authDataStr) {
-    console.error('Error: OAuth access token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
-    return { authToken: '' };
+    return { authToken: '', authData: null };
   }
 
   try {
     const authData = JSON.parse(authDataStr);
     return {
       authToken: authData.access_token ?? '',
-      authData: authData,
+      authData,
     };
   } catch (error) {
     console.error('Error parsing auth data JSON:', error);
-    return { authToken: '' };
+    return { authToken: '', authData: null };
   }
 }
 
