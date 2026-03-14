@@ -29,8 +29,7 @@ export class ChannelService {
 
     const oauth2Client = new google.auth.OAuth2(
       authInfo.client_id,
-      authInfo.client_secret,
-      authInfo.token_uri ?? 'https://oauth2.googleapis.com/token'
+      authInfo.client_secret
     );
     oauth2Client.setCredentials({
       access_token: authInfo.access_token,
