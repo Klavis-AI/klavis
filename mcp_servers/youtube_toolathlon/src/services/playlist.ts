@@ -1,7 +1,7 @@
 import { google } from 'googleapis';
 import { PlaylistParams, PlaylistItemsParams, SearchParams } from '../types.js';
 import { removeThumbnails, createErrorMessage } from '../utils/dataUtils.js';
-import { getAccessToken } from '../auth.js';
+import { getAuthData } from '../auth.js';
 
 /**
  * Service for interacting with YouTube playlists
@@ -20,13 +20,20 @@ export class PlaylistService {
   private initialize() {
     if (this.initialized) return;
 
-    const accessToken = getAccessToken();
-    if (!accessToken) {
+    const authInfo = getAuthData();
+    if (!authInfo?.access_token) {
       throw new Error('OAuth access token is missing. Provide it via AUTH_DATA env var or x-auth-data header.');
     }
 
-    const oauth2Client = new google.auth.OAuth2();
-    oauth2Client.setCredentials({ access_token: accessToken });
+    const oauth2Client = new google.auth.OAuth2(
+      authInfo.client_id,
+      authInfo.client_secret,
+      authInfo.token_uri ?? 'https://oauth2.googleapis.com/token'
+    );
+    oauth2Client.setCredentials({
+      access_token: authInfo.access_token,
+      refresh_token: authInfo.refresh_token,
+    });
 
     this.youtube = google.youtube({
       version: 'v3',

@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from 'async_hooks';
 import { Request } from 'express';
 
-export const asyncLocalStorage = new AsyncLocalStorage<{ accessToken: string }>();
+export const asyncLocalStorage = new AsyncLocalStorage<{ accessToken: string; authData?: any }>();
 
 export function extractAuthData(req: Request): { authToken: string; authData?: any } {
   let authDataStr = process.env.AUTH_DATA;
@@ -36,4 +36,19 @@ export function getAccessToken(): string {
   if (store?.accessToken) return store.accessToken;
   // Fallback to env var (for stdio / local testing)
   return process.env.ACCESS_TOKEN || '';
+}
+
+export function getAuthData(): any {
+  const store = asyncLocalStorage.getStore();
+  if (store?.authData) return store.authData;
+  // Fallback to env var (for stdio / local testing)
+  const authDataStr = process.env.AUTH_DATA;
+  if (authDataStr) {
+    try {
+      return JSON.parse(authDataStr);
+    } catch {
+      return null;
+    }
+  }
+  return null;
 }
