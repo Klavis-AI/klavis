@@ -25,7 +25,8 @@
     "src/index.ts",
     "src/server.ts",
     "src/cli.ts",
-    "src/types.ts"
+    "src/types.ts",
+    "src/auth.ts"
   ],
   "exclude": [
     "node_modules",
