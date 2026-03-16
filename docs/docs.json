@@ -264,6 +264,7 @@
               "api-reference/sandbox/list",
               "api-reference/sandbox/delete",
               "api-reference/sandbox/reset",
+              "api-reference/sandbox/prepare",
               {
                 "group": "Remote MCP Servers",
                 "pages": [
