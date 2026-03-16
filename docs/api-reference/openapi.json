@@ -7950,6 +7950,31 @@
         }
       }
     },
+    "/sandbox/prepare": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Prepare sandbox infrastructure for high demand",
+        "description": "Notify the sandbox infrastructure to scale up capacity in anticipation of heavy usage. The capacity boost is temporary and reverts automatically.",
+        "operationId": "prepare_sandbox_capacity_sandbox_prepare_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/sandbox/jira/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -21723,6 +21748,354 @@
         }
       }
     },
+    "/local-sandbox/{local_sandbox_id}/execution-upload-url": {
+      "post": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Get a pre-signed URL to upload an execution archive",
+        "description": "Returns a pre-signed GCS PUT URL so the caller can upload a tar.gz archive containing `main.py`, `requirements.txt`, etc. for later execution.",
+        "operationId": "get_execution_upload_url_local_sandbox__local_sandbox_id__execution_upload_url_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "local_sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The local sandbox identifier",
+              "title": "Local Sandbox Id"
+            },
+            "description": "The local sandbox identifier"
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/GCSRegion",
+              "description": "GCS bucket region for the signed URL. Defaults to 'us'.",
+              "default": "us"
+            },
+            "description": "GCS bucket region for the signed URL. Defaults to 'us'."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecutionUploadUrlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecutionUploadUrlResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/local-sandbox/{local_sandbox_id}/execute": {
+      "post": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Execute a script inside the sandbox",
+        "description": "Computes the internal GCS archive URL from the sandbox ID and execution name, then triggers the sandbox executor to download, install dependencies, and execute `main.py`. The execution runs in the background — poll `/execution-logs` to track progress. The archive must first be uploaded via `/execution-upload-url`.",
+        "operationId": "execute_in_sandbox_local_sandbox__local_sandbox_id__execute_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "local_sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The local sandbox identifier",
+              "title": "Local Sandbox Id"
+            },
+            "description": "The local sandbox identifier"
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/GCSRegion",
+              "description": "GCS bucket region where the archive was uploaded. Defaults to 'us'.",
+              "default": "us"
+            },
+            "description": "GCS bucket region where the archive was uploaded. Defaults to 'us'."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecuteResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/local-sandbox/{local_sandbox_id}/execution-status": {
+      "get": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Get execution status",
+        "description": "Returns the current status of an execution: pending, running, completed, or failed.",
+        "operationId": "get_execution_status_local_sandbox__local_sandbox_id__execution_status_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "local_sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The local sandbox identifier",
+              "title": "Local Sandbox Id"
+            },
+            "description": "The local sandbox identifier"
+          },
+          {
+            "name": "execution_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Name of the execution to check status for",
+              "title": "Execution Name"
+            },
+            "description": "Name of the execution to check status for"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecutionStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/local-sandbox/{local_sandbox_id}/execution-logs": {
+      "get": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Poll execution logs",
+        "description": "Returns execution status and new log content since the provided byte cursor. Call repeatedly with the returned cursor to stream logs.",
+        "operationId": "get_execution_logs_local_sandbox__local_sandbox_id__execution_logs_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "local_sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The local sandbox identifier",
+              "title": "Local Sandbox Id"
+            },
+            "description": "The local sandbox identifier"
+          },
+          {
+            "name": "execution_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Name of the execution to get logs for",
+              "title": "Execution Name"
+            },
+            "description": "Name of the execution to get logs for"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Byte offset to start reading from",
+              "default": 0,
+              "title": "Cursor"
+            },
+            "description": "Byte offset to start reading from"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecutionLogsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/local-sandbox/{local_sandbox_id}/export-artifacts": {
+      "post": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Export execution artifacts",
+        "description": "Zips the execution directory and uploads it to GCS. Returns a signed download URL for the exported artifacts.",
+        "operationId": "export_artifacts_local_sandbox__local_sandbox_id__export_artifacts_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "local_sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The local sandbox identifier",
+              "title": "Local Sandbox Id"
+            },
+            "description": "The local sandbox identifier"
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/GCSRegion",
+              "description": "GCS bucket region for the signed URL. Defaults to 'us'.",
+              "default": "us"
+            },
+            "description": "GCS bucket region for the signed URL. Defaults to 'us'."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportArtifactsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportArtifactsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/local-sandbox/google_cloud/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -27575,6 +27948,146 @@
         "title": "DumpUrlResponse",
         "description": "Response for the dump endpoint — returns a signed download URL."
       },
+      "ExecuteRequest": {
+        "properties": {
+          "execution_name": {
+            "type": "string",
+            "title": "Execution Name",
+            "description": "Logical name for this execution (e.g. 'init', 'eval_1')"
+          }
+        },
+        "type": "object",
+        "required": [
+          "execution_name"
+        ],
+        "title": "ExecuteRequest"
+      },
+      "ExecuteResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "execution_name": {
+            "type": "string",
+            "title": "Execution Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "execution_name"
+        ],
+        "title": "ExecuteResponse"
+      },
+      "ExecutionLogsResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Current status: pending | running | completed | failed"
+          },
+          "logs": {
+            "type": "string",
+            "title": "Logs",
+            "description": "New log content since the provided cursor",
+            "default": ""
+          },
+          "cursor": {
+            "type": "integer",
+            "title": "Cursor",
+            "description": "Byte offset to pass as cursor on next poll",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "ExecutionLogsResponse"
+      },
+      "ExecutionStatusResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Current status: pending | running | completed | failed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "ExecutionStatusResponse"
+      },
+      "ExecutionUploadUrlRequest": {
+        "properties": {
+          "execution_name": {
+            "type": "string",
+            "title": "Execution Name",
+            "description": "Logical name for this execution (e.g. 'init', 'eval_1')"
+          }
+        },
+        "type": "object",
+        "required": [
+          "execution_name"
+        ],
+        "title": "ExecutionUploadUrlRequest"
+      },
+      "ExecutionUploadUrlResponse": {
+        "properties": {
+          "upload_url": {
+            "type": "string",
+            "title": "Upload Url",
+            "description": "Pre-signed GCS PUT URL to upload the archive (.tar.gz)"
+          },
+          "expires_in_minutes": {
+            "type": "integer",
+            "title": "Expires In Minutes",
+            "description": "Minutes until the upload URL expires"
+          }
+        },
+        "type": "object",
+        "required": [
+          "upload_url",
+          "expires_in_minutes"
+        ],
+        "title": "ExecutionUploadUrlResponse"
+      },
+      "ExportArtifactsRequest": {
+        "properties": {
+          "execution_name": {
+            "type": "string",
+            "title": "Execution Name",
+            "description": "Name of the execution whose artifacts to export"
+          }
+        },
+        "type": "object",
+        "required": [
+          "execution_name"
+        ],
+        "title": "ExportArtifactsRequest"
+      },
+      "ExportArtifactsResponse": {
+        "properties": {
+          "download_url": {
+            "type": "string",
+            "title": "Download Url",
+            "description": "Signed GCS URL to download the exported artifacts"
+          },
+          "expires_in_minutes": {
+            "type": "integer",
+            "title": "Expires In Minutes",
+            "description": "Minutes until the download URL expires"
+          }
+        },
+        "type": "object",
+        "required": [
+          "download_url",
+          "expires_in_minutes"
+        ],
+        "title": "ExportArtifactsResponse"
+      },
       "ExternalServerInfo": {
         "properties": {
           "name": {
@@ -28719,7 +29232,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Input"
                 },
                 "type": "array"
               },
@@ -28741,7 +29254,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Output"
                 },
                 "type": "array"
               },
@@ -29889,7 +30402,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -29911,7 +30424,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -38703,7 +39216,7 @@
         "title": "YouTubePlaylistItem",
         "description": "YouTube Playlist Item - represents a video in a playlist"
       },
-      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input": {
+      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Input": {
         "properties": {
           "title": {
             "type": "string",
@@ -38845,7 +39358,7 @@
         "title": "GoogleCalendarEvent",
         "description": "Google Calendar event object"
       },
-      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output": {
+      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Output": {
         "properties": {
           "title": {
             "type": "string",
