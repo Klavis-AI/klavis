@@ -21,7 +21,6 @@
     "examples": {
       "languages": ["bash", "python", "javascript", "typescript"],
       "defaults": "all",
-      "prefill": true,
       "autogenerate": true
     }
   },
@@ -36,7 +35,6 @@
       "chatgpt",
       "claude",
       "perplexity",
-      "grok",
       "mcp",
       "cursor",
       "vscode"
