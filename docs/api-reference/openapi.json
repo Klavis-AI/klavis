@@ -7627,6 +7627,61 @@
         }
       }
     },
+    "/sandbox/prepare": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Prepare sandbox infrastructure for high demand",
+        "description": "Scale up sandbox capacity for the specified benchmark in anticipation of heavy usage. The capacity boost is temporary and reverts automatically after approximately 1 hour. Can be called multiple times for different benchmarks; each benchmark's capacity is managed independently.",
+        "operationId": "prepare_sandbox_capacity_sandbox_prepare_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "benchmark",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/BenchmarkEnum"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The benchmark to prepare capacity for. Defaults to general capacity if not specified.",
+              "title": "Benchmark"
+            },
+            "description": "The benchmark to prepare capacity for. Defaults to general capacity if not specified."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sandbox": {
       "get": {
         "tags": [
@@ -7948,31 +8003,6 @@
             }
           }
         }
-      }
-    },
-    "/sandbox/prepare": {
-      "post": {
-        "tags": [
-          "sandbox"
-        ],
-        "summary": "Prepare sandbox infrastructure for high demand",
-        "description": "Notify the sandbox infrastructure to scale up capacity in anticipation of heavy usage. The capacity boost is temporary and reverts automatically.",
-        "operationId": "prepare_sandbox_capacity_sandbox_prepare_post",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
       }
     },
     "/sandbox/jira/{sandbox_id}/initialize": {
@@ -29232,7 +29262,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Input"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -29254,7 +29284,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Output"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -30402,7 +30432,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input"
                 },
                 "type": "array"
               },
@@ -30424,7 +30454,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output"
                 },
                 "type": "array"
               },
@@ -39216,7 +39246,7 @@
         "title": "YouTubePlaylistItem",
         "description": "YouTube Playlist Item - represents a video in a playlist"
       },
-      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Input": {
+      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input": {
         "properties": {
           "title": {
             "type": "string",
@@ -39358,7 +39388,7 @@
         "title": "GoogleCalendarEvent",
         "description": "Google Calendar event object"
       },
-      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Output": {
+      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output": {
         "properties": {
           "title": {
             "type": "string",
