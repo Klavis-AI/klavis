@@ -5,6 +5,7 @@ import importlib.metadata
 import json
 import logging
 import os
+import re
 from functools import wraps
 from typing import Any, Callable
 from collections.abc import AsyncIterator
@@ -34,6 +35,26 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger("mcp_snowflake_server")
+
+# Regex for validating SQL identifiers (database, schema, table names).
+# Allows alphanumeric characters and underscores; must start with a letter or underscore.
+_IDENTIFIER_RE = re.compile(r'^[A-Za-z_][A-Za-z0-9_]{0,255}$')
+
+
+def validate_identifier(name: str, kind: str = "identifier") -> str:
+    """Validate that a string is a safe SQL identifier.
+
+    Raises ValueError if the name contains characters outside the allowed set.
+    Returns the validated name (stripped of leading/trailing whitespace).
+    """
+    name = name.strip()
+    if not _IDENTIFIER_RE.match(name):
+        raise ValueError(
+            f"Invalid {kind} name: {name!r}. "
+            f"Only alphanumeric characters and underscores are allowed, "
+            f"and the name must start with a letter or underscore."
+        )
+    return name
 
 
 # Context for request-specific connection arguments
@@ -82,7 +103,7 @@ def extract_credentials(request_or_scope) -> dict[str, Any] | None:
             return mapped_creds if mapped_creds else None
             
         except Exception as e:
-            logger.warning(f"Failed to parse x-auth-data: {e}")
+            logger.warning("Failed to parse x-auth-data header")
             return None
             
     return None
@@ -97,9 +118,15 @@ def handle_tool_errors(func: Callable) -> Callable:
     async def wrapper(*args, **kwargs) -> list[types.TextContent]:
         try:
             return await func(*args, **kwargs)
-        except Exception as e:
+        except ValueError as e:
+            # ValueError is used for expected validation errors — safe to return
             logger.error(f"Error in {func.__name__}: {str(e)}")
             return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+        except Exception as e:
+            # For unexpected errors, log the details but return a generic message
+            # to avoid leaking credentials or internal details to clients
+            logger.error(f"Error in {func.__name__}: {str(e)}")
+            return [types.TextContent(type="text", text=f"Error: An internal error occurred in {func.__name__}. Check server logs for details.")]
 
     return wrapper
 
@@ -133,7 +160,6 @@ def extract_database_from_query(query: str) -> str | None:
             return tokens[1].strip(';')
     
     # For qualified table references like database.schema.table
-    import re
     qualified_match = re.search(r'\b([A-Z_][A-Z0-9_]*)\.[A-Z_][A-Z0-9_]*\.[A-Z_][A-Z0-9_]*', query_upper)
     if qualified_match:
         return qualified_match.group(1)
@@ -197,7 +223,7 @@ async def handle_list_schemas(arguments, db, *_, exclusion_config=None, exclude_
     if not arguments or "database" not in arguments:
         raise ValueError("Missing required 'database' parameter")
 
-    database = arguments["database"]
+    database = validate_identifier(arguments["database"], "database")
     
     # Check allowed databases restriction
     check_database_access(database, allowed_databases)
@@ -243,8 +269,8 @@ async def handle_list_tables(arguments, db, *_, exclusion_config=None, exclude_j
     if not arguments or "database" not in arguments or "schema" not in arguments:
         raise ValueError("Missing required 'database' and 'schema' parameters")
 
-    database = arguments["database"]
-    schema = arguments["schema"]
+    database = validate_identifier(arguments["database"], "database")
+    schema = validate_identifier(arguments["schema"], "schema")
     
     # Check allowed databases restriction
     check_database_access(database, allowed_databases)
@@ -303,12 +329,12 @@ async def handle_describe_table(arguments, db, *_, exclude_json_results=False, a
     if len(split_identifier) < 3:
         raise ValueError("Table name must be fully qualified as 'database.schema.table'")
 
-    database_name = split_identifier[0].upper()
+    database_name = validate_identifier(split_identifier[0], "database").upper()
+    schema_name = validate_identifier(split_identifier[1], "schema").upper()
+    table_name = validate_identifier(split_identifier[2], "table").upper()
     
     # Check allowed databases restriction
     check_database_access(database_name, allowed_databases)
-    schema_name = split_identifier[1].upper()
-    table_name = split_identifier[2].upper()
 
     query = f"""
         SELECT column_name, column_default, is_nullable, data_type, comment 
@@ -413,9 +439,10 @@ async def handle_create_databases(arguments, db, _, allow_write, __, allowed_dat
     results = []
     warnings = []
     
-    # Check allowed databases restriction for all databases first
+    # Validate all database names and check allowed databases restriction
     real_database_names = []
     for db_name in database_names:
+        validate_identifier(db_name, "database")
         try:
             check_database_access(db_name, allowed_databases)
             real_database_names.append(db_name)
@@ -456,8 +483,9 @@ async def handle_drop_databases(arguments, db, _, allow_write, __, allowed_datab
     results = []
     warnings = []
     
-    # Check allowed databases restriction for all databases first
+    # Validate all database names and check allowed databases restriction
     for db_name in database_names:
+        validate_identifier(db_name, "database")
         check_database_access(db_name, allowed_databases)
     
     existing_dbs_result, _ = await db.execute_query("SHOW DATABASES")
@@ -487,7 +515,7 @@ async def handle_create_schemas(arguments, db, _, allow_write, __, allowed_datab
     if not arguments or "database" not in arguments or "schemas" not in arguments:
         raise ValueError("Missing required 'database' and 'schemas' parameters")
     
-    database_name = arguments["database"]
+    database_name = validate_identifier(arguments["database"], "database")
     schema_names = arguments["schemas"]
     
     if not isinstance(schema_names, list):
@@ -507,6 +535,7 @@ async def handle_create_schemas(arguments, db, _, allow_write, __, allowed_datab
         return [types.TextContent(type="text", text=f"Failed to check existing schemas in database '{database_name}': {str(e)}")]
     
     for schema_name in schema_names:
+        schema_name = validate_identifier(schema_name, "schema")
         schema_name_upper = schema_name.upper()
         if schema_name_upper in existing_schema_names:
             warnings.append(f"Warning: Schema '{schema_name}' already exists in database '{database_name}', skipping creation")
@@ -530,7 +559,7 @@ async def handle_drop_schemas(arguments, db, _, allow_write, __, allowed_databas
     if not arguments or "database" not in arguments or "schemas" not in arguments:
         raise ValueError("Missing required 'database' and 'schemas' parameters")
     
-    database_name = arguments["database"]
+    database_name = validate_identifier(arguments["database"], "database")
     schema_names = arguments["schemas"]
     
     if not isinstance(schema_names, list):
@@ -550,6 +579,7 @@ async def handle_drop_schemas(arguments, db, _, allow_write, __, allowed_databas
         return [types.TextContent(type="text", text=f"Failed to check existing schemas in database '{database_name}': {str(e)}")]
     
     for schema_name in schema_names:
+        schema_name = validate_identifier(schema_name, "schema")
         schema_name_upper = schema_name.upper()
         if schema_name_upper not in existing_schema_names:
             warnings.append(f"Warning: Schema '{schema_name}' does not exist in database '{database_name}', skipping deletion")
@@ -573,8 +603,8 @@ async def handle_create_tables(arguments, db, _, allow_write, __, allowed_databa
     if not arguments or "database" not in arguments or "schema" not in arguments or "tables" not in arguments:
         raise ValueError("Missing required 'database', 'schema', and 'tables' parameters")
     
-    database_name = arguments["database"]
-    schema_name = arguments["schema"]
+    database_name = validate_identifier(arguments["database"], "database")
+    schema_name = validate_identifier(arguments["schema"], "schema")
     table_definitions = arguments["tables"]
     
     if not isinstance(table_definitions, list):
@@ -603,12 +633,14 @@ async def handle_create_tables(arguments, db, _, allow_write, __, allowed_databa
             # Simple format: just the CREATE TABLE SQL
             table_definition = table_def
             # Try to extract table name from SQL
-            import re
             match = re.search(r'CREATE\s+TABLE\s+(\w+)', table_definition.upper())
             table_name = match.group(1) if match else "UNKNOWN"
         else:
             results.append(f"Invalid table definition format: {table_def}")
             continue
+
+        # Validate the table name to prevent SQL injection
+        table_name = validate_identifier(table_name, "table")
             
         table_name_upper = table_name.upper()
         if table_name_upper in existing_table_names:
@@ -638,8 +670,8 @@ async def handle_drop_tables(arguments, db, _, allow_write, __, allowed_database
     if not arguments or "database" not in arguments or "schema" not in arguments or "tables" not in arguments:
         raise ValueError("Missing required 'database', 'schema', and 'tables' parameters")
     
-    database_name = arguments["database"]
-    schema_name = arguments["schema"]
+    database_name = validate_identifier(arguments["database"], "database")
+    schema_name = validate_identifier(arguments["schema"], "schema")
     table_names = arguments["tables"]
     
     if not isinstance(table_names, list):
@@ -661,6 +693,7 @@ async def handle_drop_tables(arguments, db, _, allow_write, __, allowed_database
         return [types.TextContent(type="text", text=f"Failed to check existing tables in {database_name}.{schema_name}: {str(e)}")]
     
     for table_name in table_names:
+        table_name = validate_identifier(table_name, "table")
         table_name_upper = table_name.upper()
         if table_name_upper not in existing_table_names:
             warnings.append(f"Warning: Table '{table_name}' does not exist in {database_name}.{schema_name}, skipping deletion")
@@ -692,16 +725,20 @@ async def prefetch_tables(db: SnowflakeDB, credentials: dict) -> dict:
     """Prefetch table and column information"""
     try:
         logger.info("Prefetching table descriptions")
+        # Validate identifiers from credentials used in queries
+        db_name = validate_identifier(credentials['database'], "database")
+        schema_name = validate_identifier(credentials['schema'], "schema")
+
         table_results, data_id = await db.execute_query(
             f"""SELECT table_name, comment 
-                FROM {credentials['database']}.information_schema.tables 
-                WHERE table_schema = '{credentials['schema'].upper()}'"""
+                FROM {db_name}.information_schema.tables 
+                WHERE table_schema = '{schema_name.upper()}'"""
         )
 
         column_results, data_id = await db.execute_query(
             f"""SELECT table_name, column_name, data_type, comment 
-                FROM {credentials['database']}.information_schema.columns 
-                WHERE table_schema = '{credentials['schema'].upper()}'"""
+                FROM {db_name}.information_schema.columns 
+                WHERE table_schema = '{schema_name.upper()}'"""
         )
 
         tables_brief = {}
@@ -748,7 +785,6 @@ async def main(
 
     # Load configuration from file if provided
     config = {}
-    #
     if config_file:
         try:
             with open(config_file, "r") as f:
@@ -757,39 +793,60 @@ async def main(
         except Exception as e:
             logger.error(f"Error loading configuration file: {e}")
 
-    # Merge exclude_patterns from parameters with config file
-    exclusion_config = config.get("exclude_patterns", {})
+    # Initialize components
+    write_detector = SQLWriteDetector()
+    server = Server("snowflake")
+
+    # Process exclusion patterns from both exclude_patterns param and config file
+    exclusion_config = {
+        "databases": [],
+        "schemas": [],
+        "tables": [],
+    }
+
     if exclude_patterns:
-        # Merge patterns from parameters with those from config file
-        for key, patterns in exclude_patterns.items():
-            if key in exclusion_config:
-                exclusion_config[key].extend(patterns)
-            else:
-                exclusion_config[key] = patterns
+        for key in ["databases", "schemas", "tables"]:
+            if key in exclude_patterns:
+                exclusion_config[key].extend(exclude_patterns[key])
 
-    # Set default patterns if none are specified
-    if not exclusion_config:
-        exclusion_config = {"databases": [], "schemas": [], "tables": []}
-
-    # Ensure all keys exist in the exclusion config
-    for key in ["databases", "schemas", "tables"]:
-        if key not in exclusion_config:
-            exclusion_config[key] = []
+    if "exclude_patterns" in config:
+        for key in ["databases", "schemas", "tables"]:
+            if key in config["exclude_patterns"]:
+                exclusion_config[key].extend(config["exclude_patterns"][key])
 
     logger.info(f"Exclusion patterns: {exclusion_config}")
 
+    # Handle allowed_databases from config file
+    if allowed_databases is None and "allowed_databases" in config:
+        allowed_databases = config["allowed_databases"]
+
+    if allowed_databases:
+        logger.info(f"Allowed databases restriction: {allowed_databases}")
+
+    # Process exclude_tools from config file
+    config_exclude_tools = config.get("exclude_tools", [])
+    if config_exclude_tools:
+        exclude_tools = list(set(exclude_tools + config_exclude_tools))
+        logger.info(f"Updated excluded tools from config: {exclude_tools}")
+
+    # Initialize database connection
     db = SnowflakeDB(connection_args)
     db.start_init_connection()
-    server = Server("snowflake-manager")
-    write_detector = SQLWriteDetector()
 
-    tables_info = (await prefetch_tables(db, connection_args)) if prefetch else {}
-    tables_brief = to_yaml(tables_info) if prefetch else ""
+    # Prefetch table information if configured
+    tables_info = {}
+    if prefetch:
+        tables_info = await prefetch_tables(db, connection_args)
+        if isinstance(tables_info, str):
+            logger.error(tables_info)
+            tables_info = {}
+    db.close()
 
+    # Define tools
     all_tools = [
         Tool(
             name="list_databases",
-            description="List all available databases in Snowflake",
+            description="List all available Snowflake databases",
             input_schema={
                 "type": "object",
                 "properties": {},
@@ -798,14 +855,14 @@ async def main(
         ),
         Tool(
             name="list_schemas",
-            description="List all schemas in a database",
+            description="List all schemas in a specific database",
             input_schema={
                 "type": "object",
                 "properties": {
                     "database": {
                         "type": "string",
-                        "description": "Database name to list schemas from",
-                    },
+                        "description": "Database name"
+                    }
                 },
                 "required": ["database"],
             },
@@ -817,8 +874,14 @@ async def main(
             input_schema={
                 "type": "object",
                 "properties": {
-                    "database": {"type": "string", "description": "Database name"},
-                    "schema": {"type": "string", "description": "Schema name"},
+                    "database": {
+                        "type": "string",
+                        "description": "Database name"
+                    },
+                    "schema": {
+                        "type": "string",
+                        "description": "Schema name"
+                    }
                 },
                 "required": ["database", "schema"],
             },
@@ -826,14 +889,14 @@ async def main(
         ),
         Tool(
             name="describe_table",
-            description="Get the schema information for a specific table",
+            description="Get a description of a table's columns, including name, type, nullable, default value, and comment",
             input_schema={
                 "type": "object",
                 "properties": {
                     "table_name": {
                         "type": "string",
-                        "description": "Fully qualified table name in the format 'database.schema.table'",
-                    },
+                        "description": "Fully qualified table name (database.schema.table)",
+                    }
                 },
                 "required": ["table_name"],
             },
@@ -841,13 +904,50 @@ async def main(
         ),
         Tool(
             name="read_query",
-            description="Execute a SELECT query.",
+            description="Execute a SELECT query on the Snowflake database. You cannot make any write operations with this tool.",
             input_schema={
                 "type": "object",
-                "properties": {"query": {"type": "string", "description": "SELECT SQL query to execute"}},
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "SELECT SQL query to execute",
+                    }
+                },
                 "required": ["query"],
             },
             handler=handle_read_query,
+        ),
+        Tool(
+            name="write_query",
+            description="Execute a write query on the Snowflake database. You cannot execute SELECT queries with this tool.",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "SQL write query to execute (INSERT, UPDATE, DELETE, etc.)",
+                    }
+                },
+                "required": ["query"],
+            },
+            handler=handle_write_query,
+            tags=["write"],
+        ),
+        Tool(
+            name="create_table",
+            description="Create a new table in the Snowflake database using a CREATE TABLE SQL statement",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "CREATE TABLE SQL statement",
+                    }
+                },
+                "required": ["query"],
+            },
+            handler=handle_create_table,
+            tags=["write"],
         ),
         Tool(
             name="append_insight",
@@ -863,33 +963,10 @@ async def main(
                 "required": ["insight"],
             },
             handler=handle_append_insight,
-            tags=["resource_based"],
-        ),
-        Tool(
-            name="write_query",
-            description="Execute an INSERT, UPDATE, or DELETE query on the Snowflake database",
-            input_schema={
-                "type": "object",
-                "properties": {"query": {"type": "string", "description": "SQL query to execute"}},
-                "required": ["query"],
-            },
-            handler=handle_write_query,
-            tags=["write"],
-        ),
-        Tool(
-            name="create_table",
-            description="Create a new table in the Snowflake database",
-            input_schema={
-                "type": "object",
-                "properties": {"query": {"type": "string", "description": "CREATE TABLE SQL statement"}},
-                "required": ["query"],
-            },
-            handler=handle_create_table,
-            tags=["write"],
         ),
         Tool(
             name="create_databases",
-            description="Create multiple databases in Snowflake",
+            description="Create multiple databases",
             input_schema={
                 "type": "object",
                 "properties": {
@@ -906,7 +983,7 @@ async def main(
         ),
         Tool(
             name="drop_databases",
-            description="Drop multiple databases in Snowflake",
+            description="Drop multiple databases",
             input_schema={
                 "type": "object",
                 "properties": {
@@ -929,7 +1006,7 @@ async def main(
                 "properties": {
                     "database": {
                         "type": "string",
-                        "description": "Database name where schemas will be created"
+                        "description": "Database name"
                     },
                     "schemas": {
                         "type": "array",
@@ -950,7 +1027,7 @@ async def main(
                 "properties": {
                     "database": {
                         "type": "string",
-                        "description": "Database name where schemas will be dropped"
+                        "description": "Database name"
                     },
                     "schemas": {
                         "type": "array",
