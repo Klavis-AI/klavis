@@ -2,8 +2,8 @@ import { JSDOM, VirtualConsole } from "jsdom";
 import TurndownService from "turndown";
 import { RequestPayload } from "./types.js";
 
-// Max response body size: 5MB to prevent OOM on huge pages
-const MAX_RESPONSE_SIZE = 5 * 1024 * 1024;
+// Max response body size: 20MB — generous for any real webpage, prevents abuse
+const MAX_RESPONSE_SIZE = 20 * 1024 * 1024;
 
 export class Fetcher {
   private static async _fetch({
