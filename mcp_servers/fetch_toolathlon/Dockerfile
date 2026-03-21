@@ -32,5 +32,8 @@ RUN npm ci --omit=dev --ignore-scripts
 
 EXPOSE 8000
 
+# Set Node.js heap limit (container has 8GiB; leave headroom for OS/buffers)
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
 # Specify the command to run the application
 ENTRYPOINT ["node", "dist/index.js"]
