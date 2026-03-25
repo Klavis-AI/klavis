@@ -1310,9 +1310,11 @@ def search_spreadsheets(query: str,
 
     # Build the search query for Google Drive
     # Search only for spreadsheets and match the query in name or fullText
+    # Escape single quotes to prevent query injection in Drive API query language
+    sanitized_query = query.replace("\\", "\\\\").replace("'", "\\'")
     search_query = (
         f"mimeType='application/vnd.google-apps.spreadsheet' and "
-        f"(name contains '{query}' or fullText contains '{query}')"
+        f"(name contains '{sanitized_query}' or fullText contains '{sanitized_query}')"
     )
 
     try:
