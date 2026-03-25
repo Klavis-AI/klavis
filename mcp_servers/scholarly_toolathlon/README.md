@@ -2,6 +2,7 @@
 
 # mcp-scholarly MCP server
 [![smithery badge](https://smithery.ai/badge/mcp-scholarly)](https://smithery.ai/server/mcp-scholarly)
+y
 
 A MCP server to search for accurate academic articles. More scholarly vendors will be added soon.
 

@@ -14,6 +14,7 @@ An MCP (Model Context Protocol) server that provides access to WooCommerce REST 
 - Reports and analytics
 - System management and webhooks
 
+
 ## Installation
 
 ```bash
