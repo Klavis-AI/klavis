@@ -12,6 +12,7 @@ Follow the instructions below to get started:
 <summary>Install in <b>Claude Desktop</b> or <b>claude.ai</b></summary>
 <br />
 
+
 Click [here](https://claude.ai/redirect/website.v1.67274164-23df-4883-8166-3c93ced276be/directory/37ed56d5-9d61-4fd4-ad00-b9134c694296) to add the Hugging Face connector to your account. 
 
 Alternatively, navigate to [https://claude.ai/settings/connectors](https://claude.ai/settings/connectors), and add "Hugging Face" from the gallery.

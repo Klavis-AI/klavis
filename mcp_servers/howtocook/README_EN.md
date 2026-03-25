@@ -6,6 +6,7 @@ English | [简体中文](./README.md)
 
 CDN acceleration and security protection for this project are sponsored by Tencent EdgeOne.
 
+y
 [Best Asian CDN, Edge, and Secure Solutions - Tencent EdgeOne](https://edgeone.ai/zh?from=github)
 
 <img src="./public/edgeone.png"/>

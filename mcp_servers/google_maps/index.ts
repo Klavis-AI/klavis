@@ -180,6 +180,7 @@ function extractApiKey(req: Request): string {
     return authDataJson.api_key ?? '';
 }
 
+
 // Tool definitions
 const GEOCODE_TOOL: Tool = {
     name: "maps_geocode",

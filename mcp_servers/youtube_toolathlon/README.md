@@ -11,6 +11,7 @@ A Model Context Protocol (MCP) server implementation for YouTube, enabling AI la
 * Get video statistics (views, likes, comments)
 * Search videos across YouTube
 
+
 ### Transcript Management
 * Retrieve video transcripts
 * Support for multiple languages

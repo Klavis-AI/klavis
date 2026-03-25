@@ -21,6 +21,7 @@ ENV PYTHONUNBUFFERED=1
 # Expose the port the server runs on
 EXPOSE 5000
 
+
 # Command to run the server with HTTP transport
 # Connection credentials must be provided at runtime via environment variables
 # (e.g. SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, SNOWFLAKE_DATABASE, etc.)
