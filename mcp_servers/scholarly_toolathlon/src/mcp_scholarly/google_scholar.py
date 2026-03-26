@@ -1,7 +1,7 @@
 import os
 from typing import List, Optional
 
-from scholarly import scholarly
+from scholarly import scholarly, ProxyGenerator
 
 MAX_RESULTS = 10
 
@@ -23,7 +23,9 @@ class GoogleScholar:
         self.scholarly = scholarly
         proxy = _get_proxy_url()
         if proxy:
-            self.scholarly.use_proxy(http=proxy, https=proxy)
+            pg = ProxyGenerator()
+            pg.SingleProxy(http=proxy, https=proxy)
+            self.scholarly.use_proxy(pg)
 
     def get_scholarly(self, keyword):
         return self.scholarly.search_pubs(keyword)
