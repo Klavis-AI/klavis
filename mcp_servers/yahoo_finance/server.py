@@ -1,9 +1,30 @@
 import json
+import os
 from enum import Enum
+from typing import Optional
 
 import pandas as pd
 import yfinance as yf
 from mcp.server.fastmcp import FastMCP
+
+
+def _get_proxy_url() -> Optional[str]:
+    """Build proxy URL from environment variables (same as duckduckgo server)."""
+    username = os.environ.get("PROXY_USERNAME")
+    password = os.environ.get("PROXY_PASSWORD")
+    if not (username and password):
+        return None
+    host = os.environ.get("PROXY_HOST", "p.webshare.io")
+    scheme = os.environ.get("PROXY_SCHEME", "http")
+    port = os.environ.get("PROXY_PORT", "1080" if "socks" in scheme else "80")
+    return f"{scheme}://{username}:{password}@{host}:{port}"
+
+
+# yfinance uses requests/urllib3 which respect HTTP_PROXY/HTTPS_PROXY env vars
+_proxy = _get_proxy_url()
+if _proxy:
+    os.environ.setdefault("HTTP_PROXY", _proxy)
+    os.environ.setdefault("HTTPS_PROXY", _proxy)
 
 
 # Define an enum for the type of financial statement

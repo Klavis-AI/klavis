@@ -1,12 +1,29 @@
+import os
+from typing import List, Optional
+
 from scholarly import scholarly
-from typing import List
 
 MAX_RESULTS = 10
+
+
+def _get_proxy_url() -> Optional[str]:
+    """Build proxy URL from environment variables (same as duckduckgo server)."""
+    username = os.environ.get("PROXY_USERNAME")
+    password = os.environ.get("PROXY_PASSWORD")
+    if not (username and password):
+        return None
+    host = os.environ.get("PROXY_HOST", "p.webshare.io")
+    scheme = os.environ.get("PROXY_SCHEME", "http")
+    port = os.environ.get("PROXY_PORT", "1080" if "socks" in scheme else "80")
+    return f"{scheme}://{username}:{password}@{host}:{port}"
 
 
 class GoogleScholar:
     def __init__(self):
         self.scholarly = scholarly
+        proxy = _get_proxy_url()
+        if proxy:
+            self.scholarly.use_proxy(http=proxy, https=proxy)
 
     def get_scholarly(self, keyword):
         return self.scholarly.search_pubs(keyword)

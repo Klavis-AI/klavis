@@ -1,5 +1,30 @@
+import os
+from typing import List, Optional
+
 import arxiv
-from typing import List
+
+
+def _get_proxy_url() -> Optional[str]:
+    """Build proxy URL from environment variables (same as duckduckgo server)."""
+    username = os.environ.get("PROXY_USERNAME")
+    password = os.environ.get("PROXY_PASSWORD")
+    if not (username and password):
+        return None
+    host = os.environ.get("PROXY_HOST", "p.webshare.io")
+    scheme = os.environ.get("PROXY_SCHEME", "http")
+    port = os.environ.get("PROXY_PORT", "1080" if "socks" in scheme else "80")
+    return f"{scheme}://{username}:{password}@{host}:{port}"
+
+
+def _setup_arxiv_proxy() -> None:
+    """Set HTTP_PROXY/HTTPS_PROXY env vars so arxiv (urllib) uses the proxy."""
+    proxy = _get_proxy_url()
+    if proxy:
+        os.environ.setdefault("HTTP_PROXY", proxy)
+        os.environ.setdefault("HTTPS_PROXY", proxy)
+
+
+_setup_arxiv_proxy()
 
 client = arxiv.Client()
 
