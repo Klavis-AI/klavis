@@ -145,6 +145,10 @@ curl -X POST "https://api.klavis.ai/v1/mcp-server/instance" \
 ```
 
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/klavis-ai-youtube).
+
 ## Resources
 
 - 📖 [Documentation](https://www.klavis.ai/docs)
