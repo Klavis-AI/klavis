@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 
 app.post('/mcp', async (req: Request, res: Response) => {
-    const { authToken: accessToken, authData } = extractAuthData(req);
+    const { authToken: accessToken, authData, apiKey } = extractAuthData(req);
 
     const server = createMcpServer();
     try {
@@ -16,7 +16,7 @@ app.post('/mcp', async (req: Request, res: Response) => {
         });
         await server.connect(transport);
 
-        asyncLocalStorage.run({ accessToken, authData }, async () => {
+        asyncLocalStorage.run({ accessToken, authData, apiKey }, async () => {
             await transport.handleRequest(req, res, req.body);
         });
 

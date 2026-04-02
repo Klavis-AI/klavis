@@ -1,7 +1,7 @@
 import { google } from 'googleapis';
 import { PlaylistParams, PlaylistItemsParams, SearchParams } from '../types.js';
 import { removeThumbnails, createErrorMessage } from '../utils/dataUtils.js';
-import { getAuthData } from '../auth.js';
+import { getApiKey } from '../auth.js';
 
 /**
  * Service for interacting with YouTube playlists
@@ -20,23 +20,14 @@ export class PlaylistService {
   private initialize() {
     if (this.initialized) return;
 
-    const authInfo = getAuthData();
-    if (!authInfo?.access_token) {
-      throw new Error('OAuth access token is missing. Provide it via AUTH_DATA env var or x-auth-data header.');
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      throw new Error('YouTube API key is missing. Provide it via YOUTUBE_API_KEY env var or x-auth-data header.');
     }
-
-    const oauth2Client = new google.auth.OAuth2(
-      authInfo.client_id,
-      authInfo.client_secret
-    );
-    oauth2Client.setCredentials({
-      access_token: authInfo.access_token,
-      refresh_token: authInfo.refresh_token,
-    });
 
     this.youtube = google.youtube({
       version: 'v3',
-      auth: oauth2Client,
+      auth: apiKey,
     });
 
     this.initialized = true;
