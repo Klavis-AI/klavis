@@ -43,13 +43,25 @@ type Channel struct {
 type ApiProvider struct {
 	transport string
 	logger    *zap.Logger
+	cache     *cachedClient
 }
 
 func NewApiProvider(transport string, logger *zap.Logger) *ApiProvider {
-	return &ApiProvider{
+	ap := &ApiProvider{
 		transport: transport,
 		logger:    logger,
 	}
+	dir := os.Getenv("SLACK_EXPORT_DIR")
+	if dir == "" {
+		dir = "./slack_mcp_eval_export"
+	}
+	cache, err := LoadCache(dir)
+	if err != nil {
+		logger.Fatal("Failed to load Slack export cache", zap.String("dir", dir), zap.Error(err))
+	}
+	ap.cache = cache
+	logger.Info("Loaded Slack export cache", zap.String("dir", dir))
+	return ap
 }
 
 func (ap *ApiProvider) ServerTransport() string {
@@ -66,6 +78,9 @@ func (ap *ApiProvider) GetClient(ctx context.Context) (SlackAPI, error) {
 	}
 	if token == "" {
 		return nil, errors.New("no auth token found in request context or environment")
+	}
+	if ap.cache != nil {
+		return ap.cache, nil
 	}
 	return &slackClient{client: slack.New(token)}, nil
 }

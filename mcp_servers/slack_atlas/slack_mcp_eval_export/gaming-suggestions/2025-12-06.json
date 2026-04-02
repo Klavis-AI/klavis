@@ -1,0 +1,176 @@
+[
+    {
+        "subtype": "channel_join",
+        "user": "U093JH7PD9A",
+        "text": "<@U093JH7PD9A> has joined the channel",
+        "type": "message",
+        "ts": "1765033134.732769"
+    },
+    {
+        "user": "U093JH7PD9A",
+        "type": "message",
+        "ts": "1765033315.301309",
+        "edited": {
+            "user": "U093JH7PD9A",
+            "ts": "1765034251.000000"
+        },
+        "client_msg_id": "16abf254-34c3-462b-970d-d0f66ceb9d01",
+        "text": "*I recommend my all-time favorite game, _Disco Elysium._ It's on PC and Consoles.*",
+        "team": "T092JB0UZAS",
+        "user_team": "T092JB0UZAS",
+        "source_team": "T092JB0UZAS",
+        "user_profile": {
+            "avatar_hash": "gcc80953a4b0",
+            "image_72": "https://secure.gravatar.com/avatar/cc80953a4b088cdcbc3893d6a46122b2.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0004-72.png",
+            "first_name": "Samuel",
+            "real_name": "Samuel Jara",
+            "display_name": "Samuel Jara",
+            "team": "T092JB0UZAS",
+            "name": "spjara.aravena",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "FlNil",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I recommend my all-time favorite game, ",
+                                "style": {
+                                    "bold": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "Disco Elysium. ",
+                                "style": {
+                                    "bold": true,
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": "It's on PC and Consoles.",
+                                "style": {
+                                    "bold": true
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U0930LCUF1D",
+        "type": "message",
+        "ts": "1765037920.376889",
+        "client_msg_id": "2c898aa1-2bf6-4819-969b-b72f956db259",
+        "text": "I recommend The Legend of Zelda: The Wind Waker on GameCube. It's a masterpiece with such a beautiful story.",
+        "team": "T092JB0UZAS",
+        "user_team": "T092JB0UZAS",
+        "source_team": "T092JB0UZAS",
+        "user_profile": {
+            "avatar_hash": "3f875fe28db1",
+            "image_72": "https://avatars.slack-edge.com/2025-06-27/9102693330471_3f875fe28db11265fd41_72.png",
+            "first_name": "Brandon",
+            "real_name": "Brandon Vadillo",
+            "display_name": "Brandon Vadillo",
+            "team": "T092JB0UZAS",
+            "name": "brandonaz.vadillo",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "k5cj1",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I recommend The Legend of Zelda: The Wind Waker on GameCube. It's a masterpiece with such a beautiful story."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "user": "U0939QZ7SK0",
+        "type": "message",
+        "ts": "1765054804.721939",
+        "client_msg_id": "01466c2c-370e-474b-994c-8f89e0fc6af6",
+        "text": "Talking about Nintendo games, one of my favorites is _Monster Hunter Stories 2: Wings of Ruin_. But if we’re talking more generally, without a doubt, _Marvel’s Spider-Man_ is the best.",
+        "team": "T092JB0UZAS",
+        "user_team": "T092JB0UZAS",
+        "source_team": "T092JB0UZAS",
+        "user_profile": {
+            "avatar_hash": "3ece9b600b30",
+            "image_72": "https://avatars.slack-edge.com/2025-06-27/9111849978486_3ece9b600b30a0f431a1_72.png",
+            "first_name": "Sebastián",
+            "real_name": "Sebastián Mendoza Brieva",
+            "display_name": "Sebastián MB",
+            "team": "T092JB0UZAS",
+            "name": "sebas.mb12",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "dCZ3b",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Talking about Nintendo games, one of my favorites is "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Monster Hunter Stories 2: Wings of Ruin",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": ". But if we’re talking more generally, without a doubt, "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Marvel’s Spider-Man",
+                                "style": {
+                                    "italic": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": " is the best."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "reactions": [
+            {
+                "name": "raised_hands",
+                "users": [
+                    "U092JB0UZFY"
+                ],
+                "count": 1
+            }
+        ]
+    }
+]

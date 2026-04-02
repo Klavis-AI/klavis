@@ -1,0 +1,388 @@
+[
+    {
+        "subtype": "channel_join",
+        "user": "U0944CHVBT6",
+        "text": "<@U0944CHVBT6> has joined the channel",
+        "type": "message",
+        "ts": "1765380778.937059"
+    },
+    {
+        "user": "U0944CHVBT6",
+        "type": "message",
+        "ts": "1765380804.845349",
+        "client_msg_id": "da4a9336-b626-4369-9bce-39c9dc779c60",
+        "text": "I always loved the anime One Piece",
+        "team": "T092JB0UZAS",
+        "user_team": "T092JB0UZAS",
+        "source_team": "T092JB0UZAS",
+        "user_profile": {
+            "avatar_hash": "0ed21174bdaf",
+            "image_72": "https://avatars.slack-edge.com/2025-07-02/9140426715652_0ed21174bdafc199944b_72.png",
+            "first_name": "kcpfan",
+            "real_name": "kcpfan",
+            "display_name": "kcpfan",
+            "team": "T092JB0UZAS",
+            "name": "kcpfan46",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "s5b27",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I always loved the anime One Piece"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U093P4WJ05D",
+        "text": "<@U093P4WJ05D> has joined the channel",
+        "type": "message",
+        "ts": "1765381157.745819"
+    },
+    {
+        "user": "U093P4WJ05D",
+        "type": "message",
+        "ts": "1765381188.677179",
+        "client_msg_id": "45c002c5-393d-4885-ac11-c4fe8c9646e3",
+        "text": "Oh nice, One Piece is a good anime. I've been rewatching Dragon Ball Z lately, you should if you haven't and like anime!",
+        "team": "T092JB0UZAS",
+        "user_team": "T092JB0UZAS",
+        "source_team": "T092JB0UZAS",
+        "user_profile": {
+            "avatar_hash": "gf95faaf9099",
+            "image_72": "https://secure.gravatar.com/avatar/f95faaf909977c50afce41ac0ff52fc5.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0012-72.png",
+            "first_name": "kwfan",
+            "real_name": "kwfan lakes",
+            "display_name": "kwfan lakes",
+            "team": "T092JB0UZAS",
+            "name": "kwfan2022",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "OSz4Y",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Oh nice, One Piece is a good anime. I've been rewatching Dragon Ball Z lately, you should if you haven't and like anime!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U0944EJFDM2",
+        "text": "<@U0944EJFDM2> has joined the channel",
+        "type": "message",
+        "ts": "1765381406.635949"
+    },
+    {
+        "user": "U0944EJFDM2",
+        "type": "message",
+        "ts": "1765381452.567749",
+        "client_msg_id": "e4ba51df-98d7-4856-b8bc-777af8422db5",
+        "text": "Oh since we are talking about anime, I always loved Death Note. I didn't like the movie with Nat Wolff though.",
+        "team": "T092JB0UZAS",
+        "user_team": "T092JB0UZAS",
+        "source_team": "T092JB0UZAS",
+        "user_profile": {
+            "avatar_hash": "ga8d7053eef9",
+            "image_72": "https://secure.gravatar.com/avatar/a8d7053eef99ba8787ff47f5802197fb.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0024-72.png",
+            "first_name": "QT",
+            "real_name": "QT watcher",
+            "display_name": "QT watcher",
+            "team": "T092JB0UZAS",
+            "name": "qtwatcher1999",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "tYdsY",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "Oh since we are talking about anime, I always loved Death Note. I didn't like the movie with Nat Wolff though."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U094G0AQR6V",
+        "text": "<@U094G0AQR6V> has joined the channel",
+        "type": "message",
+        "ts": "1765383321.015479"
+    },
+    {
+        "user": "U094G0AQR6V",
+        "type": "message",
+        "ts": "1765383327.905339",
+        "edited": {
+            "user": "U094G0AQR6V",
+            "ts": "1765383365.000000"
+        },
+        "client_msg_id": "b89aa060-3f26-4f8b-8917-be5f3a202aad",
+        "text": "I always like to watch the animes Naruto and Shippuden",
+        "team": "T092JB0UZAS",
+        "user_team": "T092JB0UZAS",
+        "source_team": "T092JB0UZAS",
+        "user_profile": {
+            "avatar_hash": "g2fbdd7759c8",
+            "image_72": "https://secure.gravatar.com/avatar/2fbdd7759c81ac418ce10f6f8e92f44a.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0021-72.png",
+            "first_name": "Jim",
+            "real_name": "Jim Rat",
+            "display_name": "Jim Rat",
+            "team": "T092JB0UZAS",
+            "name": "gymrat2079",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "GTMde",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I always like to watch the animes Naruto and Shippuden"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U0944N06J20",
+        "text": "<@U0944N06J20> has joined the channel",
+        "type": "message",
+        "ts": "1765383711.835569"
+    },
+    {
+        "user": "U0944N06J20",
+        "type": "message",
+        "ts": "1765383748.834369",
+        "client_msg_id": "14be476e-715b-4523-8290-33ad50b069d3",
+        "text": "I love animes too, One Punch Man is a good one!",
+        "team": "T092JB0UZAS",
+        "user_team": "T092JB0UZAS",
+        "source_team": "T092JB0UZAS",
+        "user_profile": {
+            "avatar_hash": "g3c7427a283d",
+            "image_72": "https://secure.gravatar.com/avatar/3c7427a283d8317350cd0ebdd3664b05.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0020-72.png",
+            "first_name": "James",
+            "real_name": "James Fitz",
+            "display_name": "James Fitz",
+            "team": "T092JB0UZAS",
+            "name": "quickfits01",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "IPfsr",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I love animes too, One Punch Man is a good one!"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U094G2BTX7B",
+        "text": "<@U094G2BTX7B> has joined the channel",
+        "type": "message",
+        "ts": "1765384119.094589"
+    },
+    {
+        "user": "U094G2BTX7B",
+        "type": "message",
+        "ts": "1765384158.898549",
+        "edited": {
+            "user": "U094G2BTX7B",
+            "ts": "1765384166.000000"
+        },
+        "client_msg_id": "aec92625-3d1a-4982-a9b3-524fcc1e0af6",
+        "text": "I always loved the anime JoJo's Bizarre Adventure",
+        "team": "T092JB0UZAS",
+        "user_team": "T092JB0UZAS",
+        "source_team": "T092JB0UZAS",
+        "user_profile": {
+            "avatar_hash": "g72fcb48c36b",
+            "image_72": "https://secure.gravatar.com/avatar/72fcb48c36bdb459c8ff1be5b7f44223.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0010-72.png",
+            "first_name": "Steve",
+            "real_name": "Steve Shins",
+            "display_name": "Steve Shins",
+            "team": "T092JB0UZAS",
+            "name": "shinsplints7070",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "Zjq8E",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I always loved the anime JoJo's Bizarre Adventure"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U093YBBLH9U",
+        "text": "<@U093YBBLH9U> has joined the channel",
+        "type": "message",
+        "ts": "1765384489.252249"
+    },
+    {
+        "user": "U093YBBLH9U",
+        "type": "message",
+        "ts": "1765384688.127389",
+        "client_msg_id": "df514d1c-5786-4a6d-abe0-d7c908a7e665",
+        "text": "I'm always watching the anime _Samurai Champloo_",
+        "team": "T092JB0UZAS",
+        "user_team": "T092JB0UZAS",
+        "source_team": "T092JB0UZAS",
+        "user_profile": {
+            "avatar_hash": "g3391429af68",
+            "image_72": "https://secure.gravatar.com/avatar/3391429af682906d938aad932221444b.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0005-72.png",
+            "first_name": "Omari",
+            "real_name": "Omari West",
+            "display_name": "Omari West",
+            "team": "T092JB0UZAS",
+            "name": "hiphopluvr1989",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "FCHYu",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "I'm always watching the anime "
+                            },
+                            {
+                                "type": "text",
+                                "text": "Samurai Champloo",
+                                "style": {
+                                    "italic": true
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "channel_convert_to_private",
+        "user": "U092JB0UZFY",
+        "text": "made this channel *private*. Now, it can only be viewed or joined by invitation.",
+        "type": "message",
+        "ts": "1765385928.199209"
+    },
+    {
+        "subtype": "channel_leave",
+        "user": "U0930LCUF1D",
+        "text": "<@U0930LCUF1D> has left the channel",
+        "type": "message",
+        "ts": "1765385932.377679"
+    },
+    {
+        "subtype": "channel_leave",
+        "user": "U093FRM3U2Y",
+        "text": "<@U093FRM3U2Y> has left the channel",
+        "type": "message",
+        "ts": "1765385935.617919"
+    },
+    {
+        "subtype": "channel_leave",
+        "user": "U093FRRTEDS",
+        "text": "<@U093FRRTEDS> has left the channel",
+        "type": "message",
+        "ts": "1765385938.899289"
+    },
+    {
+        "subtype": "channel_leave",
+        "user": "U093F1270TU",
+        "text": "<@U093F1270TU> has left the channel",
+        "type": "message",
+        "ts": "1765385943.898459"
+    },
+    {
+        "subtype": "channel_leave",
+        "user": "U093U9S2Z5F",
+        "text": "<@U093U9S2Z5F> has left the channel",
+        "type": "message",
+        "ts": "1765385946.826059"
+    },
+    {
+        "subtype": "channel_leave",
+        "user": "U093JH7PD9A",
+        "text": "<@U093JH7PD9A> has left the channel",
+        "type": "message",
+        "ts": "1765385953.732549"
+    },
+    {
+        "subtype": "channel_leave",
+        "user": "U0939QZ7SK0",
+        "text": "<@U0939QZ7SK0> has left the channel",
+        "type": "message",
+        "ts": "1765385957.041619"
+    }
+]

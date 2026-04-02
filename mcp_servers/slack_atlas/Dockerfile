@@ -32,6 +32,7 @@ FROM alpine:3.22 AS production
 RUN apk add --no-cache ca-certificates net-tools curl
 
 COPY --from=build /go/bin/mcp-server /usr/local/bin/mcp-server
+COPY --from=build /app/slack_mcp_eval_export /app/slack_mcp_eval_export
 
 WORKDIR /app
 

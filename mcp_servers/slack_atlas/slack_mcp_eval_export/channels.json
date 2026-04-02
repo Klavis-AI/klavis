@@ -1,0 +1,180 @@
+[
+{
+    "id": "C092JB1AMK8",
+    "name": "all-dumle-servers",
+    "created": 1750712682,
+    "creator": "U092JB0UZFY",
+    "is_archived": false,
+    "is_general": true,
+    "members": [
+        "U092JB0UZFY",
+        "U0930LCUF1D",
+        "U09395SU0PQ",
+        "U093982097Y",
+        "U0939QZ7SK0",
+        "U093FRM3U2Y",
+        "U093FRRTEDS",
+        "U093JH7PD9A",
+        "U093P4WJ05D",
+        "U093U9S2Z5F",
+        "U093UBJHSNM",
+        "U093UGEAVC1",
+        "U093YBBLH9U",
+        "U0944CHVBT6",
+        "U0944EJFDM2",
+        "U0944N06J20",
+        "U094G0AQR6V",
+        "U094G2BTX7B"
+    ],
+    "topic": {
+        "value": "",
+        "creator": "",
+        "last_set": 0
+    },
+    "purpose": {
+        "value": "Share announcements and updates about company news, upcoming events, or teammates who deserve some kudos. ⭐",
+        "creator": "U092JB0UZFY",
+        "last_set": 1750712682
+    }
+},
+{
+    "id": "C092JB1DH9C",
+    "name": "social",
+    "created": 1750712683,
+    "creator": "U092JB0UZFY",
+    "is_archived": false,
+    "is_general": false,
+    "members": [
+        "U092JB0UZFY",
+        "U093P4WJ05D",
+        "U093YBBLH9U",
+        "U0944CHVBT6",
+        "U0944EJFDM2",
+        "U0944N06J20",
+        "U094G0AQR6V",
+        "U094G2BTX7B"
+    ],
+    "topic": {
+        "value": "",
+        "creator": "",
+        "last_set": 0
+    },
+    "purpose": {
+        "value": "Other channels are for work. This one’s just for fun. Get to know your teammates and show your lighter side. 🎈",
+        "creator": "U092JB0UZFY",
+        "last_set": 1750712683
+    }
+},
+{
+    "id": "C092QL74W68",
+    "name": "new-channel",
+    "created": 1750712712,
+    "creator": "U092JB0UZFY",
+    "is_archived": false,
+    "is_general": false,
+    "members": [
+        "U092JB0UZFY",
+        "U093P4WJ05D",
+        "U093YBBLH9U",
+        "U0944CHVBT6",
+        "U0944EJFDM2",
+        "U0944N06J20",
+        "U094G0AQR6V",
+        "U094G2BTX7B"
+    ],
+    "topic": {
+        "value": "",
+        "creator": "",
+        "last_set": 0
+    },
+    "purpose": {
+        "value": "This channel is for everything #new-channel. Hold meetings, share docs, and make decisions together with your team.",
+        "creator": "U092JB0UZFY",
+        "last_set": 1750712712
+    }
+},
+{
+    "id": "C0938PV4E7Q",
+    "name": "gaming-suggestions",
+    "created": 1751042041,
+    "creator": "U092JB0UZFY",
+    "is_archived": false,
+    "is_general": false,
+    "members": [
+        "U092JB0UZFY",
+        "U093P4WJ05D",
+        "U093YBBLH9U",
+        "U0944CHVBT6",
+        "U0944EJFDM2",
+        "U0944N06J20",
+        "U094G0AQR6V",
+        "U094G2BTX7B"
+    ],
+    "topic": {
+        "value": "",
+        "creator": "",
+        "last_set": 0
+    },
+    "purpose": {
+        "value": "",
+        "creator": "",
+        "last_set": 0
+    }
+},
+{
+    "id": "C093EL23YP4",
+    "name": "tv-show-suggestions",
+    "created": 1751042079,
+    "creator": "U092JB0UZFY",
+    "is_archived": false,
+    "is_general": false,
+    "members": [
+        "U092JB0UZFY",
+        "U093P4WJ05D",
+        "U093YBBLH9U",
+        "U0944CHVBT6",
+        "U0944EJFDM2",
+        "U0944N06J20",
+        "U094G0AQR6V",
+        "U094G2BTX7B"
+    ],
+    "topic": {
+        "value": "",
+        "creator": "",
+        "last_set": 0
+    },
+    "purpose": {
+        "value": "",
+        "creator": "",
+        "last_set": 0
+    }
+},
+{
+    "id": "C093FF10B5J",
+    "name": "movie-suggestions",
+    "created": 1751042063,
+    "creator": "U092JB0UZFY",
+    "is_archived": false,
+    "is_general": false,
+    "members": [
+        "U092JB0UZFY",
+        "U093P4WJ05D",
+        "U093YBBLH9U",
+        "U0944CHVBT6",
+        "U0944EJFDM2",
+        "U0944N06J20",
+        "U094G0AQR6V",
+        "U094G2BTX7B"
+    ],
+    "topic": {
+        "value": "",
+        "creator": "",
+        "last_set": 0
+    },
+    "purpose": {
+        "value": "",
+        "creator": "",
+        "last_set": 0
+    }
+}
+]

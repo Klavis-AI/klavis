@@ -1,0 +1,58 @@
+[
+    {
+        "subtype": "channel_join",
+        "user": "U0944CHVBT6",
+        "text": "<@U0944CHVBT6> has joined the channel",
+        "type": "message",
+        "ts": "1765380712.232459"
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U093P4WJ05D",
+        "text": "<@U093P4WJ05D> has joined the channel",
+        "type": "message",
+        "ts": "1765381091.434609"
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U0944EJFDM2",
+        "text": "<@U0944EJFDM2> has joined the channel",
+        "type": "message",
+        "ts": "1765381349.285549"
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U094G0AQR6V",
+        "text": "<@U094G0AQR6V> has joined the channel",
+        "type": "message",
+        "ts": "1765383266.826529"
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U0944N06J20",
+        "text": "<@U0944N06J20> has joined the channel",
+        "type": "message",
+        "ts": "1765383670.661059"
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U094G2BTX7B",
+        "text": "<@U094G2BTX7B> has joined the channel",
+        "type": "message",
+        "ts": "1765384034.113809"
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U093YBBLH9U",
+        "text": "<@U093YBBLH9U> has joined the channel",
+        "type": "message",
+        "ts": "1765384443.392029"
+    },
+    {
+        "subtype": "channel_convert_to_private",
+        "user": "U092JB0UZFY",
+        "text": "made this channel *private*. Now, it can only be viewed or joined by invitation.",
+        "type": "message",
+        "ts": "1765385983.191739"
+    }
+]

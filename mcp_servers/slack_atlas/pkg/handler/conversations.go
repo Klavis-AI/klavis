@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -17,7 +16,6 @@ import (
 	"github.com/korotovsky/slack-mcp-server/pkg/text"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/slack-go/slack"
-	slackGoUtil "github.com/takara2314/slack-go-util"
 	"go.uber.org/zap"
 )
 
@@ -67,13 +65,6 @@ type searchParams struct {
 	query string
 	limit int
 	page  int
-}
-
-type addMessageParams struct {
-	channel     string
-	threadTs    string
-	text        string
-	contentType string
 }
 
 type ConversationsHandler struct {
@@ -143,87 +134,9 @@ func (ch *ConversationsHandler) UsersResource(ctx context.Context, request mcp.R
 	}, nil
 }
 
-// ConversationsAddMessageHandler posts a message and returns it as CSV.
-func (ch *ConversationsHandler) ConversationsAddMessageHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	ch.logger.Debug("ConversationsAddMessageHandler called", zap.Any("params", request.Params))
-
-	client, err := ch.apiProvider.GetClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	params, err := ch.parseParamsToolAddMessage(request)
-	if err != nil {
-		ch.logger.Error("Failed to parse add-message params", zap.Error(err))
-		return nil, err
-	}
-
-	var options []slack.MsgOption
-	if params.threadTs != "" {
-		options = append(options, slack.MsgOptionTS(params.threadTs))
-	}
-
-	switch params.contentType {
-	case "text/plain":
-		options = append(options, slack.MsgOptionDisableMarkdown())
-		options = append(options, slack.MsgOptionText(params.text, false))
-	case "text/markdown":
-		blocks, err := slackGoUtil.ConvertMarkdownTextToBlocks(params.text)
-		if err != nil {
-			ch.logger.Warn("Markdown parsing error", zap.Error(err))
-			options = append(options, slack.MsgOptionDisableMarkdown())
-			options = append(options, slack.MsgOptionText(params.text, false))
-		} else {
-			options = append(options, slack.MsgOptionBlocks(blocks...))
-		}
-	default:
-		return nil, errors.New("content_type must be either 'text/plain' or 'text/markdown'")
-	}
-
-	unfurlOpt := os.Getenv("SLACK_MCP_ADD_MESSAGE_UNFURLING")
-	if text.IsUnfurlingEnabled(params.text, unfurlOpt, ch.logger) {
-		options = append(options, slack.MsgOptionEnableLinkUnfurl())
-	} else {
-		options = append(options, slack.MsgOptionDisableLinkUnfurl())
-		options = append(options, slack.MsgOptionDisableMediaUnfurl())
-	}
-
-	ch.logger.Debug("Posting Slack message",
-		zap.String("channel", params.channel),
-		zap.String("thread_ts", params.threadTs),
-		zap.String("content_type", params.contentType),
-	)
-	respChannel, respTimestamp, err := client.PostMessageContext(ctx, params.channel, options...)
-	if err != nil {
-		ch.logger.Error("Slack PostMessageContext failed", zap.Error(err))
-		return nil, err
-	}
-
-	toolConfig := os.Getenv("SLACK_MCP_ADD_MESSAGE_MARK")
-	if toolConfig == "1" || toolConfig == "true" || toolConfig == "yes" {
-		err := client.MarkConversationContext(ctx, params.channel, respTimestamp)
-		if err != nil {
-			ch.logger.Error("Slack MarkConversationContext failed", zap.Error(err))
-			return nil, err
-		}
-	}
-
-	historyParams := slack.GetConversationHistoryParameters{
-		ChannelID: respChannel,
-		Limit:     1,
-		Oldest:    respTimestamp,
-		Latest:    respTimestamp,
-		Inclusive: true,
-	}
-	history, err := client.GetConversationHistoryContext(ctx, &historyParams)
-	if err != nil {
-		ch.logger.Error("GetConversationHistoryContext failed", zap.Error(err))
-		return nil, err
-	}
-	ch.logger.Debug("Fetched conversation history", zap.Int("message_count", len(history.Messages)))
-
-	messages := convertMessagesFromHistory(history.Messages, historyParams.ChannelID, false)
-	return marshalMessagesToCSV(messages)
+// ConversationsAddMessageHandler rejects write operations.
+func (ch *ConversationsHandler) ConversationsAddMessageHandler(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return mcp.NewToolResultText("write permission not allowed"), nil
 }
 
 // ConversationsHistoryHandler streams conversation history as CSV.
@@ -352,28 +265,6 @@ func (ch *ConversationsHandler) ConversationsSearchHandler(ctx context.Context, 
 	return marshalMessagesToCSV(messages)
 }
 
-func isChannelAllowed(channel string) bool {
-	config := os.Getenv("SLACK_MCP_ADD_MESSAGE_TOOL")
-	if config == "" || config == "true" || config == "1" {
-		return true
-	}
-	items := strings.Split(config, ",")
-	isNegated := strings.HasPrefix(strings.TrimSpace(items[0]), "!")
-	for _, item := range items {
-		item = strings.TrimSpace(item)
-		if isNegated {
-			if strings.TrimPrefix(item, "!") == channel {
-				return false
-			}
-		} else {
-			if item == channel {
-				return true
-			}
-		}
-	}
-	return !isNegated
-}
-
 func convertMessagesFromHistory(slackMessages []slack.Message, channel string, includeActivity bool) []Message {
 	var messages []Message
 	for _, msg := range slackMessages {
@@ -464,55 +355,6 @@ func (ch *ConversationsHandler) parseParamsToolConversations(request mcp.CallToo
 		latest:   paramLatest,
 		cursor:   cursor,
 		activity: activity,
-	}, nil
-}
-
-func (ch *ConversationsHandler) parseParamsToolAddMessage(request mcp.CallToolRequest) (*addMessageParams, error) {
-	toolConfig := os.Getenv("SLACK_MCP_ADD_MESSAGE_TOOL")
-	if toolConfig == "" {
-		ch.logger.Error("Add-message tool disabled by default")
-		return nil, errors.New(
-			"by default, the conversations_add_message tool is disabled to guard Slack workspaces against accidental spamming." +
-				"To enable it, set the SLACK_MCP_ADD_MESSAGE_TOOL environment variable to true, 1, or comma separated list of channels" +
-				"to limit where the MCP can post messages, e.g. 'SLACK_MCP_ADD_MESSAGE_TOOL=C1234567890,D0987654321', 'SLACK_MCP_ADD_MESSAGE_TOOL=!C1234567890'" +
-				"to enable all except one or 'SLACK_MCP_ADD_MESSAGE_TOOL=true' for all channels and DMs",
-		)
-	}
-
-	channel := request.GetString("channel_id", "")
-	if channel == "" {
-		ch.logger.Error("channel_id missing in add-message params")
-		return nil, errors.New("channel_id must be a string")
-	}
-
-	if !isChannelAllowed(channel) {
-		ch.logger.Warn("Add-message tool not allowed for channel", zap.String("channel", channel), zap.String("policy", toolConfig))
-		return nil, fmt.Errorf("conversations_add_message tool is not allowed for channel %q, applied policy: %s", channel, toolConfig)
-	}
-
-	threadTs := request.GetString("thread_ts", "")
-	if threadTs != "" && !strings.Contains(threadTs, ".") {
-		ch.logger.Error("Invalid thread_ts format", zap.String("thread_ts", threadTs))
-		return nil, errors.New("thread_ts must be a valid timestamp in format 1234567890.123456")
-	}
-
-	msgText := request.GetString("payload", "")
-	if msgText == "" {
-		ch.logger.Error("Message text missing")
-		return nil, errors.New("text must be a string")
-	}
-
-	contentType := request.GetString("content_type", "text/markdown")
-	if contentType != "text/plain" && contentType != "text/markdown" {
-		ch.logger.Error("Invalid content_type", zap.String("content_type", contentType))
-		return nil, errors.New("content_type must be either 'text/plain' or 'text/markdown'")
-	}
-
-	return &addMessageParams{
-		channel:     channel,
-		threadTs:    threadTs,
-		text:        msgText,
-		contentType: contentType,
 	}, nil
 }
 

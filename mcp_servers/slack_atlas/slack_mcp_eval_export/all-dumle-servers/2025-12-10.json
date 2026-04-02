@@ -1,0 +1,72 @@
+[
+    {
+        "subtype": "channel_join",
+        "user": "U0944CHVBT6",
+        "text": "<@U0944CHVBT6> has joined the channel",
+        "type": "message",
+        "ts": "1765380712.139749"
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U093P4WJ05D",
+        "text": "<@U093P4WJ05D> has joined the channel",
+        "type": "message",
+        "ts": "1765381091.346169"
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U0944EJFDM2",
+        "text": "<@U0944EJFDM2> has joined the channel",
+        "type": "message",
+        "ts": "1765381349.186319"
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U094G0AQR6V",
+        "text": "<@U094G0AQR6V> has joined the channel",
+        "type": "message",
+        "ts": "1765383266.745299"
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U0944N06J20",
+        "text": "<@U0944N06J20> has joined the channel",
+        "type": "message",
+        "ts": "1765383670.564689"
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U094G2BTX7B",
+        "text": "<@U094G2BTX7B> has joined the channel",
+        "type": "message",
+        "ts": "1765384033.996979"
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U093YBBLH9U",
+        "text": "<@U093YBBLH9U> has joined the channel",
+        "type": "message",
+        "ts": "1765384443.310459"
+    },
+    {
+        "subtype": "channel_posting_permissions",
+        "user": "U092JB0UZFY",
+        "text": "changed channel posting permissions",
+        "type": "message",
+        "ts": "1765384754.078389"
+    },
+    {
+        "subtype": "channel_posting_permissions",
+        "user": "U092JB0UZFY",
+        "text": "changed channel posting permissions",
+        "type": "message",
+        "ts": "1765385165.428759"
+    },
+    {
+        "subtype": "channel_posting_permissions",
+        "user": "U092JB0UZFY",
+        "text": "changed channel posting permissions",
+        "type": "message",
+        "ts": "1765385184.732289"
+    }
+]
