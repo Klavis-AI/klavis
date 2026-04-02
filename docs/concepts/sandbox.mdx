@@ -3,15 +3,6 @@ title: "Sandbox"
 description: "Scalable, isolated training and RL environments for real-world tool use"
 ---
 
-<Tip>
-  Klavis Sandbox supports a wide range of categories for training the best tool-use LLMs and AI Agents:
-  - **50+ MCP servers** that need authentication - Klavis handles accessibility and reproducibility.
-  - **200+ stateless MCP servers** via Klavis API, no authentication needed, for easy scaling.
-
-  These cover a wide range of categories. 
-</Tip>
-
-
 ## The Problem
 
 For LLM researchers, setting up LLM training or reinforcement learning environment for real-world tool use is complex and painful:
@@ -34,16 +25,16 @@ Our sandbox infrastructure is **horizontally scalable**, so it can handle any nu
 
 <Steps>
   <Step title="Create">
-    Request a sandbox based on the external services you need (Snowflake, Gmail, CRM, ERP, etc.) and get an MCP server URL for that isolated instance.
+    Request a sandbox based on the external services you need (Snowflake, GitHub, Notion, Woocommerce, etc.) and get an MCP server URL for that isolated instance.
   </Step>
-  <Step title="Initialize (seed)">
-    Load a deterministic "world state" in JSON format. We handle everything—creating databases, setting up CRM data, ERP systems, and more.
+  <Step title="Initialize">
+    Load a deterministic "world state" in JSON format. We handle everything—creating databases, setting up data, and more.
   </Step>
-  <Step title="Interact (MCP)">
+  <Step title="Interact via MCP">
     Let your LLM / AI agent use MCP tools against the sandbox as if it were the real app. You can use multiple MCP servers with many tools simultaneously.
   </Step>
-  <Step title="Dump (verify)">
-    Snapshot the full sandbox state to programmatically compare against your ground truth—whether your LLM completed the task correctly or not.
+  <Step title="Verify">
+    Access the full sandbox state to programmatically compare against your ground truth—whether your LLM completed the task correctly or not.
   </Step>
   <Step title="Reset / Delete">
     Wipe the sandbox back to a clean state and kick off the next run.
