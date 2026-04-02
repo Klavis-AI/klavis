@@ -1,0 +1,183 @@
+[
+    {
+        "subtype": "channel_join",
+        "user": "U092JB0UZFY",
+        "text": "<@U092JB0UZFY> has joined the channel",
+        "type": "message",
+        "ts": "1764952442.120829"
+    },
+    {
+        "user": "U092JB0UZFY",
+        "type": "message",
+        "ts": "1764952708.961259",
+        "client_msg_id": "fb4725b7-bf2c-4c1a-8d38-554cb7f3c392",
+        "text": "One of my favorite games growing up was Paper Mario and the Thousand Year Old Door on the Nintendo Gamecube",
+        "team": "T092JB0UZAS",
+        "user_team": "T092JB0UZAS",
+        "source_team": "T092JB0UZAS",
+        "user_profile": {
+            "avatar_hash": "g5facf2e1d07",
+            "image_72": "https://secure.gravatar.com/avatar/5facf2e1d072ace8667d6c2bc48fe7bd.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0015-72.png",
+            "first_name": "mcpdumle",
+            "real_name": "mcpdumle",
+            "display_name": "",
+            "team": "T092JB0UZAS",
+            "name": "mcpdumle",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "mQOpP",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "One of my favorite games growing up was Paper Mario and the Thousand Year Old Door on the Nintendo Gamecube"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U093U9S2Z5F",
+        "text": "<@U093U9S2Z5F> has joined the channel",
+        "type": "message",
+        "ts": "1764956675.661989"
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U0930LCUF1D",
+        "text": "<@U0930LCUF1D> has joined the channel",
+        "type": "message",
+        "ts": "1764956689.874019"
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U093F1270TU",
+        "text": "<@U093F1270TU> has joined the channel",
+        "type": "message",
+        "ts": "1764956886.099539"
+    },
+    {
+        "user": "U093F1270TU",
+        "type": "message",
+        "ts": "1764957140.117599",
+        "client_msg_id": "17ecb212-0bb6-4d1f-a143-8701fbdf65a4",
+        "text": "You should totally check out 'This War of Mine'. Makes you see war in a whole new way.",
+        "team": "T092JB0UZAS",
+        "user_team": "T092JB0UZAS",
+        "source_team": "T092JB0UZAS",
+        "user_profile": {
+            "avatar_hash": "d8ac57d04181",
+            "image_72": "https://avatars.slack-edge.com/2025-06-27/9117036591458_d8ac57d041810d8862de_72.png",
+            "first_name": "Lucas",
+            "real_name": "Lucas Medina",
+            "display_name": "Lucas Medina",
+            "team": "T092JB0UZAS",
+            "name": "lucas.t.medina1994",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "F3d4i",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "You should totally check out 'This War of Mine'. Makes you see war in a whole new way."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "reactions": [
+            {
+                "name": "raised_hands",
+                "users": [
+                    "U092JB0UZFY"
+                ],
+                "count": 1
+            }
+        ]
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U093FRM3U2Y",
+        "text": "<@U093FRM3U2Y> has joined the channel",
+        "type": "message",
+        "ts": "1764957466.499739"
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U093FRRTEDS",
+        "text": "<@U093FRRTEDS> has joined the channel",
+        "type": "message",
+        "ts": "1764958994.431389"
+    },
+    {
+        "user": "U093FRRTEDS",
+        "type": "message",
+        "ts": "1764959375.819739",
+        "client_msg_id": "fa0a4977-1a41-44f4-822e-5bcfe79d574a",
+        "text": "If we're talking about Super Nintendo classics, you can't go wrong with Donkey Kong Country. A must-play for anyone who likes retro games.",
+        "team": "T092JB0UZAS",
+        "user_team": "T092JB0UZAS",
+        "source_team": "T092JB0UZAS",
+        "user_profile": {
+            "avatar_hash": "8ceb583fde47",
+            "image_72": "https://avatars.slack-edge.com/2025-06-27/9117876084196_8ceb583fde472e8ebecf_72.png",
+            "first_name": "Éldson",
+            "real_name": "Éldson Santos",
+            "display_name": "Éldson Santos",
+            "team": "T092JB0UZAS",
+            "name": "nosdle",
+            "is_restricted": false,
+            "is_ultra_restricted": false
+        },
+        "blocks": [
+            {
+                "type": "rich_text",
+                "block_id": "QjFLb",
+                "elements": [
+                    {
+                        "type": "rich_text_section",
+                        "elements": [
+                            {
+                                "type": "text",
+                                "text": "If we're talking about Super Nintendo classics, you can't go wrong with Donkey Kong Country. A must-play for anyone who likes retro games."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "reactions": [
+            {
+                "name": "fire",
+                "users": [
+                    "U092JB0UZFY"
+                ],
+                "count": 1
+            }
+        ]
+    },
+    {
+        "subtype": "channel_join",
+        "user": "U0939QZ7SK0",
+        "text": "<@U0939QZ7SK0> has joined the channel",
+        "type": "message",
+        "ts": "1764965469.453619"
+    }
+]
