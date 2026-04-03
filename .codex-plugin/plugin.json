@@ -1,0 +1,24 @@
+{
+  "name": "klavis",
+  "version": "0.1.0",
+  "description": "Reliable MCP tool integration at scale from Codex via MCP",
+  "author": {
+    "name": "Klavis-AI",
+    "url": "https://github.com/Klavis-AI/klavis"
+  },
+  "homepage": "https://github.com/Klavis-AI/klavis",
+  "repository": "https://github.com/Klavis-AI/klavis",
+  "keywords": [
+    "mcp",
+    "codex"
+  ],
+  "mcpServers": "./.mcp.json",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Klavis AI",
+    "shortDescription": "Reliable MCP tool integration at scale from Codex via MCP",
+    "longDescription": "MCP integration platform that lets AI agents use tools reliably at any scale.",
+    "category": "Development",
+    "websiteURL": "https://github.com/Klavis-AI/klavis"
+  }
+}

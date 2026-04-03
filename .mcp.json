@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "klavis": {
+      "command": "pip",
+      "args": [
+        "install",
+        "klavis"
+      ]
+    }
+  }
+}
