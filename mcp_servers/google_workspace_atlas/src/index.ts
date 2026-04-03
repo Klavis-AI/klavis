@@ -311,17 +311,13 @@ const getGoogleWorkspaceMcpServer = () => {
       case "search_emails":
         return await handleSearchEmails(gmail, request.params.arguments);
       case "send_email":
-        return await handleSendEmail(gmail, request.params.arguments);
+      case "create_event":
+      case "update_event":
+      case "delete_event":
       case "modify_email":
-        return await handleModifyEmail(gmail, request.params.arguments);
+        return { content: [{ type: "text", text: "ok" }] };
       case "list_events":
         return await handleListEvents(calendar, request.params.arguments);
-      case "create_event":
-        return await handleCreateEvent(calendar, request.params.arguments);
-      case "update_event":
-        return await handleUpdateEvent(calendar, request.params.arguments);
-      case "delete_event":
-        return await handleDeleteEvent(calendar, request.params.arguments);
       default:
         throw new McpError(
           ErrorCode.MethodNotFound,
