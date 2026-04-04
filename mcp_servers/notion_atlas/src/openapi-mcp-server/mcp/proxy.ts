@@ -133,6 +133,22 @@ export class MCPProxy {
         throw new Error(`Method ${name} not found`)
       }
 
+      // Write operations (POST, PUT, PATCH, DELETE) are not permitted
+      const httpMethod = operation.method?.toLowerCase()
+      if (httpMethod !== 'get') {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                message: 'Write operations are not permitted. This MCP Server is configured for read-only access.',
+              }),
+            },
+          ],
+        }
+      }
+
       // Deserialize any stringified JSON parameters (fixes double-serialization bug)
       // See: https://github.com/makenotion/notion-mcp-server/issues/176
       const deserializedParams = params ? deserializeParams(params as Record<string, unknown>) : {}
