@@ -60,6 +60,10 @@ function deserializeParams(params: Record<string, unknown>): Record<string, unkn
   return result
 }
 
+// POST operations that are semantically read-only (search/query, not create/update/delete).
+// These use POST only because they carry complex filter bodies.
+const READ_ONLY_POST_OPERATIONS = new Set(['post-search', 'post-database-query'])
+
 // import this class, extend and return server
 export class MCPProxy {
   private server: Server
@@ -104,7 +108,8 @@ export class MCPProxy {
           // Look up the HTTP method to determine annotations
           const operation = this.openApiLookup[toolNameWithMethod];
           const httpMethod = operation?.method?.toLowerCase();
-          const isReadOnly = httpMethod === 'get';
+          const isReadOnly = httpMethod === 'get' ||
+            (httpMethod === 'post' && READ_ONLY_POST_OPERATIONS.has(operation?.operationId ?? ''));
 
           tools.push({
             name: truncatedToolName,
@@ -133,9 +138,11 @@ export class MCPProxy {
         throw new Error(`Method ${name} not found`)
       }
 
-      // Write operations (POST, PUT, PATCH, DELETE) are not permitted
+      // Write operations (POST, PUT, PATCH, DELETE) are not permitted,
+      // except for POST operations that are semantically read-only (e.g. search, query).
       const httpMethod = operation.method?.toLowerCase()
-      if (httpMethod !== 'get') {
+      const isReadOnlyPost = httpMethod === 'post' && READ_ONLY_POST_OPERATIONS.has(operation.operationId ?? '')
+      if (httpMethod !== 'get' && !isReadOnlyPost) {
         return {
           content: [
             {
