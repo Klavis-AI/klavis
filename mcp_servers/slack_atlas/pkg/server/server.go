@@ -28,7 +28,6 @@ func NewMCPServer(p *provider.ApiProvider, logger *zap.Logger) *MCPServer {
 	s := server.NewMCPServer(
 		"Slack MCP Server",
 		version.Version,
-		server.WithLogging(),
 		server.WithRecovery(),
 		server.WithToolHandlerMiddleware(buildLoggerMiddleware(logger)),
 		server.WithToolHandlerMiddleware(auth.BuildMiddleware(p.ServerTransport(), logger)),
