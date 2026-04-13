@@ -173,7 +173,7 @@ def authenticate_command(args):
 
 def tool_add_command(args):
     """Add Strata MCP server to Claude, Gemini, VSCode, or Cursor configurations."""
-    return add_strata_to_tool(args.target, args.scope or "user")
+    return add_strata_to_tool(args.target, args.scope or "user", yes=getattr(args, "yes", False))
 
 
 def run_command(args):
@@ -323,6 +323,13 @@ def create_parser():
         choices=["user", "project", "local"],
         default="user",
         help="Configuration scope (user, project, or local). Default: user. Note: VSCode doesn't support scope.",
+    )
+    tool_add_parser.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        default=False,
+        help="Skip confirmation prompt before modifying config files.",
     )
     tool_add_parser.set_defaults(func=tool_add_command)
 
