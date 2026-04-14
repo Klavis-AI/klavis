@@ -5,7 +5,7 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { randomBytes } from 'node:crypto'
 import express from 'express'
 
-import { initProxy, ValidationError } from '../src/init-server'
+import { initProxy, ValidationError, getSharedProxyState, buildRequestProxy } from '../src/init-server'
 
 /**
  * Extract Notion token from request header.
@@ -113,6 +113,11 @@ Examples:
     return proxy.getServer()
   } else if (transport === 'http') {
     // Use Streamable HTTP transport
+    // Parse OpenAPI spec + convert to MCP tools + build axios client ONCE at
+    // startup; reuse across all concurrent /mcp requests to avoid OOM.
+    const sharedState = await getSharedProxyState(specPath, baseUrl)
+    console.log(`Shared proxy state ready: ${Object.keys(sharedState.tools).length} tools`)
+
     const app = express()
     app.use(express.json())
 
@@ -184,7 +189,7 @@ Examples:
           sessionIdGenerator: undefined, // Stateless mode
         })
 
-        const proxy = await initProxy(specPath, baseUrl, notionToken || undefined)
+        const proxy = buildRequestProxy(sharedState, notionToken || undefined)
         await proxy.connect(transport)
 
         await transport.handleRequest(req, res, req.body)
