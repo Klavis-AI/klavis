@@ -104,6 +104,7 @@ export class HttpClient {
   async executeOperation<T = any>(
     operation: OpenAPIV3.OperationObject & { method: string; path: string },
     params: Record<string, any> = {},
+    notionToken?: string,
   ): Promise<HttpClientResponse<T>> {
     const api = await this.api
     const operationId = operation.operationId
@@ -158,6 +159,9 @@ export class HttpClient {
       const requestConfig = {
         headers: {
           ...headers,
+          ...(notionToken
+            ? { 'Authorization': `Bearer ${notionToken}`, 'Notion-Version': '2022-06-28' }
+            : {}),
         },
       }
 

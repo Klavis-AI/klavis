@@ -23,32 +23,60 @@ type NewToolDefinition = {
   }>
 }
 
+// State that is safe to share across requests: the parsed OpenAPI spec,
+// converted MCP tool definitions, the operation lookup table, and the axios
+// client (which has NO auth headers baked in — token is injected per call).
+export type SharedProxyState = {
+  tools: Record<string, NewToolDefinition>
+  openApiLookup: Record<string, OpenAPIV3.OperationObject & { method: string; path: string }>
+  httpClient: HttpClient
+}
+
+export function buildSharedProxyState(openApiSpec: OpenAPIV3.Document): SharedProxyState {
+  const baseUrl = openApiSpec.servers?.[0].url
+  if (!baseUrl) {
+    throw new Error('No base URL found in OpenAPI spec')
+  }
+  const httpClient = new HttpClient({ baseUrl, headers: {} }, openApiSpec)
+  const converter = new OpenAPIToMCPConverter(openApiSpec)
+  const { tools, openApiLookup } = converter.convertToMCPTools()
+  return { tools, openApiLookup, httpClient }
+}
+
 // import this class, extend and return server
 export class MCPProxy {
   private server: Server
   private httpClient: HttpClient
   private tools: Record<string, NewToolDefinition>
   private openApiLookup: Record<string, OpenAPIV3.OperationObject & { method: string; path: string }>
+  private notionToken?: string
 
-  constructor(name: string, openApiSpec: OpenAPIV3.Document, notionToken?: string) {
+  constructor(
+    name: string,
+    specOrShared: OpenAPIV3.Document | SharedProxyState,
+    notionToken?: string,
+  ) {
     this.server = new Server({ name, version: '1.0.0' }, { capabilities: { tools: {} } })
-    const baseUrl = openApiSpec.servers?.[0].url
-    if (!baseUrl) {
-      throw new Error('No base URL found in OpenAPI spec')
-    }
-    this.httpClient = new HttpClient(
-      {
-        baseUrl,
-        headers: this.parseHeadersFromEnv(notionToken),
-      },
-      openApiSpec,
-    )
+    this.notionToken = notionToken
 
-    // Convert OpenAPI spec to MCP tools
-    const converter = new OpenAPIToMCPConverter(openApiSpec)
-    const { tools, openApiLookup } = converter.convertToMCPTools()
-    this.tools = tools
-    this.openApiLookup = openApiLookup
+    if ('httpClient' in specOrShared) {
+      // Hot path: reuse the shared parsed/converted/axios state.
+      this.httpClient = specOrShared.httpClient
+      this.tools = specOrShared.tools
+      this.openApiLookup = specOrShared.openApiLookup
+    } else {
+      // Legacy path (stdio / tests): parse + convert + build axios per instance.
+      const shared = buildSharedProxyState(specOrShared)
+      this.tools = shared.tools
+      this.openApiLookup = shared.openApiLookup
+      this.httpClient = shared.httpClient
+      // stdio mode: fall back to env-based auth if no per-request token
+      if (!notionToken) {
+        const envHeaders = this.parseHeadersFromEnv(undefined)
+        const envToken = envHeaders['Authorization']?.replace(/^Bearer\s+/, '')
+        if (envToken) this.notionToken = envToken
+      }
+    }
 
     this.setupHandlers()
   }
@@ -85,8 +113,8 @@ export class MCPProxy {
       }
 
       try {
-        // Execute the operation
-        const response = await this.httpClient.executeOperation(operation, params)
+        // Execute the operation (inject per-request Notion token)
+        const response = await this.httpClient.executeOperation(operation, params, this.notionToken)
 
         // Convert response to MCP format
         return {

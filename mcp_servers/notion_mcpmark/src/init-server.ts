@@ -4,7 +4,7 @@ import path from 'node:path'
 import { OpenAPIV3 } from 'openapi-types'
 import OpenAPISchemaValidator from 'openapi-schema-validator'
 
-import { MCPProxy } from './openapi-mcp-server/mcp/proxy'
+import { MCPProxy, SharedProxyState, buildSharedProxyState } from './openapi-mcp-server/mcp/proxy'
 
 export class ValidationError extends Error {
   constructor(public errors: any[]) {
@@ -47,4 +47,32 @@ export async function initProxy(specPath: string, baseUrl: string | undefined, n
   const proxy = new MCPProxy('Notion API', openApiSpec, notionToken)
 
   return proxy
+}
+
+// Module-scoped cache of the expensive parts: OpenAPI parse, tool conversion,
+// and axios client. Shared across all concurrent POST /mcp requests so each
+// request only builds a new lightweight MCP Server + handler wiring.
+//
+// Before this cache, each request rebuilt all of the above, which caused the
+// Cloud Run container to OOM under ~300 concurrent sessions after ~1h.
+let _sharedState: SharedProxyState | null = null
+let _sharedStateInit: Promise<SharedProxyState> | null = null
+
+export async function getSharedProxyState(
+  specPath: string,
+  baseUrl: string | undefined,
+): Promise<SharedProxyState> {
+  if (_sharedState) return _sharedState
+  if (_sharedStateInit) return _sharedStateInit
+  _sharedStateInit = (async () => {
+    const openApiSpec = await loadOpenApiSpec(specPath, baseUrl)
+    const shared = buildSharedProxyState(openApiSpec)
+    _sharedState = shared
+    return shared
+  })()
+  return _sharedStateInit
+}
+
+export function buildRequestProxy(shared: SharedProxyState, notionToken?: string): MCPProxy {
+  return new MCPProxy('Notion API', shared, notionToken)
 }
