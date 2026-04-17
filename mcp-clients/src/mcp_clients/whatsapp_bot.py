@@ -1,3 +1,4 @@
+import hmac
 import os
 import logging
 import uvicorn
@@ -479,7 +480,7 @@ async def verify_webhook(request: Request):
     challenge = query_params.get("hub.challenge")
     
     # Verify parameters
-    if mode == "subscribe" and token == VERIFY_TOKEN:
+    if mode == "subscribe" and hmac.compare_digest(token or "", VERIFY_TOKEN or ""):
         logger.info("Webhook verified successfully!")
         return Response(content=challenge, media_type="text/plain")
     else:
