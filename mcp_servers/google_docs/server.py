@@ -1,11 +1,11 @@
+"""Google Docs MCP Server - Main entry point."""
+
 import contextlib
-import base64
+import json
 import logging
 import os
-import json
 from collections.abc import AsyncIterator
 from typing import Any, Dict
-from contextvars import ContextVar
 
 import click
 import mcp.types as types
@@ -17,9 +17,24 @@ from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
+
+# Import from tools package
+from tools import (
+    # Base utilities
+    auth_token_context,
+    extract_access_token,
+    # Converters (for backward compatibility)
+    normalize_document_response,
+    # Tools
+    get_document_by_id,
+    get_all_documents,
+    insert_text_at_end,
+    create_blank_document,
+    create_document_from_text,
+    edit_text,
+    apply_style,
+    insert_formatted_text,
+)
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -28,382 +43,6 @@ load_dotenv()
 
 GOOGLE_DOCS_MCP_SERVER_PORT = int(os.getenv("GOOGLE_DOCS_MCP_SERVER_PORT", "5000"))
 
-# Context variable to store the access token for each request
-auth_token_context: ContextVar[str] = ContextVar('auth_token')
-
-def extract_access_token(request_or_scope) -> str:
-    """Extract access token from x-auth-data header."""
-    auth_data = os.getenv("AUTH_DATA")
-    
-    if not auth_data:
-        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
-        if hasattr(request_or_scope, 'headers'):
-            # SSE request object
-            auth_data = request_or_scope.headers.get(b'x-auth-data')
-            if auth_data:
-                auth_data = base64.b64decode(auth_data).decode('utf-8')
-        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
-            # StreamableHTTP scope object
-            headers = dict(request_or_scope.get("headers", []))
-            auth_data = headers.get(b'x-auth-data')
-            if auth_data:
-                auth_data = base64.b64decode(auth_data).decode('utf-8')
-    
-    if not auth_data:
-        return ""
-    
-    try:
-        # Parse the JSON auth data to extract access_token
-        auth_json = json.loads(auth_data)
-        return auth_json.get('access_token', '')
-    except (json.JSONDecodeError, TypeError) as e:
-        logger.warning(f"Failed to parse auth data JSON: {e}")
-        return ""
-
-def get_docs_service(access_token: str):
-    """Create Google Docs service with access token."""
-    credentials = Credentials(token=access_token)
-    return build('docs', 'v1', credentials=credentials)
-
-def get_drive_service(access_token: str):
-    """Create Google Drive service with access token."""
-    credentials = Credentials(token=access_token)
-    return build('drive', 'v3', credentials=credentials)
-
-def get_auth_token() -> str:
-    """Get the authentication token from context."""
-    try:
-        return auth_token_context.get()
-    except LookupError:
-        raise RuntimeError("Authentication token not found in request context")
-
-
-def normalize_document_response(raw_response: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Normalize the Google Docs API response to a simplified structure.
-    Reduces complexity while preserving important information.
-    """
-    
-    def extract_text_from_paragraph(paragraph: Dict) -> Dict[str, Any]:
-        """Extract text content and styling from a paragraph."""
-        elements = paragraph.get('elements', [])
-        text_parts = []
-        
-        for element in elements:
-            if 'textRun' in element:
-                text_run = element['textRun']
-                content = text_run.get('content', '')
-                text_style = text_run.get('textStyle', {})
-                
-                part = {'text': content}
-                if text_style.get('bold'):
-                    part['bold'] = True
-                if text_style.get('italic'):
-                    part['italic'] = True
-                if text_style.get('underline'):
-                    part['underline'] = True
-                
-                text_parts.append(part)
-        
-        # Combine text for simple display
-        full_text = ''.join(p['text'] for p in text_parts).strip()
-        
-        result = {'text': full_text}
-        
-        # Add paragraph style info
-        para_style = paragraph.get('paragraphStyle', {})
-        named_style = para_style.get('namedStyleType')
-        if named_style and named_style != 'NORMAL_TEXT':
-            result['style'] = named_style
-        
-        heading_id = para_style.get('headingId')
-        if heading_id:
-            result['headingId'] = heading_id
-        
-        # Add bullet info if present
-        if 'bullet' in paragraph:
-            bullet = paragraph['bullet']
-            result['isBullet'] = True
-            result['listId'] = bullet.get('listId')
-            if bullet.get('nestingLevel', 0) > 0:
-                result['nestingLevel'] = bullet['nestingLevel']
-        
-        # Include rich text parts if there's formatting
-        has_formatting = any(
-            p.get('bold') or p.get('italic') or p.get('underline')
-            for p in text_parts
-        )
-        if has_formatting:
-            result['formattedParts'] = [p for p in text_parts if p['text'].strip()]
-        
-        return result
-    
-    def extract_table(table: Dict) -> Dict[str, Any]:
-        """Extract table content in a simplified format."""
-        rows = table.get('rows', 0)
-        columns = table.get('columns', 0)
-        table_rows = table.get('tableRows', [])
-        
-        extracted_rows = []
-        for table_row in table_rows:
-            cells = []
-            for cell in table_row.get('tableCells', []):
-                cell_content = []
-                for content_item in cell.get('content', []):
-                    if 'paragraph' in content_item:
-                        para_data = extract_text_from_paragraph(content_item['paragraph'])
-                        if para_data['text']:
-                            cell_content.append(para_data['text'])
-                cells.append(' '.join(cell_content))
-            extracted_rows.append(cells)
-        
-        return {
-            'type': 'table',
-            'rows': rows,
-            'columns': columns,
-            'data': extracted_rows
-        }
-    
-    def process_content(content_list: list) -> list:
-        """Process the document content into a simplified structure."""
-        processed = []
-        
-        for item in content_list:
-            # Skip section breaks
-            if 'sectionBreak' in item:
-                continue
-            
-            # Process paragraphs
-            if 'paragraph' in item:
-                para_data = extract_text_from_paragraph(item['paragraph'])
-                if para_data['text']:  # Only include non-empty paragraphs
-                    processed.append({
-                        'type': 'paragraph',
-                        **para_data
-                    })
-            
-            # Process tables
-            elif 'table' in item:
-                table_data = extract_table(item['table'])
-                processed.append(table_data)
-        
-        return processed
-    
-    # Build the normalized response
-    normalized = {
-        'documentId': raw_response.get('documentId'),
-        'title': raw_response.get('title'),
-        'revisionId': raw_response.get('revisionId'),
-    }
-    
-    # Process body content
-    body = raw_response.get('body', {})
-    content = body.get('content', [])
-    normalized['content'] = process_content(content)
-    
-    # Extract document metadata
-    doc_style = raw_response.get('documentStyle', {})
-    if doc_style:
-        page_size = doc_style.get('pageSize', {})
-        normalized['pageInfo'] = {
-            'width': page_size.get('width', {}).get('magnitude'),
-            'height': page_size.get('height', {}).get('magnitude'),
-            'unit': page_size.get('width', {}).get('unit', 'PT'),
-            'margins': {
-                'top': doc_style.get('marginTop', {}).get('magnitude'),
-                'bottom': doc_style.get('marginBottom', {}).get('magnitude'),
-                'left': doc_style.get('marginLeft', {}).get('magnitude'),
-                'right': doc_style.get('marginRight', {}).get('magnitude'),
-            }
-        }
-    
-    # Include list definitions (simplified)
-    lists = raw_response.get('lists', {})
-    if lists:
-        normalized['lists'] = {
-            list_id: {
-                'type': 'bullet' if props.get('listProperties', {}).get('nestingLevels', [{}])[0].get('glyphSymbol') else 'numbered'
-            }
-            for list_id, props in lists.items()
-        }
-    
-    return normalized
-
-async def _get_document_raw(document_id: str) -> Dict[str, Any]:
-    """Internal function to get raw Google Docs API response."""
-    access_token = get_auth_token()
-    service = get_docs_service(access_token)
-    request = service.documents().get(documentId=document_id)
-    response = request.execute()
-    return dict(response)
-
-
-async def get_document_by_id(document_id: str) -> Dict[str, Any]:
-    """Get the latest version of the specified Google Docs document.
-    
-    Args:
-        document_id: The ID of the Google Docs document to retrieve.
-    
-    Returns:
-        Normalized document response with simplified structure.
-    """
-    logger.info(f"Executing tool: get_document_by_id with document_id: {document_id}")
-    try:
-        raw_response = await _get_document_raw(document_id)
-        return normalize_document_response(raw_response)
-    except HttpError as e:
-        logger.error(f"Google Docs API error: {e}")
-        error_detail = json.loads(e.content.decode('utf-8'))
-        raise RuntimeError(f"Google Docs API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
-    except Exception as e:
-        logger.exception(f"Error executing tool get_document_by_id: {e}")
-        raise e
-
-async def insert_text_at_end(document_id: str, text: str) -> Dict[str, Any]:
-    """Insert text at the end of a Google Docs document."""
-    logger.info(f"Executing tool: insert_text_at_end with document_id: {document_id}")
-    try:
-        access_token = get_auth_token()
-        service = get_docs_service(access_token)
-        
-        # Need raw response to get endIndex
-        document = await _get_document_raw(document_id)
-        
-        end_index = document["body"]["content"][-1]["endIndex"]
-        
-        requests = [
-            {
-                'insertText': {
-                    'location': {
-                        'index': int(end_index) - 1
-                    },
-                    'text': text
-                }
-            }
-        ]
-        
-        # Execute the request
-        response = (
-            service.documents()
-            .batchUpdate(documentId=document_id, body={"requests": requests})
-            .execute()
-        )
-        
-        return {
-            "id": document_id,
-            "status": "success",
-        }
-    except HttpError as e:
-        logger.error(f"Google Docs API error: {e}")
-        error_detail = json.loads(e.content.decode('utf-8'))
-        raise RuntimeError(f"Google Docs API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
-    except Exception as e:
-        logger.exception(f"Error executing tool insert_text_at_end: {e}")
-        raise e
-
-async def create_blank_document(title: str) -> Dict[str, Any]:
-    """Create a new blank Google Docs document with a title."""
-    logger.info(f"Executing tool: create_blank_document with title: {title}")
-    try:
-        access_token = get_auth_token()
-        service = get_docs_service(access_token)
-        
-        body = {"title": title}
-        
-        request = service.documents().create(body=body)
-        response = request.execute()
-        
-        return {
-            "title": response["title"],
-            "id": response["documentId"],
-            "url": f"https://docs.google.com/document/d/{response['documentId']}/edit",
-        }
-    except HttpError as e:
-        logger.error(f"Google Docs API error: {e}")
-        error_detail = json.loads(e.content.decode('utf-8'))
-        raise RuntimeError(f"Google Docs API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
-    except Exception as e:
-        logger.exception(f"Error executing tool create_blank_document: {e}")
-        raise e
-
-async def create_document_from_text(title: str, text_content: str) -> Dict[str, Any]:
-    """Create a new Google Docs document with specified text content."""
-    logger.info(f"Executing tool: create_document_from_text with title: {title}")
-    try:
-        # First, create a blank document
-        document = await create_blank_document(title)
-        
-        access_token = get_auth_token()
-        service = get_docs_service(access_token)
-        
-        # Insert the text content
-        requests = [
-            {
-                "insertText": {
-                    "location": {
-                        "index": 1,
-                    },
-                    "text": text_content,
-                }
-            }
-        ]
-        
-        # Execute the batchUpdate method to insert text
-        service.documents().batchUpdate(
-            documentId=document["id"], body={"requests": requests}
-        ).execute()
-        
-        return {
-            "title": document["title"],
-            "id": document["id"],
-            "url": f"https://docs.google.com/document/d/{document["id"]}/edit",
-        }
-    except HttpError as e:
-        logger.error(f"Google Docs API error: {e}")
-        error_detail = json.loads(e.content.decode('utf-8'))
-        raise RuntimeError(f"Google Docs API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
-    except Exception as e:
-        logger.exception(f"Error executing tool create_document_from_text: {e}")
-        raise e
-
-async def get_all_documents() -> Dict[str, Any]:
-    """Get all Google Docs documents from the user's Drive."""
-    logger.info(f"Executing tool: get_all_documents")
-    try:
-        access_token = get_auth_token()
-        service = get_drive_service(access_token)
-        
-        # Query for Google Docs files
-        query = "mimeType='application/vnd.google-apps.document'"
-        
-        request = service.files().list(
-            q=query,
-            fields="nextPageToken, files(id, name, createdTime, modifiedTime, webViewLink)",
-            orderBy="modifiedTime desc"
-        )
-        response = request.execute()
-        
-        documents = []
-        for file in response.get('files', []):
-            documents.append({
-                'id': file['id'],
-                'name': file['name'],
-                'createdAt': file.get('createdTime'),
-                'modifiedAt': file.get('modifiedTime'),
-                'url': file.get('webViewLink')
-            })
-        
-        return {
-            'documents': documents,
-            'total_count': len(documents)
-        }
-    except HttpError as e:
-        logger.error(f"Google Drive API error: {e}")
-        error_detail = json.loads(e.content.decode('utf-8'))
-        raise RuntimeError(f"Google Drive API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
-    except Exception as e:
-        logger.exception(f"Error executing tool get_all_documents: {e}")
-        raise e
 
 @click.command()
 @click.option("--port", default=GOOGLE_DOCS_MCP_SERVER_PORT, help="Port to listen on for HTTP")
@@ -437,7 +76,12 @@ def main(
         return [
             types.Tool(
                 name="google_docs_get_document_by_id",
-                description="Retrieve a Google Docs document by ID.",
+                description="""Retrieve a Google Docs document by ID.
+
+Response formats: 'normalized' (default), 'raw', 'plain_text', 'markdown', 'structured'.
+Use 'structured' to get character indices for editing with apply_style.
+
+Partial retrieval: Use start_paragraph/end_paragraph to fetch specific paragraphs (1-based, inclusive).""",
                 inputSchema={
                     "type": "object",
                     "required": ["document_id"],
@@ -445,6 +89,19 @@ def main(
                         "document_id": {
                             "type": "string",
                             "description": "The ID of the Google Docs document to retrieve.",
+                        },
+                        "response_format": {
+                            "type": "string",
+                            "enum": ["raw", "plain_text", "markdown", "structured", "normalized"],
+                            "description": "Output format. Default: 'normalized' (backward compatible)",
+                        },
+                        "start_paragraph": {
+                            "type": "integer",
+                            "description": "Start paragraph number (1-based, inclusive). Example: 5 retrieves from 5th paragraph.",
+                        },
+                        "end_paragraph": {
+                            "type": "integer",
+                            "description": "End paragraph number (1-based, inclusive). Example: 10 retrieves up to 10th paragraph.",
                         },
                     },
                 },
@@ -522,12 +179,174 @@ def main(
                     **{"category": "GOOGLE_DOCS_DOCUMENT"}
                 ),
             ),
+            # New tools
+            types.Tool(
+                name="google_docs_edit_text",
+                description="""Edit text in a Google Docs document by replacing old text with new text.
+
+Operations: Replace (old_text→new_text), Delete (new_text=""), Append (old_text="" with append_to_end=true).
+Note: Google Docs API always replaces all occurrences.""",
+                inputSchema={
+                    "type": "object",
+                    "required": ["document_id", "old_text", "new_text"],
+                    "properties": {
+                        "document_id": {
+                            "type": "string",
+                            "description": "The ID of the Google Docs document.",
+                        },
+                        "old_text": {
+                            "type": "string",
+                            "description": "The text to find and replace. Use empty string with append_to_end=true to insert at end.",
+                        },
+                        "new_text": {
+                            "type": "string",
+                            "description": "The replacement text. Use empty string to delete.",
+                        },
+                        "match_case": {
+                            "type": "boolean",
+                            "description": "Whether to match case when finding old_text. Default: true",
+                        },
+                        "replace_all": {
+                            "type": "boolean",
+                            "description": "Replace all occurrences or just the first one. Default: false (Note: Google Docs API always replaces all)",
+                        },
+                        "append_to_end": {
+                            "type": "boolean",
+                            "description": "If true and old_text is empty, append new_text to the end of document. Default: false",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DOCS_DOCUMENT"}
+                ),
+            ),
+            types.Tool(
+                name="google_docs_apply_style",
+                description="""Apply formatting styles to a specified range in a Google Docs document.
+
+Supports both character-level styles (bold, italic, etc.) and paragraph-level styles (headings, alignment, etc.).
+
+To find the correct indices, use google_docs_get_document_by_id with response_format='structured'.
+""",
+                inputSchema={
+                    "type": "object",
+                    "required": ["document_id", "start_index", "end_index"],
+                    "properties": {
+                        "document_id": {
+                            "type": "string",
+                            "description": "The ID of the Google Docs document.",
+                        },
+                        "start_index": {
+                            "type": "integer",
+                            "description": "Start position of the range (1-based, inclusive).",
+                        },
+                        "end_index": {
+                            "type": "integer",
+                            "description": "End position of the range (exclusive).",
+                        },
+                        # Character styles
+                        "bold": {
+                            "type": "boolean",
+                            "description": "Apply bold formatting.",
+                        },
+                        "italic": {
+                            "type": "boolean",
+                            "description": "Apply italic formatting.",
+                        },
+                        "underline": {
+                            "type": "boolean",
+                            "description": "Apply underline formatting.",
+                        },
+                        "strikethrough": {
+                            "type": "boolean",
+                            "description": "Apply strikethrough formatting.",
+                        },
+                        "font_size": {
+                            "type": "number",
+                            "description": "Font size in points (e.g., 12, 14, 18).",
+                        },
+                        "font_family": {
+                            "type": "string",
+                            "description": "Font family name (e.g., 'Arial', 'Times New Roman').",
+                        },
+                        "foreground_color": {
+                            "type": "string",
+                            "description": "Text color in hex format (e.g., '#FF0000' for red).",
+                        },
+                        "background_color": {
+                            "type": "string",
+                            "description": "Background/highlight color in hex format.",
+                        },
+                        "link_url": {
+                            "type": "string",
+                            "description": "URL to create a hyperlink.",
+                        },
+                        # Paragraph styles
+                        "heading_type": {
+                            "type": "string",
+                            "enum": ["NORMAL_TEXT", "TITLE", "SUBTITLE", "HEADING_1", "HEADING_2", "HEADING_3", "HEADING_4", "HEADING_5", "HEADING_6"],
+                            "description": "Paragraph heading style.",
+                        },
+                        "alignment": {
+                            "type": "string",
+                            "enum": ["START", "CENTER", "END", "JUSTIFIED"],
+                            "description": "Text alignment.",
+                        },
+                        "line_spacing": {
+                            "type": "number",
+                            "description": "Line spacing (100 = single, 150 = 1.5, 200 = double).",
+                        },
+                        "space_above": {
+                            "type": "number",
+                            "description": "Space above paragraph in points.",
+                        },
+                        "space_below": {
+                            "type": "number",
+                            "description": "Space below paragraph in points.",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DOCS_DOCUMENT"}
+                ),
+            ),
+            types.Tool(
+                name="google_docs_insert_formatted_text",
+                description="""Insert formatted text by replacing anchor text with formatted content.
+
+The formatted_text must contain the anchor_text. This enables inserting at any position.
+Example: anchor_text="Chapter 1", formatted_text="Chapter 1\\n**New paragraph**"
+
+Supported: **bold**, *italic*, ~~strikethrough~~, `code`, [link](url), # headings (1-6), - bullets.
+Escape with backslash: \\* \\_ \\` for literal characters.""",
+                inputSchema={
+                    "type": "object",
+                    "required": ["document_id", "anchor_text", "formatted_text"],
+                    "properties": {
+                        "document_id": {
+                            "type": "string",
+                            "description": "The ID of the Google Docs document.",
+                        },
+                        "anchor_text": {
+                            "type": "string",
+                            "description": "Text to find in the document. Will be replaced by formatted_text.",
+                        },
+                        "formatted_text": {
+                            "type": "string",
+                            "description": "Replacement text with markdown-like syntax. Should contain anchor_text.",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DOCS_DOCUMENT"}
+                ),
+            ),
         ]
 
     @app.call_tool()
     async def call_tool(
         name: str, arguments: dict
-    ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:     
+    ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         if name == "google_docs_get_document_by_id":
             document_id = arguments.get("document_id")
             if not document_id:
@@ -537,13 +356,23 @@ def main(
                         text="Error: document_id parameter is required",
                     )
                 ]
-            
+
+            # Get response_format with default 'normalized' for backward compatibility
+            response_format = arguments.get("response_format", "normalized")
+            start_paragraph = arguments.get("start_paragraph")
+            end_paragraph = arguments.get("end_paragraph")
+
             try:
-                result = await get_document_by_id(document_id)
+                result = await get_document_by_id(
+                    document_id,
+                    response_format,
+                    start_paragraph=start_paragraph,
+                    end_paragraph=end_paragraph
+                )
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, ensure_ascii=False, indent=2) if isinstance(result, dict) else str(result),
                     )
                 ]
             except Exception as e:
@@ -554,14 +383,14 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
-        elif name == "google_docs_get_all_documents":            
+
+        elif name == "google_docs_get_all_documents":
             try:
                 result = await get_all_documents()
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, ensure_ascii=False, indent=2),
                     )
                 ]
             except Exception as e:
@@ -572,7 +401,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "google_docs_insert_text_at_end":
             document_id = arguments.get("document_id")
             text = arguments.get("text")
@@ -583,13 +412,13 @@ def main(
                         text="Error: document_id and text parameters are required",
                     )
                 ]
-            
+
             try:
                 result = await insert_text_at_end(document_id, text)
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, ensure_ascii=False, indent=2),
                     )
                 ]
             except Exception as e:
@@ -600,7 +429,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "google_docs_create_blank_document":
             title = arguments.get("title")
             if not title:
@@ -610,13 +439,13 @@ def main(
                         text="Error: title parameter is required",
                     )
                 ]
-            
+
             try:
                 result = await create_blank_document(title)
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, ensure_ascii=False, indent=2),
                     )
                 ]
             except Exception as e:
@@ -627,7 +456,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "google_docs_create_document_from_text":
             title = arguments.get("title")
             text_content = arguments.get("text_content")
@@ -638,13 +467,13 @@ def main(
                         text="Error: title and text_content parameters are required",
                     )
                 ]
-            
+
             try:
                 result = await create_document_from_text(title, text_content)
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, ensure_ascii=False, indent=2),
                     )
                 ]
             except Exception as e:
@@ -655,7 +484,139 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
+        elif name == "google_docs_edit_text":
+            document_id = arguments.get("document_id")
+            old_text = arguments.get("old_text")
+            new_text = arguments.get("new_text")
+
+            if not document_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: document_id parameter is required",
+                    )
+                ]
+
+            # old_text and new_text can be empty strings, so check for None explicitly
+            if old_text is None or new_text is None:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: old_text and new_text parameters are required",
+                    )
+                ]
+
+            match_case = arguments.get("match_case", True)
+            replace_all = arguments.get("replace_all", False)
+            append_to_end = arguments.get("append_to_end", False)
+
+            try:
+                result = await edit_text(
+                    document_id=document_id,
+                    old_text=old_text,
+                    new_text=new_text,
+                    match_case=match_case,
+                    replace_all=replace_all,
+                    append_to_end=append_to_end
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, ensure_ascii=False, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
+        elif name == "google_docs_apply_style":
+            document_id = arguments.get("document_id")
+            start_index = arguments.get("start_index")
+            end_index = arguments.get("end_index")
+
+            if not document_id or start_index is None or end_index is None:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: document_id, start_index, and end_index parameters are required",
+                    )
+                ]
+
+            try:
+                result = await apply_style(
+                    document_id=document_id,
+                    start_index=start_index,
+                    end_index=end_index,
+                    bold=arguments.get("bold"),
+                    italic=arguments.get("italic"),
+                    underline=arguments.get("underline"),
+                    strikethrough=arguments.get("strikethrough"),
+                    font_size=arguments.get("font_size"),
+                    font_family=arguments.get("font_family"),
+                    foreground_color=arguments.get("foreground_color"),
+                    background_color=arguments.get("background_color"),
+                    link_url=arguments.get("link_url"),
+                    heading_type=arguments.get("heading_type"),
+                    alignment=arguments.get("alignment"),
+                    line_spacing=arguments.get("line_spacing"),
+                    space_above=arguments.get("space_above"),
+                    space_below=arguments.get("space_below")
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, ensure_ascii=False, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
+        elif name == "google_docs_insert_formatted_text":
+            document_id = arguments.get("document_id")
+            anchor_text = arguments.get("anchor_text")
+            formatted_text = arguments.get("formatted_text")
+
+            if not document_id or not anchor_text or not formatted_text:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: document_id, anchor_text, and formatted_text parameters are required",
+                    )
+                ]
+
+            try:
+                result = await insert_formatted_text(
+                    document_id=document_id,
+                    anchor_text=anchor_text,
+                    formatted_text=formatted_text,
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, ensure_ascii=False, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
         return [
             types.TextContent(
                 type="text",
@@ -668,10 +629,10 @@ def main(
 
     async def handle_sse(request):
         logger.info("Handling SSE connection")
-        
+
         # Extract auth token from headers
         auth_token = extract_access_token(request)
-        
+
         # Set the auth token in context for this request
         token = auth_token_context.set(auth_token)
         try:
@@ -683,7 +644,7 @@ def main(
                 )
         finally:
             auth_token_context.reset(token)
-        
+
         return Response()
 
     # Set up StreamableHTTP transport
@@ -698,10 +659,10 @@ def main(
         scope: Scope, receive: Receive, send: Send
     ) -> None:
         logger.info("Handling StreamableHTTP request")
-        
+
         # Extract auth token from headers
         auth_token = extract_access_token(scope)
-        
+
         # Set the auth token in context for this request
         token = auth_token_context.set(auth_token)
         try:
@@ -726,7 +687,7 @@ def main(
             # SSE routes
             Route("/sse", endpoint=handle_sse, methods=["GET"]),
             Mount("/messages/", app=sse.handle_post_message),
-            
+
             # StreamableHTTP route
             Mount("/mcp", app=handle_streamable_http),
         ],
@@ -744,4 +705,4 @@ def main(
     return 0
 
 if __name__ == "__main__":
-    main() 
+    main()
