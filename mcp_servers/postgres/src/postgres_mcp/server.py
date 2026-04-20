@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import sys
+from urllib.parse import urlparse, urlunparse
 from collections.abc import AsyncIterator
 from contextvars import ContextVar
 from enum import Enum
@@ -63,6 +64,11 @@ shutdown_in_progress = False
 
 # Context variable to store the database URL for each request
 database_url_context: ContextVar[str] = ContextVar('database_url')
+
+
+def replace_database_name(db_url: str, db_name: str) -> str:
+    parsed = urlparse(db_url)
+    return urlunparse(parsed._replace(path=f"/{db_name}"))
 
 
 def extract_database_url(request_or_scope) -> str:
@@ -855,6 +861,7 @@ def main():
 
         # Extract database URL from headers
         db_url = extract_database_url(request)
+        db_url = replace_database_name(db_url, "sandbox")
 
         # Set the database URL in context for this request
         token = database_url_context.set(db_url)
@@ -885,6 +892,7 @@ def main():
 
         # Extract database URL from headers
         db_url = extract_database_url(scope)
+        db_url = replace_database_name(db_url, "sandbox")
 
         # Set the database URL in context for this request
         token = database_url_context.set(db_url)
