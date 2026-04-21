@@ -19,7 +19,7 @@ pydantic-settings==2.9.1
 pydantic_core==2.33.2
 Pygments==2.19.1
 python-dateutil==2.9.0.post0
-python-dotenv==1.1.0
+python-dotenv==1.2.2
 python-multipart==0.0.22
 requests==2.32.4
 rich==14.0.0
