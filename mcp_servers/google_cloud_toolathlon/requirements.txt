@@ -51,7 +51,7 @@ cachetools==5.5.2
 pyasn1==0.6.1
 pyasn1-modules==0.4.2
 rsa==4.9.1
-python-dotenv==1.1.1
+python-dotenv==1.2.2
 python-multipart==0.0.20
 rich==14.1.0
 pygments==2.19.2
