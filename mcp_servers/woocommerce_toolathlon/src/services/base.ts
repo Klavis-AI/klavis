@@ -14,12 +14,16 @@ export const asyncLocalStorage = new AsyncLocalStorage<WooCommerceAuth>();
 // Transport hardening against Bunny Shield WAF.
 // - Fixed UA so Shield's fingerprint detectors don't classify us as a generic
 //   axios bot and return HTML 403s.
-// - Short timeout so a hung request doesn't burn the MCP 60s tool budget.
-// - Retry on transient failures (429, 5xx, or 403 with HTML body = WAF block).
-//   JSON 403 ({"code": "woocommerce_rest_cannot_view", ...}) is a real auth
-//   error and is NOT retried.
+// - 30s timeout: gives room to respond under concurrent load. A
+//   previous 15s was too aggressive — requests that would eventually succeed
+//   in 20-25s got killed, and the retries also kept timing out.
+// - Retry ONLY on transient HTTP signals (429, 5xx, 403 with HTML body = WAF
+//   block). Do NOT retry on pure timeout / network abort — those indicate
+//   uniformly overloaded and piling on more requests makes it
+//   worse. JSON 403 ({"code": "woocommerce_rest_cannot_view", ...}) is a
+//   real auth error and is never retried.
 const WOO_USER_AGENT = 'Klavis-Sandbox/1.0 (+https://klavis.ai)';
-const REQUEST_TIMEOUT_MS = 15_000;
+const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_RETRIES = 3;
 const INITIAL_RETRY_DELAY_MS = 1_000;
 
@@ -32,10 +36,10 @@ function isHtmlBody(data: unknown): boolean {
 }
 
 function isTransientError(error: AxiosError): boolean {
-    if (!error.response) {
-        // No response = network/timeout/DNS — transient.
-        return true;
-    }
+    // No response = network/timeout (ECONNABORTED, ECONNRESET, etc.).
+    // Under concurrent overload, retrying these just amplifies
+    // the problem — fail fast instead.
+    if (!error.response) return false;
     const { status, data } = error.response;
     if (status === 429 || (status >= 500 && status <= 599)) return true;
     if (status === 403 && isHtmlBody(data)) return true;
