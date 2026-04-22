@@ -8,6 +8,6 @@ dependencies = [
     "click>=8.3.0",
     "httpx>=0.28.1",
     "mcp>=1.15.0",
-    "python-dotenv>=1.1.1",
+    "python-dotenv>=1.2.2",
     "starlette>=0.48.0",
 ]
