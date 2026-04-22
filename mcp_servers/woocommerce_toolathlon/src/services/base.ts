@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { AsyncLocalStorage } from 'async_hooks';
 
 export interface WooCommerceAuth {
@@ -10,6 +10,41 @@ export interface WooCommerceAuth {
 }
 
 export const asyncLocalStorage = new AsyncLocalStorage<WooCommerceAuth>();
+
+// Transport hardening against Bunny Shield WAF.
+// - Fixed UA so Shield's fingerprint detectors don't classify us as a generic
+//   axios bot and return HTML 403s.
+// - Short timeout so a hung request doesn't burn the MCP 60s tool budget.
+// - Retry on transient failures (429, 5xx, or 403 with HTML body = WAF block).
+//   JSON 403 ({"code": "woocommerce_rest_cannot_view", ...}) is a real auth
+//   error and is NOT retried.
+const WOO_USER_AGENT = 'Klavis-Sandbox/1.0 (+https://klavis.ai)';
+const REQUEST_TIMEOUT_MS = 15_000;
+const MAX_RETRIES = 3;
+const INITIAL_RETRY_DELAY_MS = 1_000;
+
+type RetryableConfig = InternalAxiosRequestConfig & { __retryCount?: number };
+
+function isHtmlBody(data: unknown): boolean {
+    if (typeof data !== 'string') return false;
+    const s = data.trimStart().toLowerCase();
+    return s.startsWith('<!doctype') || s.startsWith('<html');
+}
+
+function isTransientError(error: AxiosError): boolean {
+    if (!error.response) {
+        // No response = network/timeout/DNS — transient.
+        return true;
+    }
+    const { status, data } = error.response;
+    if (status === 429 || (status >= 500 && status <= 599)) return true;
+    if (status === 403 && isHtmlBody(data)) return true;
+    return false;
+}
+
+function delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 /**
  * Extract WooCommerce auth from AUTH_DATA env var or x-auth-data header (base64-encoded JSON).
@@ -81,16 +116,45 @@ export class BaseService {
         const siteUrl = auth.siteUrl.replace(/\/$/, '');
         const baseURL = `${siteUrl}/wp-json/wc/v3`;
 
-        return axios.create({
+        const instance = axios.create({
             baseURL,
+            timeout: REQUEST_TIMEOUT_MS,
             auth: {
                 username: auth.consumerKey,
                 password: auth.consumerSecret
             },
             headers: {
                 'Content-Type': 'application/json',
+                'User-Agent': WOO_USER_AGENT,
             },
         });
+
+        instance.interceptors.response.use(
+            (response) => response,
+            async (error: AxiosError) => {
+                const config = error.config as RetryableConfig | undefined;
+                if (!config || !isTransientError(error)) {
+                    return Promise.reject(error);
+                }
+                config.__retryCount = (config.__retryCount ?? 0) + 1;
+                if (config.__retryCount > MAX_RETRIES) {
+                    return Promise.reject(error);
+                }
+                const backoff = INITIAL_RETRY_DELAY_MS * 2 ** (config.__retryCount - 1);
+                const status = error.response?.status;
+                const label = error.response
+                    ? `HTTP ${status}${status === 403 ? ' WAF-HTML' : ''}`
+                    : error.code ?? 'network';
+                console.warn(
+                    `[woo-retry] ${label} on ${config.method?.toUpperCase()} ${config.url} — ` +
+                    `attempt ${config.__retryCount}/${MAX_RETRIES}, retry in ${backoff}ms`
+                );
+                await delay(backoff);
+                return instance.request(config);
+            }
+        );
+
+        return instance;
     }
 
     protected toSnakeCase(params: any): any {
