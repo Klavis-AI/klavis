@@ -180,6 +180,10 @@ Examples:
 
     // Handle POST requests for client-to-server communication (stateless per-request model)
     app.post('/mcp', async (req, res) => {
+      // Belt-and-braces in case the upstream axios timeout is bypassed: cap each
+      // request well under Cloud Run's 300s so a hang terminates with a normal
+      // 5xx instead of tearing down the client's MCP stream.
+      req.setTimeout(90_000)
       // Extract Notion token from request header
       const notionToken = extractNotionToken(req)
 
