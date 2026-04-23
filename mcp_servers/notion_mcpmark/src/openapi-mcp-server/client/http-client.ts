@@ -193,6 +193,17 @@ export class HttpClient {
 
         throw new HttpClientError(error.response.statusText || 'Request failed', error.response.status, error.response.data, headers)
       }
+      // No response (timeout, DNS, socket hangup) — wrap so proxy.ts can return
+      // a structured tool-result error instead of bubbling as a protocol-level
+      // McpError. Keeps the CallToolResult schema consistent for the agent.
+      if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || error.code === 'ECONNRESET') {
+        console.error('Error in http client (no response)', error.code, error.message)
+        throw new HttpClientError(
+          error.message || 'Upstream request failed',
+          504,
+          { code: error.code, message: error.message },
+        )
+      }
       throw error
     }
   }
