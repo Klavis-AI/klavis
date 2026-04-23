@@ -39,6 +39,10 @@ export class HttpClient {
       definition: openApiSpec,
       axiosConfigDefaults: {
         baseURL: config.baseUrl,
+        // Without this, a half-open TCP connection to Notion's API hangs the
+        // handler until Cloud Run's 300s request limit kills it with 504,
+        // which closes the client's MCP stream and surfaces as ClosedResourceError.
+        timeout: 60_000,
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': 'notion-mcp-server',
