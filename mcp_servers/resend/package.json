@@ -11,7 +11,7 @@
     "@react-email/components": "^0.0.41",
     "@react-email/render": "^1.0.5",
     "dotenv": "^16.3.1",
-    "resend": "^4.1.2",
+    "resend": "^4.8.0",
     "zod": "^3.24.2",
     "express": "^5.1.0"
   },
