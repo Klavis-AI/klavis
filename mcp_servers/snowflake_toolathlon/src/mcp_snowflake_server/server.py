@@ -3,6 +3,7 @@ import contextvars
 import base64
 import importlib.metadata
 import json
+import re
 import logging
 import os
 from functools import wraps
@@ -82,12 +83,30 @@ def extract_credentials(request_or_scope) -> dict[str, Any] | None:
             return mapped_creds if mapped_creds else None
             
         except Exception as e:
-            logger.warning(f"Failed to parse x-auth-data: {e}")
+            logger.warning("Failed to parse x-auth-data header")
             return None
             
     return None
 
 
+
+
+
+
+# Patterns that may contain sensitive credential information in error messages
+_SENSITIVE_PATTERNS = [
+    re.compile(r'(password\s*[=:]\s*)\S+', re.IGNORECASE),
+    re.compile(r'(token\s*[=:]\s*)\S+', re.IGNORECASE),
+    re.compile(r'(private.?key\S*\s*[=:]\s*)\S+', re.IGNORECASE),
+]
+
+
+def _sanitize_error_message(error: Exception) -> str:
+    """Remove potentially sensitive credential data from error messages."""
+    msg = str(error)
+    for pattern in _SENSITIVE_PATTERNS:
+        msg = pattern.sub(r'\1[REDACTED]', msg)
+    return msg
 
 
 def handle_tool_errors(func: Callable) -> Callable:
@@ -98,8 +117,9 @@ def handle_tool_errors(func: Callable) -> Callable:
         try:
             return await func(*args, **kwargs)
         except Exception as e:
-            logger.error(f"Error in {func.__name__}: {str(e)}")
-            return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+            sanitized_msg = _sanitize_error_message(e)
+            logger.error(f"Error in {func.__name__}: {sanitized_msg}")
+            return [types.TextContent(type="text", text=f"Error: {sanitized_msg}")]
 
     return wrapper
 
@@ -716,8 +736,8 @@ async def prefetch_tables(db: SnowflakeDB, credentials: dict) -> dict:
         return tables_brief
 
     except Exception as e:
-        logger.error(f"Error prefetching table descriptions: {e}")
-        return f"Error prefetching table descriptions: {e}"
+        logger.error(f"Error prefetching table descriptions: {_sanitize_error_message(e)}")
+        return f"Error prefetching table descriptions: {_sanitize_error_message(e)}"
 
 
 async def main(
