@@ -131,6 +131,7 @@ export class MCPProxy {
           console.error('HttpClientError encountered, returning structured error', error)
           const data = error.data?.response?.data ?? error.data ?? {}
           return {
+            isError: true,
             content: [
               {
                 type: 'text',
