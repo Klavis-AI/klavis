@@ -145,6 +145,47 @@ curl -X POST "https://api.klavis.ai/v1/mcp-server/instance" \
 ```
 
 
+
+## ❓ FAQ
+
+### What is Klavis AI?
+
+Klavis AI is an MCP (Model Context Protocol) integration platform that enables AI agents to reliably use tools at any scale. It provides intelligent connectors, prebuilt MCP server integrations, and scalable sandbox environments for LLM training.
+
+### What are Strata connectors?
+
+Strata is Klavis's intelligent connector system that optimizes context windows for AI agents. It dynamically manages tool connections, handles OAuth authentication, and provides intelligent routing to ensure agents can access the right tools at the right time.
+
+### How many MCP integrations are available?
+
+Klavis offers 100+ prebuilt MCP server integrations out-of-the-box, including GitHub, Gmail, Slack, Notion, Jira, and more. Each integration supports OAuth authentication and is maintained by the Klavis team.
+
+### Can I self-host Klavis?
+
+Yes! Klavis can be self-hosted using Docker. You can run individual MCP servers or deploy the full Klavis platform. See the [self-hosting guide](https://www.klavis.ai/docs) for detailed instructions.
+
+### What is MCP Sandbox?
+
+MCP Sandbox provides scalable, isolated environments for LLM training and reinforcement learning. It allows you to test and develop MCP integrations in a safe, reproducible environment without affecting production systems.
+
+### How do I get started with the SDK?
+
+Klavis provides both Python and TypeScript SDKs. Install via `pip install klavis` (Python) or `npm install klavis` (TypeScript), then use your API key to create Strata instances or individual MCP server connections.
+
+### Does Klavis support custom MCP servers?
+
+Yes. You can build custom MCP servers using the Klavis SDK or integrate existing MCP-compatible tools. The platform supports both stdio and SSE transport protocols.
+
+### How does Klavis handle authentication?
+
+Klavis uses OAuth 2.0 for most integrations. When a user connects a service like Gmail or Slack, Klavis handles the OAuth flow securely and stores encrypted credentials. For API-based integrations, Klavis supports API key management.
+
+### Where can I get help?
+
+- 📖 [Documentation](https://www.klavis.ai/docs)
+- 💬 [Discord Community](https://discord.gg/p7TuTEcssn)
+- 🐛 [GitHub Issues](https://github.com/klavis-ai/klavis/issues)
+
 ## Resources
 
 - 📖 [Documentation](https://www.klavis.ai/docs)
