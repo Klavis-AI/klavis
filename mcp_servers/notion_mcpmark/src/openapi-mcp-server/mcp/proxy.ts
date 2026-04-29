@@ -126,9 +126,7 @@ export class MCPProxy {
           ],
         }
       } catch (error) {
-        console.error('Error in tool call', error)
         if (error instanceof HttpClientError) {
-          console.error('HttpClientError encountered, returning structured error', error)
           const data = error.data?.response?.data ?? error.data ?? {}
           return {
             isError: true,
