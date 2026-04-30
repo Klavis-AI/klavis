@@ -42,7 +42,9 @@ export class HttpClient {
         // Without this, a half-open TCP connection to Notion's API hangs the
         // handler until Cloud Run's 300s request limit kills it with 504,
         // which closes the client's MCP stream and surfaces as ClosedResourceError.
-        timeout: 60_000,
+        // 90s covers slow Notion writes (delete-a-block, post-page,
+        // patch-block-children) while staying well under Cloud Run's 300s deadline.
+        timeout: 90_000,
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': 'notion-mcp-server',
