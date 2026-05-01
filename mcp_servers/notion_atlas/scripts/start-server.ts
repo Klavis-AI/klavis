@@ -2,7 +2,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'url'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
-import { randomBytes } from 'node:crypto'
+import { randomBytes, timingSafeEqual } from 'node:crypto'
 import express from 'express'
 
 import { initProxy, ValidationError } from '../src/init-server'
@@ -143,7 +143,7 @@ Examples:
         return
       }
 
-      if (token !== authToken) {
+      if (!token || !authToken || Buffer.byteLength(token) !== Buffer.byteLength(authToken) || !timingSafeEqual(Buffer.from(token), Buffer.from(authToken))) {
         res.status(403).json({
           jsonrpc: '2.0',
           error: {
