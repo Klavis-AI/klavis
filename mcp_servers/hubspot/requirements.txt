@@ -17,7 +17,7 @@ protobuf==6.33.5
 pydantic==2.11.7
 pydantic-settings==2.9.1
 pydantic_core==2.33.2
-Pygments==2.19.1
+Pygments==2.20.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.0
 python-multipart==0.0.22
