@@ -165,7 +165,11 @@ def authenticate_command(args):
     server_list = MCPServerList(args.config_path)
 
     if args.name in server_list.servers:
-        asyncio.run(authenticate(args.name))
+        try:
+            asyncio.run(authenticate(args.name))
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
         return 0
     else:
         print(f"Error: Server '{args.name}' not found", file=sys.stderr)
