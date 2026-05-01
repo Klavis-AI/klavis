@@ -1,0 +1,5 @@
+klavis>=2.0.2
+python-dotenv>=1.1.0
+ag2[openai,mcp]>=0.11.1
+pytest>=8.0.0
+pytest-asyncio>=0.24.0
