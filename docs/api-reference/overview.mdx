@@ -1,21 +1,23 @@
 ---
 title: "Overview"
-description: "Overview of Klavis API base URLs and response codes."
 ---
 
-The Klavis API is built on REST principles. We enforce HTTPS in every request to improve data security, integrity, and privacy. The API does not support HTTP.
+Klavis API is built on REST principles. We enforce HTTPS in every request to improve data security, integrity, and privacy. The API does not support HTTP.
 
 ## API Structure
 
-**Standard Server:** `https://api.klavis.ai`
-
-**EU Residency Server:** `https://api.eu.klavis.ai`
-
-<Tip>
-  For EU, Klavis website will be [https://eu.klavis.ai/](https://eu.klavis.ai/)
-</Tip>
+**Server:** `https://api.klavis.ai`
 
 <CardGroup cols={2}>
+  <Card title="Sandbox API" icon="box" href="/api-reference/sandbox/create">
+    Use the Sandbox API to manage isolated MCP sandbox environments for LLM training and evaluation. Handles account pooling, state initialization, export, and teardown for reproducible AI workflows.
+  </Card>
+  <Card title="Local Sandbox API" icon="cube" href="/api-reference/local-sandbox/acquire">
+    Use the Local Sandbox API to manage k8s-pod local sandboxes for filesystem, terminal, browser, and document workflows during agent training and evaluation.
+  </Card>
+  <Card title="Universe API" icon="globe" href="/api-reference/universe/list-universes">
+    Use the Universe API to acquire benchmark task environments and verify task completion for end-to-end agentic evaluation.
+  </Card>
   <Card title="Strata API" icon="layer-group" href="/api-reference/strata/create">
     Use the Strata API to manage the unified MCP server that guides AI agents to use tools progressively. Solves tool overload, context limits, and coverage gaps for reliable agentic workflows.
   </Card>
@@ -30,9 +32,6 @@ The Klavis API is built on REST principles. We enforce HTTPS in every request to
   </Card>
   <Card title="White Label API" icon="tag" href="/api-reference/white-labeling/create">
     Use the White Label API to manage white-label configurations, allowing you to present integrations under your own branding.
-  </Card>
-  <Card title="Sandbox API" icon="box" href="/api-reference/sandbox/create">
-    Use the Sandbox API to manage isolated MCP sandbox environments for LLM training and evaluation. Handles account pooling, state initialization, export, and teardown for reproducible AI workflows.
   </Card>
 </CardGroup>
 
