@@ -70,6 +70,12 @@
             "pages": [
               "introduction"
             ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/sandbox"
+            ]
           }
         ]
       },
