@@ -375,7 +375,7 @@ async def handle_read_query(arguments, db, write_detector, *_, exclude_json_resu
     return results
 
 
-async def handle_append_insight(arguments, db, _, __, server, exclude_json_results=False):
+async def handle_append_insight(arguments, db, _, __, server, exclude_json_results=False, allowed_databases=None, **___):
     if not arguments or "insight" not in arguments:
         raise ValueError("Missing insight argument")
 
