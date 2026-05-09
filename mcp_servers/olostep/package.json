@@ -1,0 +1,44 @@
+{
+    "name": "@klavis-ai/mcp-server-olostep",
+    "version": "1.0.0",
+    "description": "MCP server for Olostep web scraping, search, and AI-powered answers.",
+    "type": "module",
+    "bin": {
+        "olostep-mcp": "dist/index.js"
+    },
+    "files": [
+        "dist"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "build": "tsc && node -e \"require('fs').chmodSync('dist/index.js', '755')\"",
+        "start": "node dist/index.js",
+        "prepare": "npm run build"
+    },
+    "license": "MIT",
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.12.1",
+        "dotenv": "^16.4.7",
+        "express": "^5.1.0",
+        "node-fetch": "^3.3.2"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.1",
+        "@types/node": "^20.10.5",
+        "typescript": "^5.3.3"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "keywords": [
+        "mcp",
+        "olostep",
+        "web-scraping",
+        "search",
+        "ai-answers",
+        "api-integration"
+    ],
+    "author": "Klavis AI"
+}
