@@ -207,6 +207,7 @@ export class DuplicateSpaceTool extends HfApiCall<DuplicateSpaceParams, Duplicat
 
 			const response = await this.fetchFromApi<{ url: string }>(url, {
 				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(payload),
 			});
 
