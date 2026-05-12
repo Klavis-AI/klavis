@@ -352,6 +352,12 @@ async def handle_read_query(arguments, db, write_detector, *_, exclude_json_resu
         extracted_db = extract_database_from_query(arguments["query"])
         if extracted_db:
             check_database_access(extracted_db, allowed_databases)
+        else:
+            raise ValueError(
+                "Access denied: Could not determine target database from query. "
+                "When allowed_databases is configured, queries must use fully "
+                "qualified table names (database.schema.table)."
+            )
 
     data, data_id = await db.execute_query(arguments["query"])
 
@@ -395,6 +401,12 @@ async def handle_write_query(arguments, db, _, allow_write, __, allowed_database
         extracted_db = extract_database_from_query(arguments["query"])
         if extracted_db:
             check_database_access(extracted_db, allowed_databases)
+        else:
+            raise ValueError(
+                "Access denied: Could not determine target database from query. "
+                "When allowed_databases is configured, queries must use fully "
+                "qualified table names (database.schema.table)."
+            )
 
     results, data_id = await db.execute_query(arguments["query"])
     return [types.TextContent(type="text", text=str(results))]
