@@ -456,8 +456,8 @@ async def handle_message(client: WhatsApp, message: Message):
                 to=message.from_user.wa_id,
                 text=f"Sorry, an error occurred: {str(e)}"
             )
-        except:
-            pass
+        except Exception as notify_err:
+            logger.error(f"Failed to send error notification to user: {notify_err}")
 
 @app.get("/")
 async def root():
