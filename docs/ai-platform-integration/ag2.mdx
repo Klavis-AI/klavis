@@ -1,0 +1,143 @@
+---
+title: "AG2"
+description: "Learn how to build AI agents that integrate AG2 (formerly AutoGen) with Strata MCP servers to interact with Gmail and Slack."
+---
+
+## Prerequisites
+
+Before we begin, you'll need:
+
+<CardGroup cols={2}>
+  <Card title="OpenAI API Key" icon="key" href="https://platform.openai.com/api-keys">
+    Get your API key from OpenAI Console
+  </Card>
+  <Card title="Klavis AI API Key" icon="key" href="https://klavis.ai/">
+    Get your API key from Klavis AI
+  </Card>
+</CardGroup>
+
+## Installation
+
+First, install the required packages:
+
+```bash Python
+pip install klavis python-dotenv "ag2[openai,mcp]>=0.11.1"
+```
+
+## Setup Environment Variables
+
+```python Python
+import os
+
+os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"  # Replace with your actual OpenAI API key
+os.environ["KLAVIS_API_KEY"] = "YOUR_KLAVIS_API_KEY"  # Replace with your actual Klavis API key
+```
+
+### Step 1 - Create Strata MCP Server with Gmail and Slack
+
+```python Python
+import webbrowser
+from klavis import Klavis
+from klavis.types import McpServerName
+
+klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+
+response = klavis_client.mcp_server.create_strata_server(
+    servers=[McpServerName.GMAIL, McpServerName.SLACK],
+    user_id="demo_user"
+)
+
+# Handle OAuth authorization if needed
+if response.oauth_urls:
+    for server_name, oauth_url in response.oauth_urls.items():
+        webbrowser.open(oauth_url)
+        input(f"Press Enter after completing {server_name} OAuth authorization...")
+```
+
+<Note>
+**OAuth Authorization Required**: The code above will open browser windows for each service. Click through the OAuth flow to authorize access to your accounts.
+</Note>
+
+### Step 2 - Connect to Strata and create AG2 toolkit
+
+```python Python
+from mcp import ClientSession
+from mcp.client.streamable_http import streamable_http_client
+from autogen.mcp import create_toolkit
+from autogen import AssistantAgent, LLMConfig
+
+async with (
+    streamable_http_client(response.strata_server_url) as (
+        read_stream,
+        write_stream,
+        _,
+    ),
+    ClientSession(read_stream, write_stream) as session,
+):
+    await session.initialize()
+
+    toolkit = await create_toolkit(session=session, use_mcp_resources=False)
+    print(f"Available tools: {[tool.name for tool in toolkit.tools]}")
+```
+
+### Step 3 - Create AG2 AssistantAgent and run
+
+```python Python
+    assistant = AssistantAgent(
+        name="klavis_assistant",
+        system_message=(
+            "You are a helpful assistant that uses MCP tools to complete tasks. "
+            "When calling execute_action, always pass request body parameters via 'body_schema' "
+            "and URL query parameters via 'query_params'. "
+            "Check get_action_details to determine which parameters go where."
+        ),
+        llm_config=LLMConfig(
+            {
+                "model": "gpt-4o-mini",
+                "api_key": os.getenv("OPENAI_API_KEY"),
+            }
+        ),
+    )
+
+    toolkit.register_for_llm(assistant)
+
+    result = await assistant.a_run(
+        message="Check my latest 5 emails and summarize them in a Slack message to #general",
+        tools=toolkit.tools,
+        max_turns=10,
+        user_input=False,
+    )
+    await result.process()
+```
+
+### Step 4 - Run!
+
+```python Python
+import asyncio
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+<Check>
+Perfect! You've integrated AG2 with Klavis MCP servers.
+</Check>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Integrations" icon="server" href="/mcp-server/github">
+    Explore available MCP servers
+  </Card>
+  <Card title="API Reference" icon="magnifying-glass" href="/api-reference/introduction">
+    REST endpoints and schemas
+  </Card>
+</CardGroup>
+
+## Useful Resources
+
+- [AG2 Documentation](https://docs.ag2.ai/)
+- [AG2 MCP Client Guide](https://docs.ag2.ai/latest/docs/user-guide/advanced-concepts/tools/mcp/client/)
+- [MCP Protocol Specification](https://modelcontextprotocol.io/)
+
+**Happy building!** 🚀
