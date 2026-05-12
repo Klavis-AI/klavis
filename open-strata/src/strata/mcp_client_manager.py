@@ -78,6 +78,8 @@ class MCPClientManager:
                 logger.info(f"Initialized MCP server: {server_name}")
             except Exception as e:
                 logger.error(f"Error initializing {server_name}: {e}")
+        else:
+            raise ValueError(f"Server '{server_name}' is not connected")
 
     async def _connect_server(self, server: MCPServerConfig) -> None:
         """Connect to a single MCP server.
