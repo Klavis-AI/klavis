@@ -508,6 +508,22 @@ def main(
                             "type": "integer",
                             "description": "New due date as Unix timestamp in milliseconds.",
                         },
+                        "assignees": {
+                            "type": "object",
+                            "description": "Object with 'add' and 'rem' arrays of user IDs to update assignees.",
+                            "properties": {
+                                "add": {
+                                    "type": "array",
+                                    "items": {"type": "number"},
+                                    "description": "User IDs to add as assignees.",
+                                },
+                                "rem": {
+                                    "type": "array",
+                                    "items": {"type": "number"},
+                                    "description": "User IDs to remove from assignees.",
+                                },
+                            },
+                        },
                     },
                 },
                 annotations=types.ToolAnnotations(
@@ -785,7 +801,8 @@ def main(
                 status = arguments.get("status")
                 priority = arguments.get("priority")
                 due_date = arguments.get("due_date")
-                result = await update_task(task_id, name, description, status, priority, due_date)
+                assignees = arguments.get("assignees")
+                result = await update_task(task_id, name, description, status, priority, due_date, assignees=assignees)
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
             
             elif name == "clickup_search_tasks":
