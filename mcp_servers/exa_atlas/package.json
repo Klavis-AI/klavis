@@ -37,7 +37,7 @@
     "@modelcontextprotocol/sdk": "^1.12.1",
     "axios": "^1.7.8",
     "dotenv": "^16.4.5",
-    "express": "^5.1.0",
+    "express": "^5.2.1",
     "yargs": "^17.7.2",
     "zod": "^3.22.4"
   },
