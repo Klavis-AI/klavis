@@ -9,55 +9,42 @@ import {
     ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { google } from 'googleapis';
-import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import { createEmailMessage, extractPdfText, extractDocxText, extractXlsxText } from "./utl.js";
 import { AsyncLocalStorage } from 'async_hooks';
+
+// Import schemas and types
+import {
+    GmailMessagePart,
+    EmailAttachment,
+    SendEmailSchema,
+    ReadEmailSchema,
+    SearchEmailsSchema,
+    ModifyEmailSchema,
+    DeleteEmailSchema,
+    SearchContactsSchema,
+    GetEmailAttachmentsSchema,
+    BatchModifyEmailsSchema,
+    BatchDeleteEmailsSchema,
+    DIRECTORY_SOURCE_MAP,
+} from "./schemas.js";
+
+// Import utilities
+import {
+    createEmailMessage,
+    extractPdfText,
+    extractDocxText,
+    extractXlsxText,
+    base64UrlToBase64,
+    extractEmailContent,
+    processBatches,
+    warmupContactSearch,
+} from "./utils.js";
 
 // Create AsyncLocalStorage for request context
 const asyncLocalStorage = new AsyncLocalStorage<{
     gmailClient: any;
     peopleClient: any;
 }>();
-
-// Type definitions for Gmail API responses
-interface GmailMessagePart {
-    partId?: string;
-    mimeType?: string;
-    filename?: string;
-    headers?: Array<{
-        name: string;
-        value: string;
-    }>;
-    body?: {
-        attachmentId?: string;
-        size?: number;
-        data?: string;
-    };
-    parts?: GmailMessagePart[];
-}
-
-interface EmailAttachment {
-    id: string;
-    filename: string;
-    mimeType: string;
-    size: number;
-}
-
-interface EmailContent {
-    text: string;
-    html: string;
-}
-
-// Convert base64url (Gmail) -> standard base64
-function base64UrlToBase64(input: string): string {
-    let output = input.replace(/-/g, '+').replace(/_/g, '/');
-    const padLen = output.length % 4;
-    if (padLen === 2) output += '==';
-    else if (padLen === 3) output += '=';
-    else if (padLen === 1) output += '==='; // extremely rare, but safe guard
-    return output;
-}
 
 // Helper function to get Gmail client from context
 function getGmailClient() {
@@ -69,42 +56,9 @@ function getPeopleClient() {
     return asyncLocalStorage.getStore()!.peopleClient;
 }
 
-/**
- * Send warmup request with empty query to update the cache.
- *
- * According to Google's documentation, searchContacts and otherContacts.search
- * require a warmup request before actual searches for better performance.
- * See: https://developers.google.com/people/v1/contacts#search_the_users_contacts
- * and https://developers.google.com/people/v1/other-contacts#search_the_users_other_contacts
- */
-async function warmupContactSearch(peopleClient: any, contactType: 'personal' | 'other'): Promise<void> {
-    try {
-        if (contactType === 'personal') {
-            // Warmup for people.searchContacts
-            await peopleClient.people.searchContacts({
-                query: '',
-                pageSize: 1,
-                readMask: 'names',
-            });
-            console.log('Warmup request sent for personal contacts');
-        } else if (contactType === 'other') {
-            // Warmup for otherContacts.search
-            await peopleClient.otherContacts.search({
-                query: '',
-                pageSize: 1,
-                readMask: 'names',
-            });
-            console.log('Warmup request sent for other contacts');
-        }
-    } catch (error) {
-        // Don't fail if warmup fails, just log it
-        console.warn(`Warmup request failed for ${contactType} contacts:`, error);
-    }
-}
-
 function extractAccessToken(req: Request): string {
     let authData = process.env.AUTH_DATA;
-    
+
     if (!authData && req.headers['x-auth-data']) {
         try {
             authData = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
@@ -121,100 +75,6 @@ function extractAccessToken(req: Request): string {
     const authDataJson = JSON.parse(authData);
     return authDataJson.access_token ?? '';
 }
-
-/**
- * Recursively extract email body content from MIME message parts
- * Handles complex email structures with nested parts
- */
-function extractEmailContent(messagePart: GmailMessagePart): EmailContent {
-    // Initialize containers for different content types
-    let textContent = '';
-    let htmlContent = '';
-
-    // If the part has a body with data, process it based on MIME type
-    if (messagePart.body && messagePart.body.data) {
-        const content = Buffer.from(messagePart.body.data, 'base64').toString('utf8');
-
-        // Store content based on its MIME type
-        if (messagePart.mimeType === 'text/plain') {
-            textContent = content;
-        } else if (messagePart.mimeType === 'text/html') {
-            htmlContent = content;
-        }
-    }
-
-    // If the part has nested parts, recursively process them
-    if (messagePart.parts && messagePart.parts.length > 0) {
-        for (const part of messagePart.parts) {
-            const { text, html } = extractEmailContent(part);
-            if (text) textContent += text;
-            if (html) htmlContent += html;
-        }
-    }
-
-    // Return both plain text and HTML content
-    return { text: textContent, html: htmlContent };
-}
-
-// Schema definitions
-const SendEmailSchema = z.object({
-    to: z.array(z.string()).describe("List of recipient email addresses. You MUST NOT assume the emails unless they are explicitly provided. You may use gmail_search_contacts tool to find contact emails."),
-    subject: z.string().describe("Email subject"),
-    body: z.string().describe("Email body content (used for text/plain or when htmlBody not provided)"),
-    htmlBody: z.string().optional().describe("HTML version of the email body"),
-    mimeType: z.enum(['text/plain', 'text/html', 'multipart/alternative']).optional().default('text/plain').describe("Email content type"),
-    cc: z.array(z.string()).optional().describe("List of CC recipients. You MUST NOT assume the emails unless they are explicitly provided. You may use gmail_search_contacts tool to find contact emails."),
-    bcc: z.array(z.string()).optional().describe("List of BCC recipients. You MUST NOT assume the emails unless they are explicitly provided. You may use gmail_search_contacts tool to find contact emails."),
-    threadId: z.string().optional().describe("Thread ID to reply to"),
-    inReplyTo: z.string().optional().describe("Message ID being replied to"),
-});
-
-const ReadEmailSchema = z.object({
-    messageId: z.string().describe("ID of the email message to retrieve"),
-});
-
-const SearchEmailsSchema = z.object({
-    query: z.string().describe("Gmail search query (e.g., 'from:example@gmail.com')"),
-    maxResults: z.number().optional().describe("Maximum number of results to return"),
-});
-
-// Updated schema to include removeLabelIds
-const ModifyEmailSchema = z.object({
-    messageId: z.string().describe("ID of the email message to modify"),
-    addLabelIds: z.array(z.string()).optional().describe("List of label IDs to add to the message"),
-    removeLabelIds: z.array(z.string()).optional().describe("List of label IDs to remove from the message"),
-});
-
-const DeleteEmailSchema = z.object({
-    messageId: z.string().describe("ID of the email message to delete"),
-});
-
-// Schema for searching contacts
-const SearchContactsSchema = z.object({
-    query: z.string().describe("The plain-text search query for contact names, email addresses, phone numbers, etc."),
-    contactType: z.enum(['all', 'personal', 'other', 'directory']).optional().default('all').describe("Type of contacts to search: 'all' (search all types - returns three separate result sets with independent pagination tokens), 'personal' (your saved contacts), 'other' (other contact sources like Gmail suggestions), or 'directory' (domain directory)"),
-    pageSize: z.number().optional().default(10).describe("Number of results to return. For personal/other: max 30, for directory: max 500"),
-    pageToken: z.string().optional().describe("Page token for pagination (used with directory searches)"),
-    directorySources: z.enum(['UNSPECIFIED', 'DOMAIN_DIRECTORY', 'DOMAIN_CONTACTS']).optional().default('UNSPECIFIED').describe("Directory sources to search (only used for directory type)")
-});
-
-// Schema for getting attachments of an email
-const GetEmailAttachmentsSchema = z.object({
-    messageId: z.string().describe("ID of the email message to retrieve attachments for"),
-});
-
-// Schemas for batch operations
-const BatchModifyEmailsSchema = z.object({
-    messageIds: z.array(z.string()).describe("List of message IDs to modify"),
-    addLabelIds: z.array(z.string()).optional().describe("List of label IDs to add to all messages"),
-    removeLabelIds: z.array(z.string()).optional().describe("List of label IDs to remove from all messages"),
-    batchSize: z.number().optional().default(50).describe("Number of messages to process in each batch (default: 50)"),
-});
-
-const BatchDeleteEmailsSchema = z.object({
-    messageIds: z.array(z.string()).describe("List of message IDs to delete"),
-    batchSize: z.number().optional().default(50).describe("Number of messages to process in each batch (default: 50)"),
-});
 
 // Get Gmail MCP Server
 const getGmailMcpServer = () => {
@@ -360,38 +220,7 @@ const getGmailMcpServer = () => {
             }
         }
 
-        // Helper function to process operations in batches
-        async function processBatches<T, U>(
-            items: T[],
-            batchSize: number,
-            processFn: (batch: T[]) => Promise<U[]>
-        ): Promise<{ successes: U[], failures: { item: T, error: Error }[] }> {
-            const successes: U[] = [];
-            const failures: { item: T, error: Error }[] = [];
-
-            // Process in batches
-            for (let i = 0; i < items.length; i += batchSize) {
-                const batch = items.slice(i, i + batchSize);
-                try {
-                    const results = await processFn(batch);
-                    successes.push(...results);
-                } catch (error) {
-                    // If batch fails, try individual items
-                    for (const item of batch) {
-                        try {
-                            const result = await processFn([item]);
-                            successes.push(...result);
-                        } catch (itemError) {
-                            failures.push({ item, error: itemError as Error });
-                        }
-                    }
-                }
-            }
-
-            return { successes, failures };
-        }
-
-        try {               
+        try {
 
             switch (name) {
                 case "gmail_send_email":
@@ -430,7 +259,7 @@ const getGmailMcpServer = () => {
                         const date = headers.find((h: any) => h.name?.toLowerCase() === 'date')?.value || '';
                         const messageId = msg.id || '';
 
-                        // Extract email content using the recursive function
+                        // Extract email content using the utility function
                         const { text, html } = extractEmailContent(msg.payload as GmailMessagePart || {});
 
                         // Get attachment information
@@ -458,7 +287,7 @@ const getGmailMcpServer = () => {
                         }
 
                         const preferredFormat = text ? 'text/plain' : (html ? 'text/html' : null);
-                        
+
                         return {
                             messageId,
                             subject,
@@ -702,14 +531,13 @@ const getGmailMcpServer = () => {
                 case "gmail_get_email_attachments": {
                     const validatedArgs = GetEmailAttachmentsSchema.parse(args);
                     const messageId = validatedArgs.messageId;
-                
 
                     // Get the message in full to inspect parts and attachment IDs
                     const messageResponse = await gmail.users.messages.get({
                         userId: 'me',
                         id: messageId,
                         format: 'full',
-                    });                 
+                    });
 
                     const attachmentsMeta: Array<{
                         attachmentId: string;
@@ -734,7 +562,6 @@ const getGmailMcpServer = () => {
                     };
 
                     collectAttachments(messageResponse.data.payload as GmailMessagePart | undefined);
-                    
 
                     if (attachmentsMeta.length === 0) {
                         const resultPayload = {
@@ -764,28 +591,11 @@ const getGmailMcpServer = () => {
                             const base64 = base64UrlToBase64(base64Url);
 
                             const mime = meta.mimeType || 'application/octet-stream';
-                            const commonMeta = {
-                                attachmentId: meta.attachmentId,
-                                filename: meta.filename,
-                                mimeType: mime,
-                                size: meta.size,
-                            };
-                            const asJsonText = (extra: Record<string, unknown>) => ({
-                                type: 'text' as const,
-                                text: JSON.stringify(
-                                    {
-                                        ...commonMeta,
-                                        ...extra,
-                                    },
-                                    null,
-                                    2
-                                ),
-                            });
-                            
-                            // Handle PDF files using pdf-parse
+
+                            // Handle PDF files using pdfjs-dist
                             if (mime === 'application/pdf' || meta.filename.toLowerCase().endsWith('.pdf')) {
                                 const pdfText = await extractPdfText(base64, meta.filename);
-                                
+
                                 return {
                                     type: 'text' as const,
                                     text: pdfText,
@@ -821,7 +631,7 @@ const getGmailMcpServer = () => {
                                     text: `[Info] Attachment ${meta.filename}: legacy .xls format is not supported for text extraction. Please convert to .xlsx and retry.`,
                                 };
                             }
-                            
+
                             if (mime.startsWith('text/') ||
                                 ['application/json', 'application/xml', 'application/javascript', 'application/typescript'].includes(mime)) {
                                 const text = Buffer.from(base64, 'base64').toString('utf8');
@@ -1101,12 +911,7 @@ const getGmailMcpServer = () => {
                             });
                         } else if (contactType === 'directory') {
                             typeLabel = 'directory contact(s)';
-                            const sourceMap: { [key: string]: string[] } = {
-                                'UNSPECIFIED': ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE', 'DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT'],
-                                'DOMAIN_DIRECTORY': ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE'],
-                                'DOMAIN_CONTACTS': ['DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT'],
-                            };
-                            const directorySources = sourceMap[validatedArgs.directorySources || 'UNSPECIFIED'];
+                            const directorySources = DIRECTORY_SOURCE_MAP[validatedArgs.directorySources || 'UNSPECIFIED'];
 
                             response = await peopleClient.people.searchDirectoryPeople({
                                 query: validatedArgs.query,
@@ -1185,6 +990,7 @@ const getGmailMcpServer = () => {
 
 // Create Express App
 const app = express();
+app.use(express.json());
 
 //=============================================================================
 // STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
@@ -1205,7 +1011,7 @@ app.post('/mcp', async (req: Request, res: Response) => {
             sessionIdGenerator: undefined,
         });
         await server.connect(transport);
-        asyncLocalStorage.run({ gmailClient, peopleClient }, async () => {
+        await asyncLocalStorage.run({ gmailClient, peopleClient }, async () => {
             await transport.handleRequest(req, res, req.body);
         });
         res.on('close', () => {
@@ -1294,7 +1100,7 @@ app.post("/messages", async (req: Request, res: Response) => {
         const gmailClient = google.gmail({ version: 'v1', auth });
         const peopleClient = google.people({ version: 'v1', auth });
 
-        asyncLocalStorage.run({ gmailClient, peopleClient }, async () => {
+        await asyncLocalStorage.run({ gmailClient, peopleClient }, async () => {
             await transport!.handlePostMessage(req, res);
         });
     } else {
@@ -1308,4 +1114,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-
