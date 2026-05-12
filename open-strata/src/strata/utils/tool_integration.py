@@ -1,8 +1,10 @@
 """Tool integration utilities for adding Strata to various IDEs and editors."""
 
 import json
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -50,6 +52,9 @@ def ensure_json_config(config_path: Path) -> dict:
 
     Returns:
         The configuration dictionary
+
+    Raises:
+        SystemExit: If the existing config file contains invalid JSON.
     """
     # Create directory if it doesn't exist
     config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -59,26 +64,49 @@ def ensure_json_config(config_path: Path) -> dict:
         try:
             with open(config_path, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except (json.JSONDecodeError, IOError) as e:
+        except json.JSONDecodeError as e:
             print(
-                f"Warning: Could not read existing config {config_path}: {e}",
+                f"Error: {config_path} contains invalid JSON: {e}",
                 file=sys.stderr,
             )
-            print("Creating new configuration file", file=sys.stderr)
+            print(
+                "Please fix the file manually or remove it before retrying.",
+                file=sys.stderr,
+            )
+            raise SystemExit(1)
+        except IOError as e:
+            print(
+                f"Error: Could not read config {config_path}: {e}",
+                file=sys.stderr,
+            )
+            raise SystemExit(1)
 
     return {}
 
 
 def save_json_config(config_path: Path, config: dict) -> None:
-    """Save JSON configuration to file.
+    """Save JSON configuration to file using atomic write.
+
+    Writes to a temporary file first, then atomically replaces the target
+    to prevent data loss if the process is interrupted mid-write.
 
     Args:
         config_path: Path to save the configuration
         config: Configuration dictionary to save
     """
     config_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(config_path, "w", encoding="utf-8") as f:
-        json.dump(config, f, indent=2, ensure_ascii=False)
+
+    # Atomic write: write to temp file in same directory, then rename
+    fd, tmp_path = tempfile.mkstemp(
+        dir=config_path.parent, suffix=".tmp", prefix=".mcp_"
+    )
+    try:
+        with open(fd, "w", encoding="utf-8") as f:
+            json.dump(config, f, indent=2, ensure_ascii=False)
+        Path(tmp_path).replace(config_path)
+    except BaseException:
+        Path(tmp_path).unlink(missing_ok=True)
+        raise
 
 
 def check_cli_available(target: str) -> bool:
@@ -106,11 +134,12 @@ def check_cli_available(target: str) -> bool:
         return False
 
 
-def add_strata_to_cursor(scope: str = "user") -> int:
+def add_strata_to_cursor(scope: str = "user", yes: bool = False) -> int:
     """Add Strata to Cursor MCP configuration.
 
     Args:
         scope: Configuration scope (user, project, or local)
+        yes: Skip confirmation prompt when True
 
     Returns:
         0 on success, 1 on error
@@ -130,9 +159,24 @@ def add_strata_to_cursor(scope: str = "user") -> int:
             )
             return 1
 
+        # Prompt for confirmation before modifying config
+        if cursor_config_path.exists() and not yes:
+            response = input(
+                f"This will modify {cursor_config_path}. Continue? [y/N] "
+            )
+            if response.lower() not in ("y", "yes"):
+                print("Aborted.", file=sys.stderr)
+                return 1
+
         print(
             f"Adding Strata to Cursor with scope '{scope}' at {cursor_config_path}..."
         )
+
+        # Back up existing config before modification
+        if cursor_config_path.exists():
+            backup_path = cursor_config_path.with_suffix(".json.bak")
+            shutil.copy2(cursor_config_path, backup_path)
+            print(f"Backup saved to {backup_path}")
 
         # Load or create cursor configuration
         cursor_config = ensure_json_config(cursor_config_path)
@@ -145,7 +189,7 @@ def add_strata_to_cursor(scope: str = "user") -> int:
             cursor_config, ["mcpServers", "strata"], strata_server_config
         )
 
-        # Save updated configuration
+        # Save updated configuration (atomic write)
         save_json_config(cursor_config_path, cursor_config)
         print("✓ Successfully added Strata to Cursor MCP configuration")
         return 0
@@ -223,12 +267,13 @@ def add_strata_to_claude_or_gemini(target: str, scope: str = "user") -> int:
         return 1
 
 
-def add_strata_to_tool(target: str, scope: str = "user") -> int:
+def add_strata_to_tool(target: str, scope: str = "user", yes: bool = False) -> int:
     """Add Strata MCP server to specified tool configuration.
 
     Args:
         target: Target tool (claude, gemini, vscode, cursor)
         scope: Configuration scope
+        yes: Skip confirmation prompt when True
 
     Returns:
         0 on success, 1 on error
@@ -262,7 +307,7 @@ def add_strata_to_tool(target: str, scope: str = "user") -> int:
 
     # Handle each target
     if target == "cursor":
-        return add_strata_to_cursor(scope)
+        return add_strata_to_cursor(scope, yes=yes)
     elif target == "vscode":
         return add_strata_to_vscode()
     else:  # claude or gemini
