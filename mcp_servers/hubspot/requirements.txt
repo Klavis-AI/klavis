@@ -21,7 +21,7 @@ Pygments==2.19.1
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.0
 python-multipart==0.0.22
-requests==2.32.4
+requests==2.33.0
 rich==14.0.0
 shellingham==1.5.4
 six==1.17.0
