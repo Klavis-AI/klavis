@@ -87,6 +87,16 @@ class MCPClient:
                 tool_dict["title"] = tool.title
             if hasattr(tool, "outputSchema") and tool.outputSchema:
                 tool_dict["outputSchema"] = tool.outputSchema
+            if hasattr(tool, "annotations") and tool.annotations:
+                annotations = tool.annotations
+                if hasattr(annotations, "model_dump"):
+                    tool_dict["annotations"] = annotations.model_dump(
+                        exclude_none=True
+                    )
+                elif hasattr(annotations, "dict"):
+                    tool_dict["annotations"] = annotations.dict(exclude_none=True)
+                elif isinstance(annotations, dict):
+                    tool_dict["annotations"] = annotations
             tools.append(tool_dict)
 
         self._tools_cache = tools
