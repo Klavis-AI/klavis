@@ -18,6 +18,49 @@ TOOL_EXECUTE_ACTION = "execute_action"
 TOOL_SEARCH_DOCUMENTATION = "search_documentation"
 TOOL_HANDLE_AUTH_FAILURE = "handle_auth_failure"
 
+ACTION_SCOPE_ALL = "all"
+ACTION_SCOPE_READ_ONLY = "read_only"
+ACTION_SCOPES = [ACTION_SCOPE_ALL, ACTION_SCOPE_READ_ONLY]
+
+
+def _scope_property() -> dict:
+    return {
+        "type": "string",
+        "enum": ACTION_SCOPES,
+        "default": ACTION_SCOPE_ALL,
+        "description": (
+            "Limit actions by safety scope. Use read_only to expose or execute only "
+            "actions annotated with readOnlyHint."
+        ),
+    }
+
+
+def _tool_annotations(tool: dict) -> dict:
+    annotations = tool.get("annotations") or {}
+    if isinstance(annotations, dict):
+        return annotations
+    if hasattr(annotations, "model_dump"):
+        return annotations.model_dump(exclude_none=True)
+    if hasattr(annotations, "dict"):
+        return annotations.dict(exclude_none=True)
+    return {}
+
+
+def is_read_only_tool(tool: dict) -> bool:
+    annotations = _tool_annotations(tool)
+    return annotations.get("readOnlyHint") is True
+
+
+def filter_tools_by_scope(tools: List[dict] | None, scope: str | None) -> List[dict]:
+    tool_list = list(tools or [])
+    if not scope or scope == ACTION_SCOPE_ALL:
+        return tool_list
+    if scope == ACTION_SCOPE_READ_ONLY:
+        return [tool for tool in tool_list if is_read_only_tool(tool)]
+    raise ValueError(
+        f"Invalid scope '{scope}'. Expected one of: {', '.join(ACTION_SCOPES)}"
+    )
+
 
 def get_tool_definitions(user_available_servers: List[str]) -> List[types.Tool]:
     """Get tool definitions for the available servers."""
@@ -38,6 +81,7 @@ def get_tool_definitions(user_available_servers: List[str]) -> List[types.Tool]:
                         "items": {"type": "string", "enum": user_available_servers},
                         "description": "List of server names to discover actions from.",
                     },
+                    "scope": _scope_property(),
                 },
             },
         ),
@@ -57,6 +101,7 @@ def get_tool_definitions(user_available_servers: List[str]) -> List[types.Tool]:
                         "type": "string",
                         "description": "The name of the action/operation",
                     },
+                    "scope": _scope_property(),
                 },
             },
         ),
@@ -89,6 +134,7 @@ def get_tool_definitions(user_available_servers: List[str]) -> List[types.Tool]:
                         "description": "JSON string containing request body",
                         "default": "{}",
                     },
+                    "scope": _scope_property(),
                 },
             },
         ),
@@ -115,6 +161,7 @@ def get_tool_definitions(user_available_servers: List[str]) -> List[types.Tool]:
                         "maximum": 50,
                         "default": 10,
                     },
+                    "scope": _scope_property(),
                 },
             },
         ),
@@ -155,6 +202,7 @@ async def execute_tool(
         if name == TOOL_DISCOVER_SERVER_ACTIONS:
             user_query = arguments.get("user_query")
             server_names = arguments.get("server_names")
+            scope = arguments.get("scope", ACTION_SCOPE_ALL)
 
             # If no server names provided, use all available servers
             if not server_names:
@@ -165,7 +213,7 @@ async def execute_tool(
             for server_name in server_names:
                 try:
                     client = client_manager.get_client(server_name)
-                    tools = await client.list_tools()
+                    tools = filter_tools_by_scope(await client.list_tools(), scope)
 
                     # Filter tools based on user query if provided
                     if user_query and tools:
@@ -205,6 +253,7 @@ async def execute_tool(
         elif name == TOOL_GET_ACTION_DETAILS:
             server_name = arguments.get("server_name")
             action_name = arguments.get("action_name")
+            scope = arguments.get("scope", ACTION_SCOPE_ALL)
 
             if not server_name or not action_name:
                 return [
@@ -216,7 +265,7 @@ async def execute_tool(
 
             try:
                 client = client_manager.get_client(server_name)
-                tools = await client.list_tools()
+                tools = filter_tools_by_scope(await client.list_tools(), scope)
 
                 action_found = None
                 for tool in tools or []:
@@ -249,6 +298,7 @@ async def execute_tool(
             path_params = arguments.get("path_params")
             query_params = arguments.get("query_params")
             body_schema = arguments.get("body_schema", "{}")
+            scope = arguments.get("scope", ACTION_SCOPE_ALL)
 
             if not server_name or not action_name:
                 return [
@@ -260,6 +310,22 @@ async def execute_tool(
 
             try:
                 client = client_manager.get_client(server_name)
+                tools = await client.list_tools()
+                scoped_tools = filter_tools_by_scope(tools, scope)
+                if scope != ACTION_SCOPE_ALL and not any(
+                    tool["name"] == action_name for tool in scoped_tools
+                ):
+                    result = {
+                        "error": (
+                            f"Action '{action_name}' is not available in scope "
+                            f"'{scope}' for server '{server_name}'"
+                        )
+                    }
+                    return [
+                        types.TextContent(
+                            type="text", text=json.dumps(result, separators=(",", ":"))
+                        )
+                    ]
                 action_params = {}
 
                 # Parse parameters if they're JSON strings
@@ -295,6 +361,7 @@ async def execute_tool(
             query = arguments.get("query")
             server_name = arguments.get("server_name")
             max_results = arguments.get("max_results", 10)
+            scope = arguments.get("scope", ACTION_SCOPE_ALL)
 
             if not query or not server_name:
                 return [
@@ -306,7 +373,7 @@ async def execute_tool(
 
             try:
                 client = client_manager.get_client(server_name)
-                tools = await client.list_tools()
+                tools = filter_tools_by_scope(await client.list_tools(), scope)
 
                 tools_map = {server_name: tools if tools else []}
                 searcher = UniversalToolSearcher(tools_map)

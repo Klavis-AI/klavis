@@ -198,6 +198,13 @@ When running as a router, the following tools are exposed:
 - `search_documentation` - Search server documentation
 - `handle_auth_failure` - Handle authentication issues
 
+`discover_server_actions`, `get_action_details`, `execute_action`, and
+`search_documentation` accept an optional `scope` argument. Use
+`"scope": "read_only"` to only discover, inspect, search, or execute actions
+whose upstream MCP tool is annotated with `readOnlyHint: true`. This is useful
+when connecting user-owned integrations in contexts where the agent should be
+able to inspect data but not mutate it.
+
 # Development
 
 ### Running Tests
@@ -243,4 +250,3 @@ strata run --port 8080
 ---
 
 👉 **[Get Instant Access at Klavis AI (YC X25)](https://klavis.ai/)** 👈
-
