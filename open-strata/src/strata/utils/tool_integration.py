@@ -1,8 +1,10 @@
 """Tool integration utilities for adding Strata to various IDEs and editors."""
 
 import json
+import shutil
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -81,6 +83,32 @@ def save_json_config(config_path: Path, config: dict) -> None:
         json.dump(config, f, indent=2, ensure_ascii=False)
 
 
+def backup_json_config(config_path: Path) -> Path | None:
+    """Create a timestamped backup for an existing JSON config file.
+
+    Args:
+        config_path: Path to the configuration file to back up
+
+    Returns:
+        The backup path when a backup was created, otherwise None
+    """
+    if not config_path.exists():
+        return None
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    backup_path = config_path.with_name(f"{config_path.name}.{timestamp}.bak")
+    counter = 1
+
+    while backup_path.exists():
+        backup_path = config_path.with_name(
+            f"{config_path.name}.{timestamp}.{counter}.bak"
+        )
+        counter += 1
+
+    shutil.copy2(config_path, backup_path)
+    return backup_path
+
+
 def check_cli_available(target: str) -> bool:
     """Check if a CLI tool is available.
 
@@ -136,6 +164,7 @@ def add_strata_to_cursor(scope: str = "user") -> int:
 
         # Load or create cursor configuration
         cursor_config = ensure_json_config(cursor_config_path)
+        original_cursor_config = json.dumps(cursor_config, sort_keys=True)
 
         # Create Strata server configuration for Cursor
         strata_server_config = {"command": "strata", "args": []}
@@ -146,8 +175,18 @@ def add_strata_to_cursor(scope: str = "user") -> int:
         )
 
         # Save updated configuration
+        updated_cursor_config = json.dumps(cursor_config, sort_keys=True)
+        backup_path = None
+        if (
+            cursor_config_path.exists()
+            and original_cursor_config != updated_cursor_config
+        ):
+            backup_path = backup_json_config(cursor_config_path)
+
         save_json_config(cursor_config_path, cursor_config)
         print("✓ Successfully added Strata to Cursor MCP configuration")
+        if backup_path:
+            print(f"Backup saved at {backup_path}")
         return 0
 
     except (IOError, OSError) as e:
