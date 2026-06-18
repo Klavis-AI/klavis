@@ -1,6 +1,6 @@
 mcp==1.11.0
 exa_py==1.15.1
-python-dotenv==1.1.1
+python-dotenv==1.2.2
 httpx>=0.28.1
 click>=8.2.1
 starlette>=0.49.1
