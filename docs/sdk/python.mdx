@@ -206,15 +206,16 @@ for iteration in range(max_iterations):
 ## Error Handling
 
 ```python
-from klavis.exceptions import KlavisError
+from klavis.core.api_error import ApiError
 
 try:
     server = klavis_client.mcp_server.create_server_instance(
         server_name=McpServerName.YOUTUBE,
         user_id="user123"
     )
-except KlavisError as e:
-    print(f"Error creating server: {e}")
+except ApiError as e:
+    print(f"Error creating server: {e.status_code}")
+    print(e.body)
 ```
 
 ## Next Steps
