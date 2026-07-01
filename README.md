@@ -72,6 +72,9 @@
 
 ```bash
 # Run any MCP Integration
+
+[![Listed on TakoAPI](https://takoapi.com/api/badge/klavis-ai-klavis)](https://takoapi.com/agents/klavis-ai-klavis)
+
 docker pull ghcr.io/klavis-ai/github-mcp-server:latest
 docker run -p 5000:5000 ghcr.io/klavis-ai/github-mcp-server:latest
 
