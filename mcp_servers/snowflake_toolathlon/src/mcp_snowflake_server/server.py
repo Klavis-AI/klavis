@@ -5,6 +5,7 @@ import importlib.metadata
 import json
 import logging
 import os
+import re
 from functools import wraps
 from typing import Any, Callable
 from collections.abc import AsyncIterator
@@ -111,6 +112,27 @@ def check_database_access(database_name: str, allowed_databases: list[str] | Non
             raise ValueError(f"Access denied: Database '{database_name}' is not in the allowed databases list: {allowed_databases}")
 
 
+
+
+_IDENTIFIER_RE = re.compile(r'^[A-Za-z_][A-Za-z0-9_$]*$')
+
+
+def validate_identifier(name: str, kind: str = "identifier") -> str:
+    """Validate a Snowflake identifier (database/schema/table name).
+
+    Snowflake unquoted identifiers must start with a letter or underscore
+    and contain only letters, digits, underscores, or dollar signs.
+    Any input containing SQL metacharacters (quotes, semicolons, spaces,
+    parentheses, etc.) is rejected, preventing SQL injection when the
+    identifier is interpolated into a SQL statement.
+    """
+    if not isinstance(name, str) or not _IDENTIFIER_RE.match(name):
+        raise ValueError(
+            f"Invalid {kind}: {name!r}. Identifiers must match "
+            f"[A-Za-z_][A-Za-z0-9_$]*."
+        )
+    return name
+
 def extract_database_from_query(query: str) -> str | None:
     """Extract database name from SQL query using basic parsing"""
     # Convert to uppercase for easier matching
@@ -133,7 +155,6 @@ def extract_database_from_query(query: str) -> str | None:
             return tokens[1].strip(';')
     
     # For qualified table references like database.schema.table
-    import re
     qualified_match = re.search(r'\b([A-Z_][A-Z0-9_]*)\.[A-Z_][A-Z0-9_]*\.[A-Z_][A-Z0-9_]*', query_upper)
     if qualified_match:
         return qualified_match.group(1)
@@ -201,6 +222,7 @@ async def handle_list_schemas(arguments, db, *_, exclusion_config=None, exclude_
     
     # Check allowed databases restriction
     check_database_access(database, allowed_databases)
+    validate_identifier(database, "database name")
     query = f"SELECT SCHEMA_NAME FROM {database.upper()}.INFORMATION_SCHEMA.SCHEMATA"
     data, data_id = await db.execute_query(query)
 
@@ -248,6 +270,8 @@ async def handle_list_tables(arguments, db, *_, exclusion_config=None, exclude_j
     
     # Check allowed databases restriction
     check_database_access(database, allowed_databases)
+    validate_identifier(database, "database name")
+    validate_identifier(schema, "schema name")
 
     query = f"""
         SELECT table_catalog, table_schema, table_name, comment 
@@ -309,6 +333,9 @@ async def handle_describe_table(arguments, db, *_, exclude_json_results=False, a
     check_database_access(database_name, allowed_databases)
     schema_name = split_identifier[1].upper()
     table_name = split_identifier[2].upper()
+    validate_identifier(database_name, "database name")
+    validate_identifier(schema_name, "schema name")
+    validate_identifier(table_name, "table name")
 
     query = f"""
         SELECT column_name, column_default, is_nullable, data_type, comment 
@@ -431,6 +458,7 @@ async def handle_create_databases(arguments, db, _, allow_write, __, allowed_dat
             warnings.append(f"Warning: Database '{db_name}' already exists, skipping creation")
         else:
             try:
+                validate_identifier(db_name, "database name")
                 create_result, _ = await db.execute_query(f"CREATE DATABASE {db_name}")
                 results.append(f"Successfully created database '{db_name}'")
             except Exception as e:
@@ -469,6 +497,7 @@ async def handle_drop_databases(arguments, db, _, allow_write, __, allowed_datab
             warnings.append(f"Warning: Database '{db_name}' does not exist, skipping deletion")
         else:
             try:
+                validate_identifier(db_name, "database name")
                 drop_result, _ = await db.execute_query(f"DROP DATABASE {db_name}")
                 results.append(f"Successfully dropped database '{db_name}'")
             except Exception as e:
@@ -495,6 +524,7 @@ async def handle_create_schemas(arguments, db, _, allow_write, __, allowed_datab
     
     # Check allowed databases restriction
     check_database_access(database_name, allowed_databases)
+    validate_identifier(database_name, "database name")
     
     results = []
     warnings = []
@@ -512,6 +542,7 @@ async def handle_create_schemas(arguments, db, _, allow_write, __, allowed_datab
             warnings.append(f"Warning: Schema '{schema_name}' already exists in database '{database_name}', skipping creation")
         else:
             try:
+                validate_identifier(schema_name, "schema name")
                 create_result, _ = await db.execute_query(f"CREATE SCHEMA {database_name}.{schema_name}")
                 results.append(f"Successfully created schema '{schema_name}' in database '{database_name}'")
             except Exception as e:
@@ -538,6 +569,7 @@ async def handle_drop_schemas(arguments, db, _, allow_write, __, allowed_databas
     
     # Check allowed databases restriction
     check_database_access(database_name, allowed_databases)
+    validate_identifier(database_name, "database name")
     
     results = []
     warnings = []
@@ -555,6 +587,7 @@ async def handle_drop_schemas(arguments, db, _, allow_write, __, allowed_databas
             warnings.append(f"Warning: Schema '{schema_name}' does not exist in database '{database_name}', skipping deletion")
         else:
             try:
+                validate_identifier(schema_name, "schema name")
                 drop_result, _ = await db.execute_query(f"DROP SCHEMA {database_name}.{schema_name}")
                 results.append(f"Successfully dropped schema '{schema_name}' from database '{database_name}'")
             except Exception as e:
@@ -582,6 +615,8 @@ async def handle_create_tables(arguments, db, _, allow_write, __, allowed_databa
     
     # Check allowed databases restriction
     check_database_access(database_name, allowed_databases)
+    validate_identifier(database_name, "database name")
+    validate_identifier(schema_name, "schema name")
     
     results = []
     warnings = []
@@ -603,7 +638,6 @@ async def handle_create_tables(arguments, db, _, allow_write, __, allowed_databa
             # Simple format: just the CREATE TABLE SQL
             table_definition = table_def
             # Try to extract table name from SQL
-            import re
             match = re.search(r'CREATE\s+TABLE\s+(\w+)', table_definition.upper())
             table_name = match.group(1) if match else "UNKNOWN"
         else:
@@ -615,6 +649,7 @@ async def handle_create_tables(arguments, db, _, allow_write, __, allowed_databa
             warnings.append(f"Warning: Table '{table_name}' already exists in {database_name}.{schema_name}, skipping creation")
         else:
             try:
+                validate_identifier(table_name, "table name")
                 # Ensure the table is created in the correct database.schema
                 full_table_definition = table_definition.replace(
                     f"CREATE TABLE {table_name}", 
@@ -647,6 +682,8 @@ async def handle_drop_tables(arguments, db, _, allow_write, __, allowed_database
     
     # Check allowed databases restriction
     check_database_access(database_name, allowed_databases)
+    validate_identifier(database_name, "database name")
+    validate_identifier(schema_name, "schema name")
     
     results = []
     warnings = []
@@ -666,6 +703,7 @@ async def handle_drop_tables(arguments, db, _, allow_write, __, allowed_database
             warnings.append(f"Warning: Table '{table_name}' does not exist in {database_name}.{schema_name}, skipping deletion")
         else:
             try:
+                validate_identifier(table_name, "table name")
                 drop_result, _ = await db.execute_query(f"DROP TABLE {database_name}.{schema_name}.{table_name}")
                 results.append(f"Successfully dropped table '{table_name}' from {database_name}.{schema_name}")
             except Exception as e:
