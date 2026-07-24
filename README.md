@@ -1,3 +1,5 @@
+[![mcpindex](https://mcpindex.ai/api/v1/badge/ai-klavis-strata)](https://mcpindex.ai/server/ai-klavis-strata)
+
 <div align="center">
   <picture>
     <img src="./docs/images/logo/cover.png" width="100%">
