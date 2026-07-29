@@ -12,7 +12,7 @@
 [![Documentation](https://img.shields.io/badge/Documentation-📖-green)](https://www.klavis.ai/docs)
 [![Website](https://img.shields.io/badge/Website-🌐-purple)](https://www.klavis.ai)
 [![Discord](https://img.shields.io/badge/Discord-Join-7289DA?logo=discord&logoColor=white)](https://discord.gg/p7TuTEcssn)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../LICENSE)
 [![Docker Images](https://img.shields.io/badge/Docker-ghcr.io-blue?logo=docker)](https://github.com/orgs/klavis-ai/packages)
 
 </div>
@@ -171,6 +171,7 @@ pip install klavis  # or npm install klavis
 | **Notion** | `ghcr.io/klavis-ai/notion-mcp-server:latest` | ✅ | Database and page operations |
 | **Salesforce** | `ghcr.io/klavis-ai/salesforce-mcp-server:latest` | ✅ | CRM data management |
 | **Postgres** | `ghcr.io/klavis-ai/postgres-mcp-server` | ❌ | Database operations |
+| **Xquik** | `ghcr.io/klavis-ai/xquik-mcp-server:latest` | ❌ | X data & automation. Not affiliated with X Corp. |
 | ... | ... | ...| ... |
 
 And more! 
@@ -224,7 +225,7 @@ response = openai.chat.completions.create(
 )
 ```
 
-[**📖 View Complete Examples →**](examples/)
+[**📖 View Complete Examples →**](../examples/)
 
 ## 🌐 Hosted MCP Service - Zero Setup Required
 
@@ -289,8 +290,8 @@ Our OAuth wrapper simplifies this by handling all the complex OAuth implementati
 | **📖 Documentation** | [www.klavis.ai/docs](https://www.klavis.ai/docs) | Complete guides and API reference |
 | **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) | Get help and connect with users |
 | **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) | Report bugs and request features |
-| **📦 Examples** | [examples/](examples/) | Working examples with popular AI frameworks |
-| **🔧 Server Guides** | [mcp_servers/](mcp_servers/) | Individual server documentation |
+| **📦 Examples** | [examples/](../examples/) | Working examples with popular AI frameworks |
+| **🔧 Server Guides** | [mcp_servers/](./) | Individual server documentation |
 
 ## 🤝 Contributing
 
@@ -300,11 +301,11 @@ We love contributions! Whether you want to:
 - 🔧 Build new MCP servers
 - 🎨 Enhance existing servers
 
-Check out our [Contributing Guide](CONTRIBUTING.md) to get started!
+Check out our [Contributing Guide](../CONTRIBUTING.md) to get started!
 
 ## 📜 License
 
-Apache 2.0 license - see [LICENSE](LICENSE) for details.
+Apache 2.0 license - see [LICENSE](../LICENSE) for details.
 
 ---
 
