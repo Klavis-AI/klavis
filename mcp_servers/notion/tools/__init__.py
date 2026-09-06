@@ -1,4 +1,4 @@
-from .base import auth_token_context
+from .base import auth_token_context, is_error_envelope, ERROR_TYPES
 from .pages import create_page, get_page, update_page_properties, retrieve_page_property
 from .databases import query_database, get_database, create_database, update_database, create_database_item
 from .search import search_notion
@@ -8,6 +8,8 @@ from .blocks import retrieve_block, update_block, delete_block, get_block_childr
 
 __all__ = [
     'auth_token_context',
+    'is_error_envelope',
+    'ERROR_TYPES',
     'create_page',
     'get_page', 
     'update_page_properties',

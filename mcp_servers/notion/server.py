@@ -3,6 +3,7 @@ import json
 import logging
 import os
 from collections.abc import AsyncIterator
+from functools import partial
 from typing import Any, Dict
 import base64
 
@@ -237,8 +238,50 @@ def normalize_property_item(raw_item: dict) -> dict:
     return normalized
 
 
+class NotionToolError(Exception):
+    """Raised when a Notion tool call failed, carrying the structured error envelope.
+
+    The MCP framework builds CallToolResult with isError=False for any handler that
+    returns normally, and sets isError=True only when the handler raises, using
+    str(exception) as the content. Tool functions here catch their exceptions and
+    return an error dict, so before this the handler never raised and every failure
+    reached the client as a successful call whose body happened to be an error object.
+
+    Serialising the envelope as the exception message keeps both properties: the
+    protocol's error flag is set, and the caller still receives the structured detail
+    rather than a flattened string. google_docs in this repository already raises for
+    the same reason.
+    """
+
+    def __init__(self, envelope: dict) -> None:
+        self.envelope = envelope
+        super().__init__(json.dumps(envelope, indent=2))
+
+
+def apply_normalizer(result: Any, normalizer) -> Any:
+    """Normalize a successful tool result, or raise if the tool reported a failure.
+
+    Tool functions return either a Notion payload or the envelope from
+    handle_notion_error, and both are plain dicts, so a type check cannot tell them
+    apart. Passing an envelope to a normalizer destroyed it: the mapping-rule
+    normalizers (page, database, comment, list) found none of their source keys and
+    returned {}, while the ones that copy "type" through returned a plausible-looking
+    object such as {"userType": "not_found_error"}, because the envelope's "type" key
+    collides with the "type" every Notion object carries.
+
+    Detecting the envelope here serves both purposes: the failure is no longer
+    flattened by normalization, and raising it lets the framework mark the response
+    as an error so the client can detect the failure from the protocol rather than by
+    inspecting the payload.
+    """
+    if is_error_envelope(result):
+        raise NotionToolError(result)
+    return normalizer(result) if isinstance(result, dict) else result
+
+
 from tools import (
     auth_token_context,
+    is_error_envelope,
     create_page,
     get_page,
     update_page_properties,
@@ -924,7 +967,7 @@ def main(
                     cover=arguments.get("cover"),
                 )
                 # Normalize the response
-                normalized = normalize_page(result) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, normalize_page)
                 return [
                     types.TextContent(
                         type="text",
@@ -932,13 +975,13 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_get_page":
             try:
                 result = await get_page(
@@ -946,7 +989,7 @@ def main(
                     filter_properties=arguments.get("filter_properties"),
                 )
                 # Normalize the response
-                normalized = normalize_page(result) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, normalize_page)
                 return [
                     types.TextContent(
                         type="text",
@@ -954,13 +997,13 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_update_page_properties":
             try:
                 result = await update_page_properties(
@@ -972,7 +1015,7 @@ def main(
                     in_trash=arguments.get("in_trash"),
                 )
                 # Normalize the response
-                normalized = normalize_page(result) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, normalize_page)
                 return [
                     types.TextContent(
                         type="text",
@@ -980,13 +1023,13 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_query_database":
             try:
                 result = await query_database(
@@ -1000,7 +1043,7 @@ def main(
                     in_trash=arguments.get("in_trash"),
                 )
                 # Normalize the response (list of pages)
-                normalized = normalize_list_response(result, normalize_page) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, partial(normalize_list_response, item_normalizer=normalize_page))
                 return [
                     types.TextContent(
                         type="text",
@@ -1008,18 +1051,18 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_get_database":
             try:
                 result = await get_database(database_id=arguments.get("database_id"))
                 # Normalize the response
-                normalized = normalize_database(result) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, normalize_database)
                 return [
                     types.TextContent(
                         type="text",
@@ -1027,13 +1070,13 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_create_database":
             try:
                 result = await create_database(
@@ -1045,7 +1088,7 @@ def main(
                     description=arguments.get("description"),
                 )
                 # Normalize the response
-                normalized = normalize_database(result) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, normalize_database)
                 return [
                     types.TextContent(
                         type="text",
@@ -1053,13 +1096,13 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_update_database":
             try:
                 result = await update_database(
@@ -1072,7 +1115,7 @@ def main(
                     archived=arguments.get("archived"),
                 )
                 # Normalize the response
-                normalized = normalize_database(result) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, normalize_database)
                 return [
                     types.TextContent(
                         type="text",
@@ -1080,13 +1123,13 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_create_database_item":
             try:
                 result = await create_database_item(
@@ -1097,7 +1140,7 @@ def main(
                     cover=arguments.get("cover"),
                 )
                 # Normalize the response (returns a page)
-                normalized = normalize_page(result) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, normalize_page)
                 return [
                     types.TextContent(
                         type="text",
@@ -1105,13 +1148,13 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
 
         elif name == "notion_search":
             try:
@@ -1131,7 +1174,7 @@ def main(
                         elif obj_type == "database":
                             return normalize_database(item)
                         return item
-                    normalized = normalize_list_response(result, normalize_search_item)
+                    normalized = apply_normalizer(result, partial(normalize_list_response, item_normalizer=normalize_search_item))
                 else:
                     normalized = result
                 return [
@@ -1141,18 +1184,18 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_get_user":
             try:
                 result = await get_user(user_id=arguments.get("user_id"))
                 # Normalize the response
-                normalized = normalize_user(result) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, normalize_user)
                 return [
                     types.TextContent(
                         type="text",
@@ -1160,13 +1203,13 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_list_users":
             try:
                 result = await list_users(
@@ -1174,7 +1217,7 @@ def main(
                     page_size=arguments.get("page_size"),
                 )
                 # Normalize the response (list of users)
-                normalized = normalize_list_response(result, normalize_user) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, partial(normalize_list_response, item_normalizer=normalize_user))
                 return [
                     types.TextContent(
                         type="text",
@@ -1182,13 +1225,13 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
 
         elif name == "notion_create_comment":
             try:
@@ -1198,7 +1241,7 @@ def main(
                     discussion_id=arguments.get("discussion_id"),
                 )
                 # Normalize the response
-                normalized = normalize_comment(result) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, normalize_comment)
                 return [
                     types.TextContent(
                         type="text",
@@ -1206,13 +1249,13 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_get_comments":
             try:
                 result = await get_comments(
@@ -1221,7 +1264,7 @@ def main(
                     page_size=arguments.get("page_size"),
                 )
                 # Normalize the response (list of comments)
-                normalized = normalize_list_response(result, normalize_comment) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, partial(normalize_list_response, item_normalizer=normalize_comment))
                 return [
                     types.TextContent(
                         type="text",
@@ -1229,18 +1272,18 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_get_me":
             try:
                 result = await get_me()
                 # Normalize the response (returns a user/bot object)
-                normalized = normalize_user(result) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, normalize_user)
                 return [
                     types.TextContent(
                         type="text",
@@ -1248,13 +1291,13 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_retrieve_page_property":
             try:
                 result = await retrieve_page_property(
@@ -1264,7 +1307,7 @@ def main(
                     page_size=arguments.get("page_size"),
                 )
                 # Normalize the response (property item)
-                normalized = normalize_property_item(result) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, normalize_property_item)
                 return [
                     types.TextContent(
                         type="text",
@@ -1272,18 +1315,18 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_retrieve_block":
             try:
                 result = await retrieve_block(block_id=arguments.get("block_id"))
                 # Normalize the response
-                normalized = normalize_block(result) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, normalize_block)
                 return [
                     types.TextContent(
                         type="text",
@@ -1291,13 +1334,13 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_update_block":
             try:
                 result = await update_block(
@@ -1306,7 +1349,7 @@ def main(
                     archived=arguments.get("archived"),
                 )
                 # Normalize the response
-                normalized = normalize_block(result) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, normalize_block)
                 return [
                     types.TextContent(
                         type="text",
@@ -1314,18 +1357,18 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_delete_block":
             try:
                 result = await delete_block(block_id=arguments.get("block_id"))
                 # Normalize the response
-                normalized = normalize_block(result) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, normalize_block)
                 return [
                     types.TextContent(
                         type="text",
@@ -1333,13 +1376,13 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_get_block_children":
             try:
                 result = await get_block_children(
@@ -1348,7 +1391,7 @@ def main(
                     page_size=arguments.get("page_size"),
                 )
                 # Normalize the response (list of blocks)
-                normalized = normalize_list_response(result, normalize_block) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, partial(normalize_list_response, item_normalizer=normalize_block))
                 return [
                     types.TextContent(
                         type="text",
@@ -1356,13 +1399,13 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
         elif name == "notion_append_block_children":
             try:
                 result = await append_block_children(
@@ -1371,7 +1414,7 @@ def main(
                     after=arguments.get("after"),
                 )
                 # Normalize the response (list of blocks)
-                normalized = normalize_list_response(result, normalize_block) if isinstance(result, dict) else result
+                normalized = apply_normalizer(result, partial(normalize_list_response, item_normalizer=normalize_block))
                 return [
                     types.TextContent(
                         type="text",
@@ -1379,13 +1422,13 @@ def main(
                     )
                 ]
             except Exception as e:
+                # Re-raise rather than returning the message as content. The MCP
+                # framework sets CallToolResult.isError only for a handler that
+                # raises; returning here produced a successful result whose body
+                # happened to read "Error: ...", which a client cannot detect as a
+                # failure without parsing prose.
                 logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+                raise
 
         return [
             types.TextContent(
