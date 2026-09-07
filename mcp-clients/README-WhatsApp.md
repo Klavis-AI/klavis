@@ -29,6 +29,9 @@ CALLBACK_URL=your_webhook_url
 PORT=8080
 ```
 
+`CALLBACK_URL` is the public root of this service, with no path appended. The webhook
+lives at `/`, and the health check at `/health`.
+
 ## WhatsApp API Setup
 
 1. Create a Meta Developer account at [developers.facebook.com](https://developers.facebook.com/)

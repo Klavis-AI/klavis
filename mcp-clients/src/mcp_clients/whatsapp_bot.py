@@ -3,7 +3,7 @@ import logging
 import uvicorn
 import time
 from typing import Dict, Any, Optional, List
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI
 from pywa_async import WhatsApp, types
 from pywa_async.types import Message
 from dotenv import load_dotenv
@@ -48,6 +48,18 @@ wa = WhatsApp(
     app_secret=APP_SECRET,
     webhook_challenge_delay=20.0  # Increased delay for webhook challenge
 )
+
+# pywa owns the webhook routes. Passing `server=app` above registers them immediately,
+# at construction, ahead of anything declared later in this file. They sit on pywa's
+# default endpoint "/", which is where CALLBACK_URL points; README-WhatsApp.md asks for
+# the bare tunnel URL. Signature checking is already on, since validate_updates defaults
+# to True and app_secret is set, so pywa verifies X-Hub-Signature-256 on every update
+# and answers the hub.challenge handshake itself.
+#
+# Two things follow for anyone adding to this module. Do not declare a route on "/":
+# FastAPI keeps the first registration, so yours is shadowed and never runs. And do not
+# hand-write webhook handlers on some other path, because Meta pointed at them would
+# bypass the signature check that pywa is doing here.
 
 class WhatsAppBotContext(BotContext):
     """
@@ -459,44 +471,16 @@ async def handle_message(client: WhatsApp, message: Message):
         except:
             pass
 
-@app.get("/")
-async def root():
-    """Root endpoint for health check"""
+@app.get("/health")
+async def health():
+    """Report that the service is up.
+
+    This sits on /health rather than "/" because pywa claims "/" when the client above
+    is constructed. A health check declared on "/" is shadowed and never runs, and the
+    caller gets a 422 complaining about a missing hub.verify_token instead of a status,
+    which anything probing the service reads as unhealthy.
+    """
     return {"status": "ok", "service": "WhatsApp Bot"}
-
-# Add a webhook verification endpoint
-@app.get("/webhook")
-async def verify_webhook(request: Request):
-    """
-    Manually handle webhook verification
-    This helps to avoid issues with the automatic verification process
-    """
-    query_params = dict(request.query_params)
-    
-    # Extract verification parameters
-    mode = query_params.get("hub.mode")
-    token = query_params.get("hub.verify_token")
-    challenge = query_params.get("hub.challenge")
-    
-    # Verify parameters
-    if mode == "subscribe" and token == VERIFY_TOKEN:
-        logger.info("Webhook verified successfully!")
-        return Response(content=challenge, media_type="text/plain")
-    else:
-        logger.error(f"Webhook verification failed. Mode: {mode}, Token: {token}")
-        return Response(status_code=403)
-
-# Add a webhook endpoint for receiving messages
-@app.post("/webhook")
-async def webhook(request: Request):
-    """
-    Handle incoming webhook events
-    """
-    body = await request.json()
-    logger.debug(f"Received webhook: {body}")
-    
-    # Let the WhatsApp client process the webhook
-    return await wa.process_webhook(body)
 
 def main():
     """
