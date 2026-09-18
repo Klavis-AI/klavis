@@ -42,6 +42,11 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_google_access_token_
 
 **OAuth Setup:** Google Slides requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
 
+## 🔐 Security Note
+
+When self-hosting with the local OAuth flow, after the first successful authorization the server writes the authorized user credentials to a `token.json` file in the server's working directory (relative path, written with default OS file permissions — no restrictive mode is set). On subsequent starts the server reuses `token.json` and refreshes it when expired (see `mcp_servers/google_slides/server.py`). Keep the working directory appropriately secured, and never commit `token.json` to version control.
+
+
 ## 🛠️ Available Tools
 
 - **Presentation Management**: Create, read, update Google Slides presentations
