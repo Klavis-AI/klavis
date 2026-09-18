@@ -167,6 +167,8 @@ class MCPServerList:
                 else:  # stdio/command
                     server_config["command"] = server.command
                     server_config["args"] = server.args
+                    if server.auth:
+                        server_config["auth"] = server.auth
 
                 if server.env:
                     server_config["env"] = server.env

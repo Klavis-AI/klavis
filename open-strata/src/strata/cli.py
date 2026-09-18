@@ -51,6 +51,8 @@ def add_command(args):
             key, value = header_var.split(":", 1)
             headers_dict[key.strip()] = value.strip()
 
+    auth = args.auth_type[0] if args.auth_type else ""
+
     if server_type in ["sse", "http"]:
         # Parse HTTP URL to extract base URL and any query parameters
         parsed = urlparse(args.url_or_command)
@@ -60,7 +62,6 @@ def add_command(args):
         if parsed.path == "" or parsed.path == "/":
             base_url = f"{parsed.scheme}://{parsed.netloc}"
 
-        auth = args.auth_type[0] if args.auth_type else ""
         config = MCPServerConfig(
             name=args.name,
             type=server_type,
@@ -79,6 +80,7 @@ def add_command(args):
             args=args.args if args.args else [],
             env=env_dict,
             enabled=args.enabled,
+            auth=auth,
         )
 
     # Add server to configuration
