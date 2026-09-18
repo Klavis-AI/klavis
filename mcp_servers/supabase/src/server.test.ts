@@ -971,7 +971,6 @@ describe('tools', () => {
 
     const services = [
       'api',
-      'branch-action',
       'postgres',
       'edge-function',
       'auth',
@@ -990,6 +989,40 @@ describe('tools', () => {
 
       expect(result).toEqual([]);
     }
+  });
+
+  test('get logs for branch-action rejects - not queryable via unified logs SQL', async () => {
+    // Action Run logs have no 'workflow_run_logs' source in Supabase's
+    // unified logs model and require a separate Management API endpoint
+    // (GET /v1/projects/{ref}/actions/{run_id}/logs) this tool doesn't yet
+    // implement - see mcp_servers/supabase/src/logs.ts. Must fail loudly,
+    // never silently return an empty/wrong result.
+    const { callTool } = await setup();
+
+    const org = await createOrganization({
+      name: 'My Org',
+      plan: 'free',
+      allowed_release_channels: ['ga'],
+    });
+
+    const project = await createProject({
+      name: 'Project 1',
+      region: 'us-east-1',
+      organization_id: org.id,
+    });
+    project.status = 'ACTIVE_HEALTHY';
+
+    const resultPromise = callTool({
+      name: 'supabase_get_logs',
+      arguments: {
+        project_id: project.id,
+        service: 'branch-action',
+      },
+    });
+
+    await expect(resultPromise).rejects.toThrow(
+      'branch-action logs are not queryable via the unified logs SQL endpoint'
+    );
   });
 
   test('get logs for invalid service type', async () => {

@@ -418,7 +418,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
               ? new Date(Date.now() - 5 * 60 * 1000)
               : undefined;
           const response = await getManagementApiClient().GET(
-            '/v1/projects/{ref}/analytics/endpoints/logs.all',
+            '/v1/projects/{ref}/analytics/endpoints/logs',
             {
               params: {
                 path: {

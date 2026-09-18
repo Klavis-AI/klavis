@@ -282,7 +282,7 @@ export const mockManagementApi = [
    * Get logs for a project
    */
   http.get<{ projectId: string }, { sql: string }>(
-    `${API_URL}/v1/projects/:projectId/analytics/endpoints/logs.all`,
+    `${API_URL}/v1/projects/:projectId/analytics/endpoints/logs`,
     async ({ params, request }) => {
       const project = mockProjects.get(params.projectId);
       if (!project) {
