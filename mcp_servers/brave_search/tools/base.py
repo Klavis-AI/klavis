@@ -21,7 +21,7 @@ def get_auth_token() -> str:
         if not token:
             # Fallback to environment variable
             token = os.getenv("BRAVE_SEARCH_API_KEY")
-            logger.debug(f"Using token from environment: {token}")
+            logger.debug(f"Using token from environment: {'***' if token else 'None'}")
             if not token:
                 raise RuntimeError("No Brave auth token found in context or environment")
         return token
