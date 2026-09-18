@@ -83,6 +83,7 @@ class MCPServerConfig:
                 args=data.get("args", []),
                 env=data.get("env", {}),
                 enabled=data.get("enabled", True),
+                auth=data.get("auth", ""),
             )
 
 

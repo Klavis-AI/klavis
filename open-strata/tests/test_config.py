@@ -450,3 +450,17 @@ class TestMCPServerList:
             assert disabled.args == ["arg1", "arg2"]
             assert disabled.enabled is False
             assert disabled.enabled is False
+
+    def test_stdio_auth_round_trip(self):
+        """Test that auth survives a to_dict/from_dict round-trip for stdio servers."""
+        cfg = MCPServerConfig(name="x", type="stdio", command="npx", auth="oauth2")
+        restored = MCPServerConfig.from_dict(cfg.to_dict())
+        assert restored.auth == "oauth2"
+        assert restored == cfg
+
+    def test_from_dict_stdio_without_auth_defaults_to_empty(self):
+        """Test that from_dict on a stdio dict without auth keeps the default."""
+        restored = MCPServerConfig.from_dict(
+            {"name": "x", "type": "stdio", "command": "npx"}
+        )
+        assert restored.auth == ""
