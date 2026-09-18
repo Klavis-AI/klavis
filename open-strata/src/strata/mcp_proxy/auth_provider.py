@@ -36,7 +36,7 @@ class LocalTokenStorage(TokenStorage):
                         data = json.load(f)
                         self._tokens = OAuthToken.model_validate(data)
                     except Exception as e:
-                        logger.info("Error loading tokens:", e)
+                        logger.warning("Error loading tokens: %s", e)
         return self._tokens
 
     async def set_tokens(self, tokens: OAuthToken) -> None:
