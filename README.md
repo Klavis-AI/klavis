@@ -1,3 +1,14 @@
+# Deprecated
+
+> [!WARNING]
+> This repository is deprecated and is no longer under active development. It remains public for reference, and Issues and pull requests remain open for community discussion and contributions.
+>
+> Klavis AI now focuses on RL environments and high-quality training data for frontier AI labs. Learn more at [klavis.ai](https://www.klavis.ai/).
+>
+> This notice applies to this open-source repository; it does not announce a shutdown of the hosted MCP service. Existing customers can continue to access the MCP Platform through the Product menu on [klavis.ai](https://www.klavis.ai/).
+
+---
+
 <div align="center">
   <picture>
     <img src="./docs/images/logo/cover.png" width="100%">
