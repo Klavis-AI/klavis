@@ -978,7 +978,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/projects/{ref}/analytics/endpoints/logs.all": {
+    "/v1/projects/{ref}/analytics/endpoints/logs": {
         parameters: {
             query?: never;
             header?: never;
