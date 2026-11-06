@@ -31,6 +31,15 @@ def get_path(data: dict, path: str) -> any:
     return current
 
 
+def is_error_response(response: Any) -> bool:
+    """Return whether a tool response is a handled error envelope."""
+    return (
+        isinstance(response, dict)
+        and isinstance(response.get("error"), str)
+        and isinstance(response.get("type"), str)
+    )
+
+
 def normalize(source: dict, mapping: dict[str, any]) -> dict:
     """
     Creates a new clean dictionary based strictly on the mapping rules.
@@ -39,6 +48,9 @@ def normalize(source: dict, mapping: dict[str, any]) -> dict:
         source: Raw vendor JSON.
         mapping: Dict of { "TargetFieldName": "Source.Path" OR Lambda_Function }
     """
+    if is_error_response(source):
+        return source.copy()
+
     clean_data = {}
     for target_key, rule in mapping.items():
         value = None
@@ -188,6 +200,8 @@ def normalize_list_response(response_data: dict, item_normalizer) -> dict:
     """Normalize a response containing multiple items (like list or query operations)."""
     if not isinstance(response_data, dict):
         return response_data
+    if is_error_response(response_data):
+        return response_data.copy()
     
     normalized_response = {}
     
@@ -216,6 +230,8 @@ def normalize_property_item(raw_item: dict) -> dict:
     """Normalize a property item response."""
     if not isinstance(raw_item, dict):
         return raw_item
+    if is_error_response(raw_item):
+        return raw_item.copy()
     
     normalized = {}
     if "object" in raw_item:
@@ -1473,4 +1489,4 @@ def main(
     return 0
 
 if __name__ == "__main__":
-    main() 
+    main()
